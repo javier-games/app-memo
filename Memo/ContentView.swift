@@ -14,11 +14,16 @@ struct ContentView: View {
     @State private var inLeftTrigger = false
     @State private var inRightTrigger = false
     @State private var inTrigger = false
-    @State private var rotationAngle: Double = 0  // New state for rotation angle
-    @State private var cardScale: CGFloat = 0  // For pop animation
+    @State private var flipDirection = false
+    @State private var isCorrect = false
+    @State private var isAnswered = false
+    @State private var zRotationAngle: Double = 0
+    @State private var yRotationAngle: Double = 0
+    @State private var cardScale: CGFloat = 0
 
     var body: some View {
         ZStack {
+            
             // Left Trigger
             TriggerView()
                 .frame(width: 100, height: UIScreen.main.bounds.height)
@@ -30,39 +35,56 @@ struct ContentView: View {
                 .position(x: UIScreen.main.bounds.width - 50, y: UIScreen.main.bounds.midY)
 
             // Draggable Card
-            CardView(flipped: $flipped, inTrigger: $inTrigger, inLeftTrigger: $inLeftTrigger)
-                            .offset(x: dragAmount.width, y: 0)
-                            .rotationEffect(.degrees(rotationAngle))
-                            .scaleEffect(cardScale)
-                            .position(cardPosition)
-                            .gesture(flipped ? dragGesture : nil)
-                            .onAppear {
-                                appearWithPop()
-                            }
-                            
+            CardView(flipped: $flipped, isAnswered: $isAnswered, isCorrect: $isCorrect, flipDirection: $flipDirection, flipAmount: $yRotationAngle)
+                .offset( x: flipped ? dragAmount.width : 0, y: 0)
+                .rotationEffect(.degrees(zRotationAngle))
+                .scaleEffect(cardScale)
+                .position(cardPosition)
+                .gesture(flipGesture)
+                .onAppear {
+                    appearWithPop()
+                }
         }
     }
-
-    var dragGesture: some Gesture {
-            DragGesture()
-                .onChanged { gesture in
-                    dragAmount = CGSize(width: gesture.translation.width, height: 0)
-                    rotationAngle = calculateRotation(from: dragAmount.width)  // Calculate rotation
-                    updateTriggers()
+    
+    var flipGesture: some Gesture {
+        DragGesture()
+            .onChanged { gesture in
+                dragAmount = CGSize(width: gesture.translation.width, height: 0)
+                updateTriggers()
+                if(flipped){
+                    zRotationAngle = calculateZRotation(from: dragAmount.width)
                 }
-                .onEnded { _ in
+                else{
+                    yRotationAngle = calculateYRotation(from: dragAmount.width)
+                }
+            }
+            .onEnded { _ in
+                if(flipped){
                     cardPosition.x += dragAmount.width
-                    dragAmount = .zero  // Reset rotation
-                    checkDropTrigger()
                 }
-        }
-
-    private func calculateRotation(from dragWidth: CGFloat) -> Double {
-            let maxRotation = 15.0  // Maximum rotation angle in degrees
-            let screenWidth = UIScreen.main.bounds.width
-            let rotation = (Double(dragWidth) / Double(screenWidth)) * maxRotation
-            return min(maxRotation, max(-maxRotation, rotation))
-        }
+                else{
+                    
+                }
+                dragAmount = .zero
+                checkDropTrigger()
+            }
+    }
+    
+    private func calculateZRotation(from dragWidth: CGFloat) -> Double {
+        let maxRotation = 15.0  // Maximum rotation angle in degrees
+        let screenWidth = UIScreen.main.bounds.width
+        let rotation = (Double(dragWidth) / Double(screenWidth)) * maxRotation
+        return min(maxRotation, max(-maxRotation, rotation))
+    }
+    
+    private func calculateYRotation(from dragWidth: CGFloat) -> Double {
+        let maxRotation = 180.0  // Maximum rotation angle in degrees
+        let screenWidth = UIScreen.main.bounds.width
+        let rotation = (Double(dragWidth) / Double(screenWidth)) * maxRotation
+        return min(maxRotation, max(-maxRotation, rotation))
+    }
+    
         
     private func appearWithPop() {
         withAnimation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0)) {
@@ -86,39 +108,50 @@ struct ContentView: View {
         // Reset the state as needed
         cardPosition = CGPoint(x: UIScreen.main.bounds.midX, y: UIScreen.main.bounds.midY)
         flipped = false
-        rotationAngle = 0
+        updateTriggers()
+        zRotationAngle = 0
+        yRotationAngle = 0
         appearWithPop()
     }
     
-
     private func updateTriggers() {
         let cardCenter = CGPoint(x: cardPosition.x + dragAmount.width, y: cardPosition.y + dragAmount.height)
         inLeftTrigger = cardCenter.x < 100
         inRightTrigger = cardCenter.x > UIScreen.main.bounds.width - 100
         inTrigger = inLeftTrigger || inRightTrigger
+        isAnswered = flipped && inTrigger
+        isCorrect = isAnswered && inRightTrigger
     }
 
     private func checkDropTrigger() {
-        
-        if inLeftTrigger {
-            print("Card dropped in left trigger")
-            disappearWithPop()
-            // Handle left trigger event
-        } else if inRightTrigger {
-           disappearWithPop()
-            print("Card dropped in right trigger")
-            // Handle right trigger event
-        } else {
-            // Return card to center if not in any trigger
-            withAnimation {
-                cardPosition = CGPoint(x: UIScreen.main.bounds.midX, y: UIScreen.main.bounds.midY)
-                
-                rotationAngle = 0
+        if flipped{
+            if inLeftTrigger {
+                disappearWithPop()
+            } else if inRightTrigger {
+                disappearWithPop()
+            } else {
+                withAnimation {
+                    reset()
+                }
             }
         }
-        inLeftTrigger = false
-        inRightTrigger = false
-        inTrigger = false
+        else{
+            if inTrigger {
+                if inLeftTrigger {
+                    flipDirection = true
+                }
+                withAnimation {
+                    flipped.toggle()
+                    yRotationAngle = 0
+                }
+                flipDirection = false
+            }
+            else{
+                withAnimation {
+                    reset()
+                }
+            }
+        }
     }
 }
 
@@ -130,20 +163,27 @@ struct TriggerView: View {
 
 
 struct CardView: View {
+    
     @Binding var flipped: Bool
-    @Binding var inTrigger: Bool
-    @Binding var inLeftTrigger: Bool
+    @Binding var isAnswered: Bool
+    @Binding var isCorrect: Bool
+    @Binding var flipDirection: Bool
+    @Binding var flipAmount: Double
+    
     var frontContent: some View {
         Text("Front")
+            .foregroundColor(Color.black)
             .frame(width: 200, height: 300)
             .background(Color.white)
             .cornerRadius(10)
             .shadow(radius: 10)
     }
+    
     var backContent: some View {
         Text("Back")
+            .foregroundColor(Color.black)
             .frame(width: 200, height: 300)
-            .background(inTrigger ? inLeftTrigger ? Color.red : Color.green : Color.yellow)
+            .background(isAnswered ? isCorrect ? Color.green : Color.red : Color.yellow)
             .cornerRadius(10)
             .shadow(radius: 10)
             .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0)) // Counter-rotate the back text
@@ -157,7 +197,7 @@ struct CardView: View {
                 frontContent
             }
         }
-        .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
+        .rotation3DEffect(.degrees(flipped ? flipDirection ? -180 : 180 : flipAmount), axis: (x: 0, y: 1, z: 0))
         .onTapGesture {
             withAnimation {
                 flipped.toggle()
