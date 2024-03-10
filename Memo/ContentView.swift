@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var flipped = false
+    @State private var hasBeenFlipped = false
     @State private var dragAmount = CGSize.zero
     @State private var cardPosition = CGPoint(x: UIScreen.main.bounds.midX, y: UIScreen.main.bounds.midY)
     @State private var inLeftTrigger = false
@@ -20,6 +21,10 @@ struct ContentView: View {
     @State private var zRotationAngle: Double = 0
     @State private var yRotationAngle: Double = 0
     @State private var cardScale: CGFloat = 0
+    @State private var shakeAmount: CGFloat = 0
+    @State private var flagMarked = false;
+
+
 
     var body: some View {
         ZStack {
@@ -35,16 +40,93 @@ struct ContentView: View {
                 .position(x: UIScreen.main.bounds.width - 50, y: UIScreen.main.bounds.midY)
 
             // Draggable Card
-            CardView(flipped: $flipped, isAnswered: $isAnswered, isCorrect: $isCorrect, flipDirection: $flipDirection, flipAmount: $yRotationAngle)
-                .offset( x: flipped ? dragAmount.width : 0, y: 0)
-                .rotationEffect(.degrees(zRotationAngle))
-                .scaleEffect(cardScale)
-                .position(cardPosition)
-                .gesture(flipGesture)
-                .onAppear {
-                    appearWithPop()
+            CardView(
+                flipped: $flipped,
+                isAnswered: $isAnswered,
+                isCorrect: $isCorrect,
+                flipDirection: $flipDirection,
+                flipAmount: $yRotationAngle,
+                onTapGesture: flip
+            )
+            .modifier(ShakeEffect(animatableData: shakeAmount))
+            .offset( x: flipped ? dragAmount.width : 0, y: 0)
+            .rotationEffect(.degrees(zRotationAngle))
+            .scaleEffect(cardScale)
+            .position(cardPosition)
+            .gesture(flipGesture)
+            .onAppear {
+                appearWithPop()
+            }
+            
+//            CircleButtonView(
+//                iconName: "flag.fill",
+//                buttonColor: flagMarked ? Color.indigo: Color.accentColor,
+//                isEnabled: .constant(true),
+//                action: {
+//                    markFlagged()
+//                }
+//            )
+            
+            VStack {
+                
+                Spacer()
+
+                HStack(spacing: 20) {
+                    
+                    
+                    // Skip
+                    CircleButtonView(
+                        iconName: "forward.fill",
+                        buttonColor: Color.accentColor,
+                        isEnabled: .constant(true),
+                        action: {
+                            skip()
+                        }
+                    )
+                    
+
+                    // Mark as Wrong
+                    CircleButtonView(
+                        iconName: "xmark",
+                        buttonColor: Color.red,
+                        isEnabled: $hasBeenFlipped,
+                        action: {
+                            markIncorrect()
+                        }
+                    )
+
+                    // Mark as Correct
+                    CircleButtonView(
+                        iconName: "checkmark",
+                        buttonColor: Color.green,
+                        isEnabled: $hasBeenFlipped,
+                        action: {
+                            markCorrect()
+                        }
+                    )
+                    
+                    // Flip
+                    CircleButtonView(
+                        iconName: "arrow.2.squarepath",
+                        buttonColor: Color.accentColor,
+                        isEnabled: .constant(true),
+                        action: {
+                            flip()
+                        }
+                    )
                 }
+                .padding(.bottom, 20) // Add some padding at the bottom
+            }
         }
+    }
+    
+    private func flip(){
+        withAnimation {
+            flipped.toggle()
+            yRotationAngle = 0
+        }
+        
+        hasBeenFlipped = true
     }
     
     var flipGesture: some Gesture {
@@ -108,6 +190,7 @@ struct ContentView: View {
         // Reset the state as needed
         cardPosition = CGPoint(x: UIScreen.main.bounds.midX, y: UIScreen.main.bounds.midY)
         flipped = false
+        hasBeenFlipped = false
         updateTriggers()
         zRotationAngle = 0
         yRotationAngle = 0
@@ -126,9 +209,9 @@ struct ContentView: View {
     private func checkDropTrigger() {
         if flipped{
             if inLeftTrigger {
-                disappearWithPop()
+                markCorrect()
             } else if inRightTrigger {
-                disappearWithPop()
+                markIncorrect()
             } else {
                 withAnimation {
                     reset()
@@ -140,10 +223,7 @@ struct ContentView: View {
                 if inLeftTrigger {
                     flipDirection = true
                 }
-                withAnimation {
-                    flipped.toggle()
-                    yRotationAngle = 0
-                }
+                flip()
                 flipDirection = false
             }
             else{
@@ -153,6 +233,33 @@ struct ContentView: View {
             }
         }
     }
+    
+    private func markCorrect(){
+        disappearWithPop()
+    }
+    
+    private func markIncorrect(){
+        withAnimation(.linear(duration: 0.2)) {
+            self.shakeAmount += 10
+        }
+        
+        disappearWithPop()
+    }
+    
+    private func skip(){
+        withAnimation(.linear(duration: 0.5)) {
+            self.shakeAmount += 1
+        }
+        
+        disappearWithPop()
+    }
+    
+    private func markFlagged(){
+        withAnimation(.linear(duration: 0.5)) {
+            flagMarked.toggle()
+        }
+    }
+    
 }
 
 struct TriggerView: View {
@@ -169,6 +276,7 @@ struct CardView: View {
     @Binding var isCorrect: Bool
     @Binding var flipDirection: Bool
     @Binding var flipAmount: Double
+    let onTapGesture: () -> Void
     
     var frontContent: some View {
         Text("Front")
@@ -199,10 +307,38 @@ struct CardView: View {
         }
         .rotation3DEffect(.degrees(flipped ? flipDirection ? -180 : 180 : flipAmount), axis: (x: 0, y: 1, z: 0))
         .onTapGesture {
-            withAnimation {
-                flipped.toggle()
-            }
+            onTapGesture()
         }
+    }
+}
+
+struct ShakeEffect: GeometryEffect {
+    var amount: CGFloat = 10
+    var shakesPerUnit: CGFloat = 3
+    var animatableData: CGFloat
+
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        ProjectionTransform(CGAffineTransform(translationX: amount * sin(animatableData * .pi * shakesPerUnit), y: 0))
+    }
+}
+
+
+struct CircleButtonView: View {
+    let iconName: String
+    let buttonColor: Color // Added color parameter
+    @Binding var isEnabled: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: iconName)
+                .foregroundColor(.white)
+        }
+        .disabled(!isEnabled)
+        .padding()
+        .background(isEnabled ? buttonColor : Color.gray) // Use the color parameter here
+        .clipShape(Circle())
+        .shadow(radius: 10)
     }
 }
 
