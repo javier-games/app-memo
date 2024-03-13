@@ -7,11 +7,14 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct FlashCardsView: View {
+    
     @State private var flipped = false
     @State private var hasBeenFlipped = false
     @State private var dragAmount = CGSize.zero
-    @State private var cardPosition = CGPoint(x: UIScreen.main.bounds.midX, y: UIScreen.main.bounds.midY)
+    @State private var cardPosition = CGPoint(
+        x: UIScreen.main.bounds.midX,
+        y: UIScreen.main.bounds.midY)
     @State private var inLeftTrigger = false
     @State private var inRightTrigger = false
     @State private var inTrigger = false
@@ -24,10 +27,36 @@ struct ContentView: View {
     @State private var shakeAmount: CGFloat = 0
     @State private var flagMarked = false;
 
-
-
     var body: some View {
+        
         ZStack {
+            
+            // Header
+            VStack {
+                
+                HStack {
+                    // Return Button
+                    NavigationLink(destination: FlashCardsGroup()) {
+                        Image(systemName: "arrow.left")
+                            .foregroundColor(.blue)
+                            .padding()
+                    }
+
+                    Spacer()
+
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 20) // Adjust as needed
+                
+                // Progress Bar
+                ProgressView(value: calculateProgress())
+                    .progressViewStyle(LinearProgressViewStyle())
+                    .frame(height: 10)
+                    .padding(.top, 20)
+                    .padding(.horizontal, 20)
+                
+                Spacer()
+            }
             
             // Left Trigger
             TriggerView()
@@ -38,7 +67,7 @@ struct ContentView: View {
             TriggerView()
                 .frame(width: 100, height: UIScreen.main.bounds.height)
                 .position(x: UIScreen.main.bounds.width - 50, y: UIScreen.main.bounds.midY)
-
+            
             // Draggable Card
             CardView(
                 flipped: $flipped,
@@ -54,23 +83,14 @@ struct ContentView: View {
             .scaleEffect(cardScale)
             .position(cardPosition)
             .gesture(flipGesture)
-            .onAppear {
-                appearWithPop()
-            }
+            .onAppear {appearWithPop()}
             
-//            CircleButtonView(
-//                iconName: "flag.fill",
-//                buttonColor: flagMarked ? Color.indigo: Color.accentColor,
-//                isEnabled: .constant(true),
-//                action: {
-//                    markFlagged()
-//                }
-//            )
             
+            // Footer
             VStack {
                 
                 Spacer()
-
+                
                 HStack(spacing: 20) {
                     
                     
@@ -118,6 +138,13 @@ struct ContentView: View {
                 .padding(.bottom, 20) // Add some padding at the bottom
             }
         }
+    }
+    
+    func calculateProgress() -> Double {
+        // Calculate progress based on your logic
+        // For example, using currentCardIndex and total number of cards
+        let totalCards = 10 // Example total number of cards
+        return Double(1 + 1) / Double(totalCards)
     }
     
     private func flip(){
@@ -344,6 +371,6 @@ struct CircleButtonView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        FlashCardsView()
     }
 }

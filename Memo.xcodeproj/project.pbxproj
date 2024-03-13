@@ -8,12 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		F49183782B622B930051531F /* MemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183772B622B930051531F /* MemoApp.swift */; };
-		F491837A2B622B930051531F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183792B622B930051531F /* ContentView.swift */; };
+		F491837A2B622B930051531F /* FlashCardsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183792B622B930051531F /* FlashCardsView.swift */; };
 		F491837C2B622B950051531F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F491837B2B622B950051531F /* Assets.xcassets */; };
 		F491837F2B622B950051531F /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F491837E2B622B950051531F /* Preview Assets.xcassets */; };
 		F49183892B622B950051531F /* MemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183882B622B950051531F /* MemoTests.swift */; };
 		F49183932B622B950051531F /* MemoUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183922B622B950051531F /* MemoUITests.swift */; };
 		F49183952B622B950051531F /* MemoUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183942B622B950051531F /* MemoUITestsLaunchTests.swift */; };
+		F4C1592D2B9DB3250035895F /* FlashCardsGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C1592C2B9DB3250035895F /* FlashCardsGroup.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,7 +37,7 @@
 /* Begin PBXFileReference section */
 		F49183742B622B930051531F /* Memo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Memo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F49183772B622B930051531F /* MemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoApp.swift; sourceTree = "<group>"; };
-		F49183792B622B930051531F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		F49183792B622B930051531F /* FlashCardsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashCardsView.swift; sourceTree = "<group>"; };
 		F491837B2B622B950051531F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F491837E2B622B950051531F /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		F49183842B622B950051531F /* MemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -44,6 +45,7 @@
 		F491838E2B622B950051531F /* MemoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MemoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F49183922B622B950051531F /* MemoUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoUITests.swift; sourceTree = "<group>"; };
 		F49183942B622B950051531F /* MemoUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		F4C1592C2B9DB3250035895F /* FlashCardsGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashCardsGroup.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,9 +97,10 @@
 			isa = PBXGroup;
 			children = (
 				F49183772B622B930051531F /* MemoApp.swift */,
-				F49183792B622B930051531F /* ContentView.swift */,
+				F49183792B622B930051531F /* FlashCardsView.swift */,
 				F491837B2B622B950051531F /* Assets.xcassets */,
 				F491837D2B622B950051531F /* Preview Content */,
+				F4C1592C2B9DB3250035895F /* FlashCardsGroup.swift */,
 			);
 			path = Memo;
 			sourceTree = "<group>";
@@ -257,7 +260,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F491837A2B622B930051531F /* ContentView.swift in Sources */,
+				F491837A2B622B930051531F /* FlashCardsView.swift in Sources */,
+				F4C1592D2B9DB3250035895F /* FlashCardsGroup.swift in Sources */,
 				F49183782B622B930051531F /* MemoApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
