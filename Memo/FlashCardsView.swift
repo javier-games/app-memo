@@ -36,11 +36,13 @@ struct FlashCardsView: View {
                 
                 HStack {
                     // Return Button
-                    NavigationLink(destination: FlashCardsGroup()) {
-                        Image(systemName: "arrow.left")
-                            .foregroundColor(.blue)
-                            .padding()
-                    }
+//                    NavigationLink(
+//                        destination: GroupView()
+//                    ) {
+//                        Image(systemName: "arrow.left")
+//                            .foregroundColor(.blue)
+//                            .padding()
+//                    }
 
                     Spacer()
 

@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F410C5262BB41A5B0061282C /* DeckListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F410C5252BB41A5B0061282C /* DeckListView.swift */; };
+		F410C5282BB41AE00061282C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F410C5272BB41AE00061282C /* SettingsView.swift */; };
+		F410C52A2BB41C5C0061282C /* DeckData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F410C5292BB41C5C0061282C /* DeckData.swift */; };
+		F421D1132BB4415E00DBB875 /* EmojiTextFieldUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F421D1122BB4415E00DBB875 /* EmojiTextFieldUI.swift */; };
 		F49183782B622B930051531F /* MemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183772B622B930051531F /* MemoApp.swift */; };
 		F491837A2B622B930051531F /* FlashCardsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183792B622B930051531F /* FlashCardsView.swift */; };
 		F491837C2B622B950051531F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F491837B2B622B950051531F /* Assets.xcassets */; };
@@ -14,7 +18,7 @@
 		F49183892B622B950051531F /* MemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183882B622B950051531F /* MemoTests.swift */; };
 		F49183932B622B950051531F /* MemoUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183922B622B950051531F /* MemoUITests.swift */; };
 		F49183952B622B950051531F /* MemoUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183942B622B950051531F /* MemoUITestsLaunchTests.swift */; };
-		F4C1592D2B9DB3250035895F /* FlashCardsGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C1592C2B9DB3250035895F /* FlashCardsGroup.swift */; };
+		F4C1592D2B9DB3250035895F /* GroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C1592C2B9DB3250035895F /* GroupView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,6 +39,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F410C5252BB41A5B0061282C /* DeckListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckListView.swift; sourceTree = "<group>"; };
+		F410C5272BB41AE00061282C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F410C5292BB41C5C0061282C /* DeckData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckData.swift; sourceTree = "<group>"; };
+		F421D1122BB4415E00DBB875 /* EmojiTextFieldUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiTextFieldUI.swift; sourceTree = "<group>"; };
 		F49183742B622B930051531F /* Memo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Memo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F49183772B622B930051531F /* MemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoApp.swift; sourceTree = "<group>"; };
 		F49183792B622B930051531F /* FlashCardsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashCardsView.swift; sourceTree = "<group>"; };
@@ -45,7 +53,7 @@
 		F491838E2B622B950051531F /* MemoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MemoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F49183922B622B950051531F /* MemoUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoUITests.swift; sourceTree = "<group>"; };
 		F49183942B622B950051531F /* MemoUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		F4C1592C2B9DB3250035895F /* FlashCardsGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashCardsGroup.swift; sourceTree = "<group>"; };
+		F4C1592C2B9DB3250035895F /* GroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,7 +108,11 @@
 				F49183792B622B930051531F /* FlashCardsView.swift */,
 				F491837B2B622B950051531F /* Assets.xcassets */,
 				F491837D2B622B950051531F /* Preview Content */,
-				F4C1592C2B9DB3250035895F /* FlashCardsGroup.swift */,
+				F4C1592C2B9DB3250035895F /* GroupView.swift */,
+				F410C5252BB41A5B0061282C /* DeckListView.swift */,
+				F410C5272BB41AE00061282C /* SettingsView.swift */,
+				F410C5292BB41C5C0061282C /* DeckData.swift */,
+				F421D1122BB4415E00DBB875 /* EmojiTextFieldUI.swift */,
 			);
 			path = Memo;
 			sourceTree = "<group>";
@@ -260,9 +272,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F410C5282BB41AE00061282C /* SettingsView.swift in Sources */,
 				F491837A2B622B930051531F /* FlashCardsView.swift in Sources */,
-				F4C1592D2B9DB3250035895F /* FlashCardsGroup.swift in Sources */,
+				F4C1592D2B9DB3250035895F /* GroupView.swift in Sources */,
+				F410C52A2BB41C5C0061282C /* DeckData.swift in Sources */,
+				F410C5262BB41A5B0061282C /* DeckListView.swift in Sources */,
 				F49183782B622B930051531F /* MemoApp.swift in Sources */,
+				F421D1132BB4415E00DBB875 /* EmojiTextFieldUI.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -429,12 +445,15 @@
 				DEVELOPMENT_TEAM = M7658Z3ZA9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Memo Flash Cards";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -442,9 +461,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = games.javier.memo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -459,12 +481,15 @@
 				DEVELOPMENT_TEAM = M7658Z3ZA9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Memo Flash Cards";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -472,9 +497,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = games.javier.memo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
