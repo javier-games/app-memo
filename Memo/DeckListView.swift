@@ -16,7 +16,7 @@ struct DeckListView: View {
     
     var body: some View {
         
-        NavigationView {
+        NavigationStack {
             
             VStack{
                 
@@ -39,14 +39,15 @@ struct DeckListView: View {
                     )
                 }
                 
-                .navigationTitle("Decks")
-                .toolbar { }
                 .sheet(
                     isPresented: $isPresenting,
                     onDismiss: onDismiss,
                     content: { AddDeckView(action: addDeck) }
                 )
             }
+            
+            
+            .navigationTitle("Decks")
         }
     }
     
@@ -81,7 +82,9 @@ struct DeckRaw: View {
 
     var body: some View {
         
-        NavigationLink(destination: GroupView(deck: $deck)) {
+        NavigationLink(
+            destination: GroupView(deck: $deck)
+        ) {
             HStack {
                 Text(deck.icon).frame(width: 30)
                 Text(deck.name)
@@ -157,8 +160,16 @@ struct AddDeckView: View {
     }
 }
 
-//struct DeckListPreview: PreviewProvider {
-//    static var previews: some View {
-//        DeckListView()
-//    }
-//}
+struct DeckListPreview: PreviewProvider {
+    static var previews: some View {
+        
+        let dummyDeckData: [DeckData] = [
+            DeckData(name: "My Deck", icon: "😂", color: Color.black)
+        ]
+        dummyDeckData[0].cardList.append(CardData(frontText: "Front1", backText: "Back1"))
+        dummyDeckData[0].cardList.append(CardData(frontText: "Front2", backText: "Back2"))
+        
+        // Pass the dummy data to the DeckListView using a binding
+        return DeckListView(deckList: .constant(dummyDeckData))
+    }
+}

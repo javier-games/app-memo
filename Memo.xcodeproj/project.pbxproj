@@ -18,7 +18,9 @@
 		F49183892B622B950051531F /* MemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183882B622B950051531F /* MemoTests.swift */; };
 		F49183932B622B950051531F /* MemoUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183922B622B950051531F /* MemoUITests.swift */; };
 		F49183952B622B950051531F /* MemoUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183942B622B950051531F /* MemoUITestsLaunchTests.swift */; };
+		F4A70AB02BB9994000D62CE6 /* CustomBackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4A70AAF2BB9994000D62CE6 /* CustomBackButton.swift */; };
 		F4C1592D2B9DB3250035895F /* GroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C1592C2B9DB3250035895F /* GroupView.swift */; };
+		F4C9E2722BBC08FC00CCB32E /* Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C9E2712BBC08FC00CCB32E /* Test.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,7 +55,9 @@
 		F491838E2B622B950051531F /* MemoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MemoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F49183922B622B950051531F /* MemoUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoUITests.swift; sourceTree = "<group>"; };
 		F49183942B622B950051531F /* MemoUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		F4A70AAF2BB9994000D62CE6 /* CustomBackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomBackButton.swift; sourceTree = "<group>"; };
 		F4C1592C2B9DB3250035895F /* GroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupView.swift; sourceTree = "<group>"; };
+		F4C9E2712BBC08FC00CCB32E /* Test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Test.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +117,8 @@
 				F410C5272BB41AE00061282C /* SettingsView.swift */,
 				F410C5292BB41C5C0061282C /* DeckData.swift */,
 				F421D1122BB4415E00DBB875 /* EmojiTextFieldUI.swift */,
+				F4A70AAF2BB9994000D62CE6 /* CustomBackButton.swift */,
+				F4C9E2712BBC08FC00CCB32E /* Test.swift */,
 			);
 			path = Memo;
 			sourceTree = "<group>";
@@ -273,6 +279,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				F410C5282BB41AE00061282C /* SettingsView.swift in Sources */,
+				F4A70AB02BB9994000D62CE6 /* CustomBackButton.swift in Sources */,
+				F4C9E2722BBC08FC00CCB32E /* Test.swift in Sources */,
 				F491837A2B622B930051531F /* FlashCardsView.swift in Sources */,
 				F4C1592D2B9DB3250035895F /* GroupView.swift in Sources */,
 				F410C52A2BB41C5C0061282C /* DeckData.swift in Sources */,

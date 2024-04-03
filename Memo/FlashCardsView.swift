@@ -9,12 +9,14 @@ import SwiftUI
 
 struct FlashCardsView: View {
     
+    @Binding var deck: DeckData
+    
     @State private var flipped = false
     @State private var hasBeenFlipped = false
     @State private var dragAmount = CGSize.zero
     @State private var cardPosition = CGPoint(
         x: UIScreen.main.bounds.midX,
-        y: UIScreen.main.bounds.midY)
+        y: UIScreen.main.bounds.midY - 100)
     @State private var inLeftTrigger = false
     @State private var inRightTrigger = false
     @State private var inTrigger = false
@@ -26,127 +28,95 @@ struct FlashCardsView: View {
     @State private var cardScale: CGFloat = 0
     @State private var shakeAmount: CGFloat = 0
     @State private var flagMarked = false;
-
+    @State private var currentCardIndex = 0
+    
+    
+    
+    
     var body: some View {
-        
         ZStack {
             
-            // Header
-            VStack {
-                
-                HStack {
-                    // Return Button
-//                    NavigationLink(
-//                        destination: GroupView()
-//                    ) {
-//                        Image(systemName: "arrow.left")
-//                            .foregroundColor(.blue)
-//                            .padding()
-//                    }
-
-                    Spacer()
-
-                }
-                .padding(.horizontal)
-                .padding(.bottom, 20) // Adjust as needed
-                
-                // Progress Bar
-                ProgressView(value: calculateProgress())
-                    .progressViewStyle(LinearProgressViewStyle())
-                    .frame(height: 10)
-                    .padding(.top, 20)
-                    .padding(.horizontal, 20)
-                
-                Spacer()
+            TriggerView(
+                x: 50,
+                y: UIScreen.main.bounds.midY,
+                width: 100,
+                height: UIScreen.main.bounds.height
+            )
+            
+            TriggerView(
+                x: UIScreen.main.bounds.width - 50,
+                y: UIScreen.main.bounds.midY,
+                width: 100,
+                height: UIScreen.main.bounds.height
+            )
+            
+            VStack{
+                CardView(
+                    flipped: $flipped,
+                    isAnswered: $isAnswered,
+                    isCorrect: $isCorrect,
+                    flipDirection: $flipDirection,
+                    flipAmount: $yRotationAngle,
+                    frontText: deck.cardList[currentCardIndex].frontText,
+                    backText: deck.cardList[currentCardIndex].backText,
+                    onTapGesture: flip
+                )
+                .modifier(ShakeEffect(animatableData: shakeAmount))
+                .offset( x: flipped ? dragAmount.width : 0, y: 0)
+                .rotationEffect(.degrees(zRotationAngle))
+                .scaleEffect(cardScale)
+                .position(cardPosition)
+                .gesture(flipGesture)
+                .onAppear {appearWithPop()}
             }
             
-            // Left Trigger
-            TriggerView()
-                .frame(width: 100, height: UIScreen.main.bounds.height)
-                .position(x: 50, y: UIScreen.main.bounds.midY)
-
-            // Right Trigger
-            TriggerView()
-                .frame(width: 100, height: UIScreen.main.bounds.height)
-                .position(x: UIScreen.main.bounds.width - 50, y: UIScreen.main.bounds.midY)
-            
-            // Draggable Card
-            CardView(
-                flipped: $flipped,
-                isAnswered: $isAnswered,
-                isCorrect: $isCorrect,
-                flipDirection: $flipDirection,
-                flipAmount: $yRotationAngle,
-                onTapGesture: flip
-            )
-            .modifier(ShakeEffect(animatableData: shakeAmount))
-            .offset( x: flipped ? dragAmount.width : 0, y: 0)
-            .rotationEffect(.degrees(zRotationAngle))
-            .scaleEffect(cardScale)
-            .position(cardPosition)
-            .gesture(flipGesture)
-            .onAppear {appearWithPop()}
+        }
+        .toolbar{
             
             
-            // Footer
-            VStack {
-                
-                Spacer()
-                
-                HStack(spacing: 20) {
+            ToolbarItem(placement: .principal) {
+                ProgressView(value: calculateProgress())
+                    .progressViewStyle(LinearProgressViewStyle())
+            }
+            
+            ToolbarItem(placement: .bottomBar)
+            {
+                HStack{
                     
-                    
-                    // Skip
                     CircleButtonView(
                         iconName: "forward.fill",
                         buttonColor: Color.accentColor,
                         isEnabled: .constant(true),
-                        action: {
-                            skip()
-                        }
+                        action: skip
                     )
                     
-
-                    // Mark as Wrong
                     CircleButtonView(
                         iconName: "xmark",
                         buttonColor: Color.red,
                         isEnabled: $hasBeenFlipped,
-                        action: {
-                            markIncorrect()
-                        }
+                        action: markIncorrect
                     )
-
-                    // Mark as Correct
+                    
                     CircleButtonView(
                         iconName: "checkmark",
                         buttonColor: Color.green,
                         isEnabled: $hasBeenFlipped,
-                        action: {
-                            markCorrect()
-                        }
+                        action: markCorrect
                     )
                     
-                    // Flip
                     CircleButtonView(
                         iconName: "arrow.2.squarepath",
                         buttonColor: Color.accentColor,
                         isEnabled: .constant(true),
-                        action: {
-                            flip()
-                        }
+                        action: flip
                     )
                 }
-                .padding(.bottom, 20) // Add some padding at the bottom
             }
         }
     }
     
     func calculateProgress() -> Double {
-        // Calculate progress based on your logic
-        // For example, using currentCardIndex and total number of cards
-        let totalCards = 10 // Example total number of cards
-        return Double(1 + 1) / Double(totalCards)
+        return Double(currentCardIndex) / Double(deck.cardList.count)
     }
     
     private func flip(){
@@ -196,28 +166,28 @@ struct FlashCardsView: View {
         return min(maxRotation, max(-maxRotation, rotation))
     }
     
-        
+    
     private func appearWithPop() {
         withAnimation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0)) {
             cardScale = 1.0
         }
     }
-
+    
     private func disappearWithPop() {
         let animationDuration = 0.3
         withAnimation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0)) {
             cardScale = 0
         }
-
+        
         // Schedule the reset to be called after the animation completes
         DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) { // Delay includes animation delay and duration
             reset()
         }
     }
-
+    
     private func reset() {
         // Reset the state as needed
-        cardPosition = CGPoint(x: UIScreen.main.bounds.midX, y: UIScreen.main.bounds.midY)
+        cardPosition = CGPoint(x: UIScreen.main.bounds.midX, y: UIScreen.main.bounds.midY - 100)
         flipped = false
         hasBeenFlipped = false
         updateTriggers()
@@ -234,7 +204,7 @@ struct FlashCardsView: View {
         isAnswered = flipped && inTrigger
         isCorrect = isAnswered && inRightTrigger
     }
-
+    
     private func checkDropTrigger() {
         if flipped{
             if inLeftTrigger {
@@ -264,7 +234,15 @@ struct FlashCardsView: View {
     }
     
     private func markCorrect(){
-        disappearWithPop()
+        
+        currentCardIndex+=1
+        
+        if currentCardIndex >= deck.cardList.count{
+            currentCardIndex = 0
+        }
+        else{
+            disappearWithPop()
+        }
     }
     
     private func markIncorrect(){
@@ -272,7 +250,14 @@ struct FlashCardsView: View {
             self.shakeAmount += 10
         }
         
-        disappearWithPop()
+        currentCardIndex+=1
+        
+        if currentCardIndex >= deck.cardList.count{
+            currentCardIndex = 0
+        }
+        else{
+            disappearWithPop()
+        }
     }
     
     private func skip(){
@@ -280,7 +265,14 @@ struct FlashCardsView: View {
             self.shakeAmount += 1
         }
         
-        disappearWithPop()
+        currentCardIndex+=1
+        
+        if currentCardIndex >= deck.cardList.count{
+            currentCardIndex = 0
+        }
+        else{
+            disappearWithPop()
+        }
     }
     
     private func markFlagged(){
@@ -292,8 +284,17 @@ struct FlashCardsView: View {
 }
 
 struct TriggerView: View {
+    
+    let x : CGFloat;
+    let y : CGFloat;
+    let width : CGFloat;
+    let height : CGFloat;
+    
     var body: some View {
-        Rectangle().opacity(0) // Adjust for visibility
+        Rectangle()
+            .opacity(0)
+            .frame(width: width, height: height)
+            .position(x: x, y: y)
     }
 }
 
@@ -305,10 +306,14 @@ struct CardView: View {
     @Binding var isCorrect: Bool
     @Binding var flipDirection: Bool
     @Binding var flipAmount: Double
+    
+    let frontText: String
+    let backText: String
+    
     let onTapGesture: () -> Void
     
     var frontContent: some View {
-        Text("Front")
+        Text(frontText)
             .foregroundColor(Color.black)
             .frame(width: 200, height: 300)
             .background(Color.white)
@@ -317,7 +322,7 @@ struct CardView: View {
     }
     
     var backContent: some View {
-        Text("Back")
+        Text(backText)
             .foregroundColor(Color.black)
             .frame(width: 200, height: 300)
             .background(isAnswered ? isCorrect ? Color.green : Color.red : Color.yellow)
@@ -364,15 +369,27 @@ struct CircleButtonView: View {
                 .foregroundColor(.white)
         }
         .disabled(!isEnabled)
-        .padding()
+        .padding(15)
+        .frame(width: 70)
         .background(isEnabled ? buttonColor : Color.gray) // Use the color parameter here
         .clipShape(Circle())
-        .shadow(radius: 10)
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        FlashCardsView()
+        
+        let dummyDeckData: DeckData = DeckData(
+            name: "My Deck",
+            icon: "😂",
+            color: Color.black
+        )
+        
+        dummyDeckData.cardList = [
+            CardData(frontText: "Front", backText: "Back"),
+            CardData(frontText: "F", backText: "B")
+        ]
+        
+        return NavigationView {FlashCardsView(deck: .constant(dummyDeckData))}
     }
 }

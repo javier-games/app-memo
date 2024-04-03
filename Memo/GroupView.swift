@@ -15,45 +15,44 @@ struct GroupView: View {
     
     var body: some View {
         
-        NavigationView {
-            ZStack{
-                VStack{
+        
+        ZStack{
+            VStack{
+                
+                List{
                     
-                    List{
-                        
-                        Section{
-                            ForEach(deck.cardList) { card in
-                                CardRaw(card: card)
-                            }
-                            .onDelete(perform: deleteCard)
-                        } header: {
-                            if deck.cardList.isEmpty {
-                                Text("This deck is empty. Add some cards to start practicing!")
-                            }
+                    Section{
+                        ForEach(deck.cardList) { card in
+                            CardRaw(card: card)
                         }
-                        
-                        Button (
-                            action: openAddCardView,
-                            label: { Label("Add", systemImage: "plus") }
-                        )
+                        .onDelete(perform: deleteCard)
+                    } header: {
+                        if deck.cardList.isEmpty {
+                            Text("This deck is empty. Add some cards to start practicing!")
+                        }
                     }
                     
-                    .navigationTitle(deck.icon + " " + deck.name)
-                    .toolbar {
-                        
-                    }
-                    .sheet(
-                        isPresented: $isPresenting,
-                        onDismiss: onDismiss,
-                        content: { AddCardView(action: addCard)  }
+                    Button (
+                        action: openAddCardView,
+                        label: { Label("Add", systemImage: "plus") }
                     )
-                    
-                    
                 }
                 
-                VStack{
-                    Spacer()
-                    Button(action: openPracticeView) {
+                .sheet(
+                    isPresented: $isPresenting,
+                    onDismiss: onDismiss,
+                    content: { AddCardView(action: addCard)  }
+                )
+                
+                
+            }
+            
+            VStack{
+                Spacer()
+                Button(action: {
+                    // Put the navigation code inside the closure
+                }) {
+                    NavigationLink(destination: FlashCardsView(deck: $deck)) {
                         Text("PRACTICE")
                             .padding()
                             .foregroundColor(.white)
@@ -61,10 +60,16 @@ struct GroupView: View {
                             .cornerRadius(50)
                             .bold()
                     }
-                    .padding()
-                    
                 }
+                .padding()
+                
+                
             }
+        }
+        
+        .navigationTitle(deck.icon + " " + deck.name)
+        .toolbar {
+            
         }
     }
     
@@ -89,10 +94,6 @@ struct GroupView: View {
     }
     
     func onDismiss(){
-        
-    }
-    
-    func openPracticeView(){
         
     }
 }
@@ -156,12 +157,14 @@ struct AddCardView: View {
         dismiss()
     }
 }
-//
-//struct CardSlotView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        
-//        let deck = DeckData(name: "My Deck", icon: "🤓", color: Color.red)
-//        
-//        GroupView(deck: deck)
-//    }
-//}
+
+struct CardSlotView_Previews: PreviewProvider {
+    static var previews: some View {
+        
+        let deck = DeckData(name: "My Deck", icon: "🤓", color: Color.red)
+        deck.cardList.append(CardData(frontText: "Front1", backText: "Back1"))
+        deck.cardList.append(CardData(frontText: "Front2", backText: "Back2"))
+        return  NavigationView {GroupView(deck: .constant(deck))}
+       
+    }
+}
