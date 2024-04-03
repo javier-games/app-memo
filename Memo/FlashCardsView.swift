@@ -6,32 +6,38 @@
 //
 
 import SwiftUI
+import Combine
 
 struct FlashCardsView: View {
     
     @Binding var deck: DeckData
     
-    @State private var flipped = false
-    @State private var hasBeenFlipped = false
+    @State private var currentCardIndex = 0
+    
+    @State private var isCorrect = false
+    @State private var isAnswered = false
+    @State private var flagMarked = false;
+    
+    @State private var cardVisibility = false;
+    
+    @State private var cardPosition = CGPoint.zero
     @State private var dragAmount = CGSize.zero
-    @State private var cardPosition = CGPoint(
-        x: UIScreen.main.bounds.midX,
-        y: UIScreen.main.bounds.midY - 100)
+    
     @State private var inLeftTrigger = false
     @State private var inRightTrigger = false
     @State private var inTrigger = false
+    
+    @State private var flipped = false
+    @State private var hasBeenFlipped = false
     @State private var flipDirection = false
-    @State private var isCorrect = false
-    @State private var isAnswered = false
-    @State private var zRotationAngle: Double = 0
     @State private var yRotationAngle: Double = 0
-    @State private var cardScale: CGFloat = 0
+    
     @State private var shakeAmount: CGFloat = 0
-    @State private var flagMarked = false;
-    @State private var currentCardIndex = 0
     
-    
-    
+     var cardOrigin = CGPoint(
+        x: UIScreen.main.bounds.midX,
+        y: UIScreen.main.bounds.midY - 100
+    )
     
     var body: some View {
         ZStack {
@@ -52,25 +58,25 @@ struct FlashCardsView: View {
             
             VStack{
                 CardView(
+                    isVisible: $cardVisibility,
+                    dragAmount: $dragAmount,
                     flipped: $flipped,
+                    flipDirection: $flipDirection,
                     isAnswered: $isAnswered,
                     isCorrect: $isCorrect,
-                    flipDirection: $flipDirection,
-                    flipAmount: $yRotationAngle,
                     frontText: deck.cardList[currentCardIndex].frontText,
                     backText: deck.cardList[currentCardIndex].backText,
-                    onTapGesture: flip
+                    onTapGesture: flip,
+//                    onAppear: nil,
+                    onDissaper: reset
                 )
                 .modifier(ShakeEffect(animatableData: shakeAmount))
-                .offset( x: flipped ? dragAmount.width : 0, y: 0)
-                .rotationEffect(.degrees(zRotationAngle))
-                .scaleEffect(cardScale)
                 .position(cardPosition)
-                .gesture(flipGesture)
-                .onAppear {appearWithPop()}
+                .gesture(dragGesture)
             }
             
         }
+        .onAppear(perform: initialize)
         .toolbar{
             
             
@@ -115,6 +121,11 @@ struct FlashCardsView: View {
         }
     }
     
+    func initialize(){
+        cardPosition = cardOrigin
+        cardVisibility = true
+    }
+    
     func calculateProgress() -> Double {
         return Double(currentCardIndex) / Double(deck.cardList.count)
     }
@@ -128,72 +139,34 @@ struct FlashCardsView: View {
         hasBeenFlipped = true
     }
     
-    var flipGesture: some Gesture {
+    var dragGesture: some Gesture {
         DragGesture()
             .onChanged { gesture in
                 dragAmount = CGSize(width: gesture.translation.width, height: 0)
                 updateTriggers()
-                if(flipped){
-                    zRotationAngle = calculateZRotation(from: dragAmount.width)
-                }
-                else{
-                    yRotationAngle = calculateYRotation(from: dragAmount.width)
-                }
             }
             .onEnded { _ in
                 if(flipped){
                     cardPosition.x += dragAmount.width
-                }
-                else{
-                    
                 }
                 dragAmount = .zero
                 checkDropTrigger()
             }
     }
     
-    private func calculateZRotation(from dragWidth: CGFloat) -> Double {
-        let maxRotation = 15.0  // Maximum rotation angle in degrees
-        let screenWidth = UIScreen.main.bounds.width
-        let rotation = (Double(dragWidth) / Double(screenWidth)) * maxRotation
-        return min(maxRotation, max(-maxRotation, rotation))
-    }
-    
-    private func calculateYRotation(from dragWidth: CGFloat) -> Double {
-        let maxRotation = 180.0  // Maximum rotation angle in degrees
-        let screenWidth = UIScreen.main.bounds.width
-        let rotation = (Double(dragWidth) / Double(screenWidth)) * maxRotation
-        return min(maxRotation, max(-maxRotation, rotation))
-    }
     
     
-    private func appearWithPop() {
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0)) {
-            cardScale = 1.0
-        }
-    }
     
-    private func disappearWithPop() {
-        let animationDuration = 0.3
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0)) {
-            cardScale = 0
-        }
-        
-        // Schedule the reset to be called after the animation completes
-        DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) { // Delay includes animation delay and duration
-            reset()
-        }
-    }
     
     private func reset() {
         // Reset the state as needed
-        cardPosition = CGPoint(x: UIScreen.main.bounds.midX, y: UIScreen.main.bounds.midY - 100)
+        cardPosition = cardOrigin
+        
         flipped = false
         hasBeenFlipped = false
         updateTriggers()
-        zRotationAngle = 0
         yRotationAngle = 0
-        appearWithPop()
+        cardVisibility = true
     }
     
     private func updateTriggers() {
@@ -234,15 +207,7 @@ struct FlashCardsView: View {
     }
     
     private func markCorrect(){
-        
-        currentCardIndex+=1
-        
-        if currentCardIndex >= deck.cardList.count{
-            currentCardIndex = 0
-        }
-        else{
-            disappearWithPop()
-        }
+        cardVisibility = false
     }
     
     private func markIncorrect(){
@@ -250,14 +215,7 @@ struct FlashCardsView: View {
             self.shakeAmount += 10
         }
         
-        currentCardIndex+=1
-        
-        if currentCardIndex >= deck.cardList.count{
-            currentCardIndex = 0
-        }
-        else{
-            disappearWithPop()
-        }
+        cardVisibility = false
     }
     
     private func skip(){
@@ -265,14 +223,7 @@ struct FlashCardsView: View {
             self.shakeAmount += 1
         }
         
-        currentCardIndex+=1
-        
-        if currentCardIndex >= deck.cardList.count{
-            currentCardIndex = 0
-        }
-        else{
-            disappearWithPop()
-        }
+        cardVisibility = false
     }
     
     private func markFlagged(){
@@ -301,16 +252,24 @@ struct TriggerView: View {
 
 struct CardView: View {
     
+    @Binding var isVisible: Bool
+    
+    @Binding var dragAmount: CGSize
     @Binding var flipped: Bool
+    @Binding var flipDirection: Bool
+    
     @Binding var isAnswered: Bool
     @Binding var isCorrect: Bool
-    @Binding var flipDirection: Bool
-    @Binding var flipAmount: Double
+    
+    @State var cardScale: CGFloat = 0
+    @State var flip: CGFloat = 0
     
     let frontText: String
     let backText: String
     
     let onTapGesture: () -> Void
+//    let onAppear: () -> Void
+    let onDissaper: () -> Void
     
     var frontContent: some View {
         Text(frontText)
@@ -339,9 +298,73 @@ struct CardView: View {
                 frontContent
             }
         }
-        .rotation3DEffect(.degrees(flipped ? flipDirection ? -180 : 180 : flipAmount), axis: (x: 0, y: 1, z: 0))
-        .onTapGesture {
-            onTapGesture()
+        .rotation3DEffect(.degrees(flipped ? flipDirection ? -180 : 180 : flip), axis: (x: 0, y: 1, z: 0))
+        .rotationEffect(.degrees(flipped ? calculateZRotation(from: dragAmount.width) : 0))
+        .scaleEffect(cardScale)
+        .onTapGesture (perform: onTapGesture)
+        .offset( x: flipped ? dragAmount.width : 0, y: 0)
+        .onChange(of: isVisible) { if isVisible { show() } else { hide() }}
+        .onChange(of: dragAmount) { old, new in onDragChanged(from: old, to: new)}
+        .onChange(of: flipped){flip = 0}
+    }
+    
+    private func calculateYRotation(from dragWidth: CGFloat) -> Double {
+        let maxRotation = 180.0  // Maximum rotation angle in degrees
+        let screenWidth = UIScreen.main.bounds.width
+        let rotation = (Double(dragWidth) / Double(screenWidth)) * maxRotation
+        return min(maxRotation, max(-maxRotation, rotation))
+    }
+    
+    
+    private func calculateZRotation(from dragWidth: CGFloat) -> Double {
+        let maxRotation = 15.0
+        let screenWidth = UIScreen.main.bounds.width
+        let rotation = (Double(dragWidth) / Double(screenWidth)) * maxRotation
+        return min(maxRotation, max(-maxRotation, rotation))
+    }
+    
+    private func show() {
+        
+        let animationDuration = 0.3
+        
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0)) {
+            cardScale = 1.0
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
+//            onAppear()
+        }
+    }
+    
+    private func hide() {
+        
+        let animationDuration = 0.3
+        
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0)) {
+            cardScale = 0
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
+            onDissaper()
+        }
+    }
+    
+    private func onDragChanged(from:CGSize, to:CGSize) {
+        print("---")
+        print(from)
+        print(dragAmount)
+        
+        if(from.width != 0 && to.width == 0){
+            print("-HERE")
+        }
+        else{
+            
+            if(flipped){
+                
+            }
+            else{
+                flip = calculateYRotation(from: dragAmount.width)
+            }
         }
     }
 }

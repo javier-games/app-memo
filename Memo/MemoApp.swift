@@ -13,7 +13,7 @@ struct MemoApp: App {
     @ObservedObject static var decks = DecksData()
 
     init() {
-        MemoApp.decks = MemoApp.loadDecksData() // Assuming load() returns the array of decks
+        MemoApp.decks = MemoApp.loadDecksData()
     }
     
     var body: some Scene {

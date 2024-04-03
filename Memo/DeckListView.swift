@@ -19,7 +19,7 @@ struct DeckListView: View {
         NavigationStack {
             
             VStack{
-                
+            
                 List{
                     
                     Section{
@@ -30,6 +30,9 @@ struct DeckListView: View {
                     } header: {
                         if deckList.isEmpty {
                             Text("Memo looks quite empty uh? Try adding some decks.")
+                        }
+                        else{
+                            Spacer()
                         }
                     }
                     
@@ -45,7 +48,6 @@ struct DeckListView: View {
                     content: { AddDeckView(action: addDeck) }
                 )
             }
-            
             
             .navigationTitle("Decks")
         }

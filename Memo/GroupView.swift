@@ -27,8 +27,11 @@ struct GroupView: View {
                         }
                         .onDelete(perform: deleteCard)
                     } header: {
-                        if deck.cardList.isEmpty {
+                        if deck.cardList.isEmpty || deck.cardList.count == 0 {
                             Text("This deck is empty. Add some cards to start practicing!")
+                        }
+                        else{
+                            Spacer()
                         }
                     }
                     
@@ -46,30 +49,25 @@ struct GroupView: View {
                 
                 
             }
-            
-            VStack{
-                Spacer()
-                Button(action: {
-                    // Put the navigation code inside the closure
-                }) {
-                    NavigationLink(destination: FlashCardsView(deck: $deck)) {
-                        Text("PRACTICE")
-                            .padding()
-                            .foregroundColor(.white)
-                            .background(Color.blue)
-                            .cornerRadius(50)
-                            .bold()
-                    }
-                }
-                .padding()
-                
-                
-            }
         }
         
         .navigationTitle(deck.icon + " " + deck.name)
         .toolbar {
-            
+            ToolbarItem(placement: .bottomBar){
+                NavigationLink(destination: FlashCardsView(deck: $deck)) {
+                    HStack(){
+                        Image(systemName:"play.square.stack.fill")
+                            .symbolEffect(.bounce.up.byLayer, value: isPresenting )
+                        Text("Practice")
+                    }
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 20)
+                    .foregroundColor(.white)
+                    .background(Color.blue)
+                    .cornerRadius(10)
+                }
+                .offset(CGSize(width: 0, height: 5))
+            }
         }
     }
     
@@ -106,8 +104,8 @@ struct CardRaw: View {
         
         HStack {
             Text(card.frontText)
-            
-            Text(card.backText)
+            Spacer()
+            Text(card.backText).fontWeight(.light)
         }
     }
 }
