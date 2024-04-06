@@ -15,22 +15,18 @@ enum CardInteractivity {
 struct CardView<FrontContent,BackContent>: View
 where FrontContent: View, BackContent:View {
     
-    @Binding var isVisible: Bool
-    @State var isReveled: Bool
+    @State var isVisible: Bool
     
     let frontView: FrontContent
     let backView: BackContent
     
     @State var interactivity: [CardInteractivity]
     
-    @State var lastDrag: CGSize = .zero
-    
-    @State var cardScale: CGFloat = 0
     @State var flipAngle: CGFloat = 0
     @State var rotationAngle: CGFloat = 0
-    @State var flipAngleLast : CGFloat = 0
+    @State var lastDrag: CGSize = .zero
 
-    let onFlip: () -> Void
+    let onFlip: (_ isReveled : Bool) -> Void
     let onAppear:() -> Void
     let onDissaper: () -> Void
     
@@ -39,7 +35,7 @@ where FrontContent: View, BackContent:View {
             
             ZStack{
                 ZStack{
-                    if isReveled {
+                    if isReveled() {
                         frontView
                     } else {
                         backView.rotation3DEffect(
@@ -55,12 +51,12 @@ where FrontContent: View, BackContent:View {
             .shadow(radius: 10)
             .rotation3DEffect(.degrees(flipAngle), axis: (x: 0, y: 1, z: 0))
             .rotationEffect(.degrees(rotationAngle))
-            .onAppear(){flipAngle = isReveled ? 0 : 180}
             
             ZStack{
                 // TODO: Find a better way to avoid 3D rotation problems on drag.
                 Color.black.opacity(0.00000000001)
             }
+            .frame(width: 200, height: 300)
             .gesture(dragGesture)
             .gesture(tapGesture)
         }
@@ -69,6 +65,7 @@ where FrontContent: View, BackContent:View {
     var dragGesture: some Gesture {
         
         DragGesture()
+        
             .onChanged { gesture in
                 
                 let currentDrag = gesture.translation;
@@ -92,29 +89,58 @@ where FrontContent: View, BackContent:View {
                     } else if flipAngle < -360 {
                         flipAngle += 360
                     }
-                    
-                    isReveled = (flipAngle > -90 && flipAngle < 90)
-                        || flipAngle > 270
-                        || flipAngle < -270
-                    print(flipAngle)
                 }
                 
                 if interactivity.contains(.angularDrag){
-                    
+                    rotationAngle = map(
+                        value: Double(currentDrag.width),
+                        fromMax: Double(UIScreen.main.bounds.width),
+                        toMax:15.0
+                    )
                 }
                 
                 lastDrag = currentDrag
             }
-            .onEnded { _ in
+        
+            .onEnded { gesture in
                 
                 lastDrag = .zero
                 
+                let angle = map(
+                    value: gesture.translation.width,
+                    fromMax: UIScreen.main.bounds.width,
+                    toMax: 180
+                )
+                
+                if abs(angle) > 90 {
+                    onFlip(isReveled())
+                }
+                
                 if interactivity.contains(.flipDrag){
                     
+                    withAnimation {
+                        if flipAngle > 270 && flipAngle < 360 {
+                            flipAngle = 360
+                        }
+                        else if flipAngle > 90 && flipAngle < 270 {
+                            flipAngle = 180
+                        }
+                        else if flipAngle > -90 && flipAngle < 90 {
+                            flipAngle = 0
+                        }
+                        else if flipAngle > -270 && flipAngle < -90{
+                            flipAngle = -180
+                        }
+                        else {
+                            flipAngle = -360
+                        }
+                    }
                 }
                 
                 if interactivity.contains(.angularDrag){
-                    
+                    withAnimation{
+                        rotationAngle = 0
+                    }
                 }
             }
     }
@@ -122,14 +148,16 @@ where FrontContent: View, BackContent:View {
     var tapGesture: some Gesture{
         TapGesture().onEnded { _ in
             
+            let isReveled = isReveled()
+            
             if interactivity.contains(.flipTap){
+                withAnimation {
+                    flipAngle = isReveled ? 180 : 0
+                }
                 
+                onFlip(!isReveled)
             }
         }
-    }
-    
-    private func flipCard(){
-        
     }
     
     private func map(value : Double, fromMax: Double, toMax: Double) -> Double {
@@ -137,12 +165,16 @@ where FrontContent: View, BackContent:View {
         return min(toMax, max(-toMax, newVal))
     }
     
+    public func isReveled() -> Bool {
+        return (flipAngle > -90 && flipAngle < 90)
+        || flipAngle > 270
+        || flipAngle < -270
+    }
 }
 
 struct MyView_Previews: PreviewProvider {
     
-    @State static var isRevealed = false
-    @State static var interactivity: [CardInteractivity] = [.flipTap, .flipDrag]
+    @State static var interactivity: [CardInteractivity] = [.flipTap, .angularDrag]
     
     static var backView : some View {
         Text("backText")
@@ -158,12 +190,12 @@ struct MyView_Previews: PreviewProvider {
     
     static var previews: some View {
         CardView (
-            isVisible: .constant(false),
-            isReveled: isRevealed,
+            isVisible: true,
             frontView: frontView,
             backView: backView,
             interactivity: interactivity,
-            onFlip: { print(isRevealed) },
+            flipAngle: 180,
+            onFlip: { isReveled in print(isReveled) },
             onAppear: {},
             onDissaper: {}
         )
