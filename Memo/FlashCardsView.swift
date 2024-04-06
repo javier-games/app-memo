@@ -28,7 +28,7 @@ struct FlashCardsView: View {
     @State private var inRightTrigger = false
     @State private var inTrigger = false
     
-    @State private var interactivity = CardInteractivity.flip
+    @State private var interactivity: [CardInteractivity] = [.angularDrag, .flipTap]
     @State private var hasBeenFlipped = false
     @State private var flipDirection = false
     
@@ -47,7 +47,6 @@ struct FlashCardsView: View {
     
     var backView: some View {
         Text(deck.cardList[currentCardIndex].backText)
-            .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
             .frame(width: 200, height: 300)
             .background(deck.getColor())
     }
@@ -70,24 +69,39 @@ struct FlashCardsView: View {
             )
             
             VStack{
-                CardView(
-                    isVisible: $cardVisibility,
-                    isReveled: $reveal,
-                    flipDirection: $flipDirection,
+                
+                CardView (
+                    isVisible: .constant(true),
+                    isReveled: reveal,
                     frontView: frontView,
                     backView: backView,
                     interactivity: interactivity,
-                    dragAmount: dragAmount,
-                    onFlip: {
-                        hasBeenFlipped = true
-                        interactivity = .angularDrag
-                    },
+                    onFlip: { print(reveal) },
                     onAppear: {},
-                    onDissaper: reset
+                    onDissaper: {}
                 )
-                .modifier(ShakeEffect(animatableData: shakeAmount))
-                .position(cardPosition)
-                .gesture(dragGesture)
+                
+                
+//                CardView(
+//                    isVisible: $cardVisibility,
+//                    isReveled: $reveal,
+//                    flipDirection: $flipDirection,
+//                    frontView: frontView,
+//                    backView: backView,
+//                    interactivity: $interactivity,
+//                    dragAmount: dragAmount,
+//                    onFlip: {
+//                        hasBeenFlipped = true
+//                        if cardVisibility {
+//                            interactivity = .angularDrag
+//                        }
+//                    },
+//                    onAppear: {},
+//                    onDissaper: reset
+//                )
+//                .modifier(ShakeEffect(animatableData: shakeAmount))
+//                .position(cardPosition)
+//                .gesture(dragGesture)
             }
             
         }
@@ -141,6 +155,8 @@ struct FlashCardsView: View {
     func initialize(){
         cardPosition = cardOrigin
         cardVisibility = true
+//        interactivity = .flipTap
+        
     }
     
     func calculateProgress() -> Double {
@@ -170,7 +186,7 @@ struct FlashCardsView: View {
         hasBeenFlipped = false
         updateTriggers()
         cardVisibility = true
-        interactivity = .flip
+//        interactivity = .flipDrag
     }
     
     private func updateTriggers() {
