@@ -70,16 +70,16 @@ struct FlashCardsView: View {
             
             VStack{
                 
-                CardView (
-                    isVisible: .constant(true),
-                    isReveled: reveal,
-                    frontView: frontView,
-                    backView: backView,
-                    interactivity: interactivity,
-                    onFlip: { print(reveal) },
-                    onAppear: {},
-                    onDissaper: {}
-                )
+//                CardView (
+//                    isVisible: .constant(true),
+//                    isReveled: reveal,
+//                    frontView: frontView,
+//                    backView: backView,
+//                    interactivity: interactivity,
+//                    onFlip: { print(reveal) },
+//                    onAppear: {},
+//                    onDissaper: {}
+//                )
                 
                 
 //                CardView(
