@@ -1,5 +1,5 @@
 //
-//  Test.swift
+//  CardView.swift
 //  Memo
 //
 //  Created by Francisco Javier García Gutiérrez on 2024/04/02.
@@ -9,57 +9,55 @@ import Foundation
 import SwiftUI
 
 enum CardInteractivity {
-    case flipTap, flipDrag, angularDrag
+    case flipTap, flipDrag, horizontalDrag
 }
 
 struct CardView<FrontContent,BackContent>: View
 where FrontContent: View, BackContent:View {
     
-    @State var isVisible: Bool
+    @Binding var flip: Bool
     
     let frontView: FrontContent
     let backView: BackContent
     
-    @State var interactivity: [CardInteractivity]
+    @Binding var interactivity: [CardInteractivity]
+    
+    @Binding var offset: CGSize
+    @Binding var scale: CGFloat
     
     @State var flipAngle: CGFloat = 0
-    @State var rotationAngle: CGFloat = 0
-    @State var lastDrag: CGSize = .zero
+    @State var initialPosition: CGPoint = CGPoint.zero
+    
+    @State private var rotationAngle: CGFloat = 0
+    @State private var lastDrag: CGSize = .zero
 
     let onFlip: (_ isReveled : Bool) -> Void
-    let onAppear:() -> Void
-    let onDissaper: () -> Void
+    let onRelease: (_ isReveled : Bool) -> Void
     
     var body: some View {
+        
         ZStack {
-            
-            ZStack{
-                ZStack{
-                    if isReveled() {
-                        frontView
-                    } else {
-                        backView.rotation3DEffect(
-                            .degrees(180.0),
-                            axis: (x: 0.0, y: 1.0, z: 0.0)
-                        )
-                    }
-                }
+            if isReveled() {
+                frontView
+            } else {
+                backView.rotation3DEffect(
+                    .degrees(180.0),
+                    axis: (x: 0.0, y: 1.0, z: 0.0)
+                )
             }
-            .frame(width: 200, height: 300)
-            .background(.white)
-            .cornerRadius(10)
-            .shadow(radius: 10)
-            .rotation3DEffect(.degrees(flipAngle), axis: (x: 0, y: 1, z: 0))
-            .rotationEffect(.degrees(rotationAngle))
-            
-            ZStack{
-                // TODO: Find a better way to avoid 3D rotation problems on drag.
-                Color.black.opacity(0.00000000001)
-            }
-            .frame(width: 200, height: 300)
-            .gesture(dragGesture)
-            .gesture(tapGesture)
         }
+        .background(.white)
+        .frame(width: 200, height: 300)
+        .cornerRadius(10)
+        .shadow(radius: 10)
+        .rotation3DEffect(.degrees(flipAngle), axis: (x: 0, y: 1, z: 0))
+        .rotationEffect(.degrees(rotationAngle))
+        .scaleEffect(scale)
+        .offset(offset)
+        .gesture(dragGesture)
+        .gesture(tapGesture)
+        .onChange(of: flip){ if flip { doFlip() } }
+        .onAppear(){ if flip { doFlip() } }
     }
     
     var dragGesture: some Gesture {
@@ -91,13 +89,14 @@ where FrontContent: View, BackContent:View {
                     }
                 }
                 
-                if interactivity.contains(.angularDrag){
+                if interactivity.contains(.horizontalDrag){
                     rotationAngle = map(
                         value: Double(currentDrag.width),
                         fromMax: Double(UIScreen.main.bounds.width),
                         toMax:15.0
                     )
-                }
+                    
+                    offset.width += delta.width                }
                 
                 lastDrag = currentDrag
             }
@@ -111,10 +110,6 @@ where FrontContent: View, BackContent:View {
                     fromMax: UIScreen.main.bounds.width,
                     toMax: 180
                 )
-                
-                if abs(angle) > 90 {
-                    onFlip(isReveled())
-                }
                 
                 if interactivity.contains(.flipDrag){
                     
@@ -137,25 +132,25 @@ where FrontContent: View, BackContent:View {
                     }
                 }
                 
-                if interactivity.contains(.angularDrag){
+                if interactivity.contains(.horizontalDrag){
                     withAnimation{
                         rotationAngle = 0
                     }
                 }
+                
+                if abs(angle) > 90 {
+                    onFlip(isReveled())
+                }
+                
+                onRelease(isReveled())
             }
     }
     
     var tapGesture: some Gesture{
         TapGesture().onEnded { _ in
             
-            let isReveled = isReveled()
-            
             if interactivity.contains(.flipTap){
-                withAnimation {
-                    flipAngle = isReveled ? 180 : 0
-                }
-                
-                onFlip(!isReveled)
+                doFlip()
             }
         }
     }
@@ -170,11 +165,27 @@ where FrontContent: View, BackContent:View {
         || flipAngle > 270
         || flipAngle < -270
     }
+    
+    public func doFlip(){
+        let isReveled = isReveled()
+        
+            withAnimation {
+                flipAngle = isReveled ? 180 : 0
+            }
+            
+            onFlip(!isReveled)
+        flip = false
+    }
 }
 
 struct MyView_Previews: PreviewProvider {
     
-    @State static var interactivity: [CardInteractivity] = [.flipTap, .angularDrag]
+    @State static var interactivity: [CardInteractivity] = [.flipTap, .horizontalDrag]
+    
+    static let cardOrigin = CGPoint(
+        x: UIScreen.main.bounds.midX,
+        y: UIScreen.main.bounds.midY - 100
+    )
     
     static var backView : some View {
         Text("backText")
@@ -190,14 +201,29 @@ struct MyView_Previews: PreviewProvider {
     
     static var previews: some View {
         CardView (
-            isVisible: true,
+            flip: .constant(true),
             frontView: frontView,
             backView: backView,
-            interactivity: interactivity,
-            flipAngle: 180,
-            onFlip: { isReveled in print(isReveled) },
-            onAppear: {},
-            onDissaper: {}
+            interactivity: $interactivity,
+            offset: .constant(.zero),
+            scale: .constant(1),
+            initialPosition: cardOrigin,
+            onFlip: { isReveled in },
+            onRelease: { isReveled in }
         )
+    }
+}
+
+extension Color {
+    func invertedColor() -> Color {
+        guard let ciColor = UIColor(self).cgColor.components else {
+            return self
+        }
+        
+        let invertedRed = 1.0 - ciColor[0]
+        let invertedGreen = 1.0 - ciColor[1]
+        let invertedBlue = 1.0 - ciColor[2]
+        
+        return Color(red: Double(invertedRed), green: Double(invertedGreen), blue: Double(invertedBlue))
     }
 }

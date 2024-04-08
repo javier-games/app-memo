@@ -13,6 +13,7 @@ class DecksData: ObservableObject, Decodable, Encodable {
 }
 
 class DeckData : Identifiable, ObservableObject, Decodable, Encodable{
+    
     var name: String
     var icon: String
     private var color: String
@@ -55,6 +56,14 @@ class DeckData : Identifiable, ObservableObject, Decodable, Encodable{
         let blue = Double(components[2]) / 255.0
         let alpha = Double(components[3]) / 255.0
         return Color(red: red, green: green, blue: blue, opacity: alpha)
+    }
+    
+    public func getPracticeCards() -> [CardData] {
+        return shuflle(cards: cardList)
+    }
+    
+    private func shuflle(cards: [CardData]) -> [CardData] {
+        return cards.shuffled()
     }
 }
 

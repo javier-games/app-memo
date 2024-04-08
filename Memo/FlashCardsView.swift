@@ -12,105 +12,69 @@ struct FlashCardsView: View {
     
     @Binding var deck: DeckData
     
-    @State private var currentCardIndex = 0
-    @State private var reveal = false
+    @State private var currentCardIndex = -1
     
-    @State private var isCorrect = false
-    @State private var isAnswered = false
-    @State private var flagMarked = false;
+    @State private var flip = false
+    @State private var offset: CGSize = CGSize.zero
+    @State private var interactivity: [CardInteractivity] = [.flipTap]
     
-    @State private var cardVisibility = false;
-    
-    @State private var cardPosition = CGPoint.zero
-    @State private var dragAmount = CGSize.zero
-    
-    @State private var inLeftTrigger = false
-    @State private var inRightTrigger = false
-    @State private var inTrigger = false
-    
-    @State private var interactivity: [CardInteractivity] = [.angularDrag, .flipTap]
     @State private var hasBeenFlipped = false
-    @State private var flipDirection = false
+    @State private var cardScale: CGFloat = 0
     
-    @State private var shakeAmount: CGFloat = 0
+    @State private var practiceCards: [CardData]
     
-    var cardOrigin = CGPoint(
+    
+    let cardOrigin = CGPoint(
         x: UIScreen.main.bounds.midX,
         y: UIScreen.main.bounds.midY - 100
     )
     
     var frontView: some View {
-        Text(deck.cardList[currentCardIndex].frontText)
-            .frame(width: 200, height: 300)
-            .background(deck.getColor())
+        Text(
+            isCardIndexInRange() ? "" :
+            practiceCards[currentCardIndex].frontText
+        )
+        .frame(width: 200, height: 300)
+        .background(deck.getColor())
+        .foregroundColor(deck.getColor().invertedColor())
     }
     
     var backView: some View {
-        Text(deck.cardList[currentCardIndex].backText)
-            .frame(width: 200, height: 300)
-            .background(deck.getColor())
+        
+        Text(
+            isCardIndexInRange() ? "" :
+            practiceCards[currentCardIndex].backText
+        )
+        .frame(width: 200, height: 300)
+        .background(deck.getColor())
+        .foregroundColor(deck.getColor().invertedColor())
     }
     
     var body: some View {
+        
         ZStack {
             
-            TriggerView(
-                x: 50,
-                y: UIScreen.main.bounds.midY,
-                width: 100,
-                height: UIScreen.main.bounds.height
-            )
-            
-            TriggerView(
-                x: UIScreen.main.bounds.width - 50,
-                y: UIScreen.main.bounds.midY,
-                width: 100,
-                height: UIScreen.main.bounds.height
-            )
-            
             VStack{
-                
-//                CardView (
-//                    isVisible: .constant(true),
-//                    isReveled: reveal,
-//                    frontView: frontView,
-//                    backView: backView,
-//                    interactivity: interactivity,
-//                    onFlip: { print(reveal) },
-//                    onAppear: {},
-//                    onDissaper: {}
-//                )
-                
-                
-//                CardView(
-//                    isVisible: $cardVisibility,
-//                    isReveled: $reveal,
-//                    flipDirection: $flipDirection,
-//                    frontView: frontView,
-//                    backView: backView,
-//                    interactivity: $interactivity,
-//                    dragAmount: dragAmount,
-//                    onFlip: {
-//                        hasBeenFlipped = true
-//                        if cardVisibility {
-//                            interactivity = .angularDrag
-//                        }
-//                    },
-//                    onAppear: {},
-//                    onDissaper: reset
-//                )
-//                .modifier(ShakeEffect(animatableData: shakeAmount))
-//                .position(cardPosition)
-//                .gesture(dragGesture)
+                CardView (
+                    flip: $flip,
+                    frontView: frontView,
+                    backView: backView,
+                    interactivity: $interactivity,
+                    offset: $offset,
+                    scale: $cardScale,
+                    flipAngle: 180,
+                    onFlip: onFlip,
+                    onRelease: onRelease
+                )
+                .onAppear(perform: onAppear)
             }
             
         }
-        .onAppear(perform: initialize)
         .toolbar{
             
-            
             ToolbarItem(placement: .principal) {
-                ProgressView(value: calculateProgress())
+                ProgressView(
+                    value:  Double(currentCardIndex) /  Double(practiceCards.count))
                     .progressViewStyle(LinearProgressViewStyle())
             }
             
@@ -143,142 +107,133 @@ struct FlashCardsView: View {
                         iconName: "arrow.2.squarepath",
                         buttonColor: Color.accentColor,
                         isEnabled: .constant(true),
-                        action: {withAnimation {
-                            reveal.toggle()
-                        }}
+                        action:  { flip.toggle() }
                     )
                 }
             }
         }
     }
     
-    func initialize(){
-        cardPosition = cardOrigin
-        cardVisibility = true
-//        interactivity = .flipTap
+    
+    init(deck: Binding<DeckData>) {
+        self._deck = deck
+        self.practiceCards = deck.wrappedValue.getPracticeCards()
+    }
+    
+    private func isCardIndexInRange() -> Bool{
+        return currentCardIndex < 0
+        || currentCardIndex >= practiceCards.count
+    }
+    
+    private func onAppear(){
+        getCard()
+    }
+    
+    private func getCard(){
         
-    }
-    
-    func calculateProgress() -> Double {
-        return Double(currentCardIndex) / Double(deck.cardList.count)
-    }
-    
-    var dragGesture: some Gesture {
-        DragGesture()
-            .onChanged { gesture in
-                dragAmount = CGSize(width: gesture.translation.width, height: 0)
-                updateTriggers()
-            }
-            .onEnded { _ in
-                if(reveal){
-                    cardPosition.x += dragAmount.width
-                }
-                dragAmount = .zero
-                checkDropTrigger()
-            }
-    }
-    
-    private func reset() {
-        // Reset the state as needed
-        cardPosition = cardOrigin
+        if practiceCards.isEmpty {
+            completePractice()
+            return
+        }
         
-        reveal = false
+        currentCardIndex += 1
+        
+        if currentCardIndex >= practiceCards.count {
+            completePractice()
+            return
+        }
+        
+        
+        offset = .zero
         hasBeenFlipped = false
-        updateTriggers()
-        cardVisibility = true
-//        interactivity = .flipDrag
+        
+        if !interactivity.contains(.flipTap) {
+            interactivity.append(.flipTap)
+        }
+        
+        if !interactivity.contains(.flipDrag) {
+            interactivity.append(.flipDrag)
+        }
+        
+        showCard()
     }
     
-    private func updateTriggers() {
-        let cardCenter = CGPoint(x: cardPosition.x + dragAmount.width, y: cardPosition.y + dragAmount.height)
-        inLeftTrigger = cardCenter.x < 100
-        inRightTrigger = cardCenter.x > UIScreen.main.bounds.width - 100
-        inTrigger = inLeftTrigger || inRightTrigger
-        isAnswered = reveal && inTrigger
-        isCorrect = isAnswered && inRightTrigger
-    }
-    
-    private func checkDropTrigger() {
-        if reveal {
-            if inLeftTrigger {
-                markCorrect()
-            } else if inRightTrigger {
-                markIncorrect()
-            } else {
-                withAnimation {
-                    reset()
-                }
+    private func onFlip(isReveled: Bool){
+        if isReveled {
+            if interactivity.contains(.flipDrag) {
+                interactivity.removeAll { i in i == .flipDrag }
+            }
+            
+            if !interactivity.contains(.horizontalDrag) {
+                interactivity.append(.horizontalDrag)
+            }
+            
+            hasBeenFlipped = true
+        }
+        else {
+            if interactivity.contains(.horizontalDrag) {
+                interactivity.removeAll { i in i == .horizontalDrag }
+            }
+            
+            if !interactivity.contains(.flipDrag) {
+                interactivity.append(.flipDrag)
             }
         }
-        else{
-            if inTrigger {
-                if inLeftTrigger {
-                    flipDirection = true
-                }
-                withAnimation {
-                    reveal.toggle()
-                }
-                flipDirection = false
-            }
-            else{
-                withAnimation {
-                    reset()
-                }
+    }
+    
+    private func onRelease(isReveled: Bool){
+        if !isReveled { return }
+        
+        if offset.width > 100 {
+            markCorrect()
+        }
+        
+        else if offset.width < -100 {
+            markIncorrect()
+        }
+        
+        else {
+            withAnimation{
+                offset = .zero
             }
         }
     }
     
     private func markCorrect(){
-        cardVisibility = false
+        hideCard { getCard() }
     }
     
     private func markIncorrect(){
-        withAnimation(.linear(duration: 0.2)) {
-            self.shakeAmount += 10
-        }
-        
-        cardVisibility = false
+        hideCard { getCard() }
     }
     
     private func skip(){
-        withAnimation(.linear(duration: 0.5)) {
-            self.shakeAmount += 1
+        hideCard { getCard() }
+    }
+    
+    private func showCard() {
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0)) {
+            cardScale = 1.0
+        }
+    }
+    
+    private func hideCard(callback: @escaping () -> Void) {
+        let animationDuration = 0.3
+        flip = true
+        
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0)) {
+            cardScale = 0
         }
         
-        cardVisibility = false
-    }
-    
-    private func markFlagged(){
-        withAnimation(.linear(duration: 0.5)) {
-            flagMarked.toggle()
+        DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
+            callback()
         }
     }
     
-}
-
-struct TriggerView: View {
-    
-    let x : CGFloat;
-    let y : CGFloat;
-    let width : CGFloat;
-    let height : CGFloat;
-    
-    var body: some View {
-        Rectangle()
-            .opacity(0)
-            .frame(width: width, height: height)
-            .position(x: x, y: y)
+    private func completePractice(){
+        
     }
-}
-
-struct ShakeEffect: GeometryEffect {
-    var amount: CGFloat = 10
-    var shakesPerUnit: CGFloat = 3
-    var animatableData: CGFloat
-
-    func effectValue(size: CGSize) -> ProjectionTransform {
-        ProjectionTransform(CGAffineTransform(translationX: amount * sin(animatableData * .pi * shakesPerUnit), y: 0))
-    }
+    
 }
 
 struct CircleButtonView: View {
@@ -306,7 +261,7 @@ struct ContentView_Previews: PreviewProvider {
         let dummyDeckData: DeckData = DeckData(
             name: "My Deck",
             icon: "😂",
-            color: Color.accentColor
+            color: Color.yellow
         )
         
         dummyDeckData.cardList = [
