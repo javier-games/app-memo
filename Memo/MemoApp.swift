@@ -18,7 +18,7 @@ struct MemoApp: App {
     
     var body: some Scene {
         WindowGroup {
-            DeckListView(deckList: MemoApp.$decks.deckList)
+            DecksView(deckList: MemoApp.$decks.deckList)
         }
     }
     

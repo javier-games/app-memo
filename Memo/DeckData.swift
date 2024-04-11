@@ -70,10 +70,23 @@ class DeckData : Identifiable, ObservableObject, Decodable, Encodable{
 class CardData : Identifiable, ObservableObject, Decodable, Encodable{
     
     var frontText: String
+    var frontHintText: String
     var backText: String
+    var backHintText: String
     
-    init(frontText: String, backText: String) {
+    init(frontText: String, backText: String, frontHintText: String = "", backHintText: String = "") {
         self.frontText = frontText
         self.backText = backText
+        self.frontHintText = frontHintText
+        self.backHintText = backHintText
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        frontText = try container.decode(String.self, forKey: .frontText)
+        backText = try container.decode(String.self, forKey: .backText)
+        // Attempt to decode the hint field, providing a default value if it's missing
+        frontHintText = (try? container.decode(String.self, forKey: .frontHintText)) ?? ""
+        backHintText = (try? container.decode(String.self, forKey: .backHintText)) ?? ""
     }
 }

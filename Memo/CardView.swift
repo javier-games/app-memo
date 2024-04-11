@@ -26,10 +26,10 @@ where FrontContent: View, BackContent:View {
     @Binding var scale: CGFloat
     
     @State var flipAngle: CGFloat = 0
-    @State var initialPosition: CGPoint = CGPoint.zero
     
     @State private var rotationAngle: CGFloat = 0
     @State private var lastDrag: CGSize = .zero
+    @State private var startDraggedAngle: CGFloat = 0
 
     let onFlip: (_ isReveled : Bool) -> Void
     let onRelease: (_ isReveled : Bool) -> Void
@@ -66,6 +66,10 @@ where FrontContent: View, BackContent:View {
         
             .onChanged { gesture in
                 
+                if lastDrag == .zero {
+                    startDraggedAngle = flipAngle
+                }
+                
                 let currentDrag = gesture.translation;
                 let delta = CGSizeMake(
                     currentDrag.width - lastDrag.width,
@@ -78,7 +82,7 @@ where FrontContent: View, BackContent:View {
                     let increment = map(
                         value: delta.width,
                         fromMax: UIScreen.main.bounds.width,
-                        toMax: 180.0
+                        toMax: 200.0
                     )
                     
                     flipAngle += increment
@@ -138,7 +142,7 @@ where FrontContent: View, BackContent:View {
                     }
                 }
                 
-                if abs(angle) > 90 {
+                if abs(startDraggedAngle - flipAngle) > 90 {
                     onFlip(isReveled())
                 }
                 
@@ -207,7 +211,6 @@ struct MyView_Previews: PreviewProvider {
             interactivity: $interactivity,
             offset: .constant(.zero),
             scale: .constant(1),
-            initialPosition: cardOrigin,
             onFlip: { isReveled in },
             onRelease: { isReveled in }
         )

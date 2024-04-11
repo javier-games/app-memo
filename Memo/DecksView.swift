@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct DeckListView: View {
+struct DecksView: View {
     
     @Binding var deckList: [DeckData]
     @State private var selectedDecksIds: Set<UUID> = []
@@ -85,7 +85,7 @@ struct DeckRaw: View {
     var body: some View {
         
         NavigationLink(
-            destination: GroupView(deck: $deck)
+            destination: DeckView(deck: $deck)
         ) {
             HStack {
                 Text(deck.icon).frame(width: 30)
@@ -172,6 +172,6 @@ struct DeckListPreview: PreviewProvider {
         dummyDeckData[0].cardList.append(CardData(frontText: "Front2", backText: "Back2"))
         
         // Pass the dummy data to the DeckListView using a binding
-        return DeckListView(deckList: .constant(dummyDeckData))
+        return DecksView(deckList: .constant(dummyDeckData))
     }
 }

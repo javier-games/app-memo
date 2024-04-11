@@ -8,7 +8,7 @@
 import SwiftUI
 import Combine
 
-struct FlashCardsView: View {
+struct PracticeView: View {
     
     @Binding var deck: DeckData
     
@@ -19,7 +19,9 @@ struct FlashCardsView: View {
     @State private var interactivity: [CardInteractivity] = [.flipTap]
     
     @State private var hasBeenFlipped = false
+    @State private var isReveled = false
     @State private var cardScale: CGFloat = 0
+    @State private var showHint = false
     
     @State private var practiceCards: [CardData]
     
@@ -30,21 +32,40 @@ struct FlashCardsView: View {
     )
     
     var frontView: some View {
-        Text(
-            isCardIndexInRange() ? "" :
-            practiceCards[currentCardIndex].frontText
-        )
+        VStack{
+            Text(
+                isCardIndexInRange()
+                ? practiceCards[currentCardIndex].frontText
+                : ""
+            )
+            .bold()
+            
+            Text(
+                isCardIndexInRange() && showHint
+                ? practiceCards[currentCardIndex].frontHintText
+                : ""
+            )
+        }
         .frame(width: 200, height: 300)
         .background(deck.getColor())
         .foregroundColor(deck.getColor().invertedColor())
     }
     
     var backView: some View {
-        
-        Text(
-            isCardIndexInRange() ? "" :
-            practiceCards[currentCardIndex].backText
-        )
+        VStack{
+            Text(
+                isCardIndexInRange()
+                ? practiceCards[currentCardIndex].backText
+                : ""
+            )
+            .bold()
+            
+            Text( 
+                isCardIndexInRange() && showHint
+                ? practiceCards[currentCardIndex].backHintText
+                : ""
+            )
+        }
         .frame(width: 200, height: 300)
         .background(deck.getColor())
         .foregroundColor(deck.getColor().invertedColor())
@@ -67,6 +88,18 @@ struct FlashCardsView: View {
                     onRelease: onRelease
                 )
                 .onAppear(perform: onAppear)
+                
+                if(isCardIndexInRange()){
+                    if((isReveled && practiceCards[currentCardIndex].frontHintText != "") || !isReveled && practiceCards[currentCardIndex].backHintText != "")
+                    {
+                        CircleButtonView(
+                            iconName: "questionmark",
+                            buttonColor: Color.accentColor,
+                            isEnabled: .constant(true),
+                            action:  { showHint.toggle() }
+                        ).offset(CGSize(width: 0, height: 40))
+                    }
+                }
             }
             
         }
@@ -121,8 +154,8 @@ struct FlashCardsView: View {
     }
     
     private func isCardIndexInRange() -> Bool{
-        return currentCardIndex < 0
-        || currentCardIndex >= practiceCards.count
+        return !(currentCardIndex < 0
+        || currentCardIndex >= practiceCards.count)
     }
     
     private func onAppear(){
@@ -146,6 +179,7 @@ struct FlashCardsView: View {
         
         offset = .zero
         hasBeenFlipped = false
+        showHint = false
         
         if !interactivity.contains(.flipTap) {
             interactivity.append(.flipTap)
@@ -159,6 +193,7 @@ struct FlashCardsView: View {
     }
     
     private func onFlip(isReveled: Bool){
+        self.isReveled = isReveled
         if isReveled {
             if interactivity.contains(.flipDrag) {
                 interactivity.removeAll { i in i == .flipDrag }
@@ -219,7 +254,8 @@ struct FlashCardsView: View {
     
     private func hideCard(callback: @escaping () -> Void) {
         let animationDuration = 0.3
-        flip = true
+        
+        if isReveled {flip = true}
         
         withAnimation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0)) {
             cardScale = 0
@@ -265,10 +301,10 @@ struct ContentView_Previews: PreviewProvider {
         )
         
         dummyDeckData.cardList = [
-            CardData(frontText: "Front", backText: "Back"),
-            CardData(frontText: "F", backText: "B")
+            CardData(frontText: "Front", backText: "Back", frontHintText: "front hint"),
+            CardData(frontText: "F", backText: "B", backHintText: "back hint")
         ]
         
-        return NavigationView {FlashCardsView(deck: .constant(dummyDeckData))}
+        return NavigationView {PracticeView(deck: .constant(dummyDeckData))}
     }
 }

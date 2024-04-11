@@ -7,19 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F410C5262BB41A5B0061282C /* DeckListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F410C5252BB41A5B0061282C /* DeckListView.swift */; };
-		F410C5282BB41AE00061282C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F410C5272BB41AE00061282C /* SettingsView.swift */; };
+		F410C5262BB41A5B0061282C /* DecksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F410C5252BB41A5B0061282C /* DecksView.swift */; };
 		F410C52A2BB41C5C0061282C /* DeckData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F410C5292BB41C5C0061282C /* DeckData.swift */; };
 		F421D1132BB4415E00DBB875 /* EmojiTextFieldUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F421D1122BB4415E00DBB875 /* EmojiTextFieldUI.swift */; };
 		F49183782B622B930051531F /* MemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183772B622B930051531F /* MemoApp.swift */; };
-		F491837A2B622B930051531F /* FlashCardsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183792B622B930051531F /* FlashCardsView.swift */; };
-		F491837C2B622B950051531F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F491837B2B622B950051531F /* Assets.xcassets */; };
-		F491837F2B622B950051531F /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F491837E2B622B950051531F /* Preview Assets.xcassets */; };
-		F49183892B622B950051531F /* MemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183882B622B950051531F /* MemoTests.swift */; };
-		F49183932B622B950051531F /* MemoUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183922B622B950051531F /* MemoUITests.swift */; };
-		F49183952B622B950051531F /* MemoUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183942B622B950051531F /* MemoUITestsLaunchTests.swift */; };
-		F4A70AB02BB9994000D62CE6 /* CustomBackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4A70AAF2BB9994000D62CE6 /* CustomBackButton.swift */; };
-		F4C1592D2B9DB3250035895F /* GroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C1592C2B9DB3250035895F /* GroupView.swift */; };
+		F491837A2B622B930051531F /* PracticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183792B622B930051531F /* PracticeView.swift */; };
+		F4C1592D2B9DB3250035895F /* DeckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C1592C2B9DB3250035895F /* DeckView.swift */; };
 		F4C9E2722BBC08FC00CCB32E /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C9E2712BBC08FC00CCB32E /* CardView.swift */; };
 /* End PBXBuildFile section */
 
@@ -41,22 +34,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		F410C5252BB41A5B0061282C /* DeckListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckListView.swift; sourceTree = "<group>"; };
-		F410C5272BB41AE00061282C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F410C5252BB41A5B0061282C /* DecksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecksView.swift; sourceTree = "<group>"; };
 		F410C5292BB41C5C0061282C /* DeckData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckData.swift; sourceTree = "<group>"; };
 		F421D1122BB4415E00DBB875 /* EmojiTextFieldUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiTextFieldUI.swift; sourceTree = "<group>"; };
 		F49183742B622B930051531F /* Memo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Memo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F49183772B622B930051531F /* MemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoApp.swift; sourceTree = "<group>"; };
-		F49183792B622B930051531F /* FlashCardsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashCardsView.swift; sourceTree = "<group>"; };
-		F491837B2B622B950051531F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		F491837E2B622B950051531F /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		F49183792B622B930051531F /* PracticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeView.swift; sourceTree = "<group>"; };
 		F49183842B622B950051531F /* MemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		F49183882B622B950051531F /* MemoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoTests.swift; sourceTree = "<group>"; };
 		F491838E2B622B950051531F /* MemoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MemoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		F49183922B622B950051531F /* MemoUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoUITests.swift; sourceTree = "<group>"; };
-		F49183942B622B950051531F /* MemoUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		F4A70AAF2BB9994000D62CE6 /* CustomBackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomBackButton.swift; sourceTree = "<group>"; };
-		F4C1592C2B9DB3250035895F /* GroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupView.swift; sourceTree = "<group>"; };
+		F4C1592C2B9DB3250035895F /* DeckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckView.swift; sourceTree = "<group>"; };
 		F4C9E2712BBC08FC00CCB32E /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -89,8 +75,6 @@
 			isa = PBXGroup;
 			children = (
 				F49183762B622B930051531F /* Memo */,
-				F49183872B622B950051531F /* MemoTests */,
-				F49183912B622B950051531F /* MemoUITests */,
 				F49183752B622B930051531F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -109,43 +93,14 @@
 			isa = PBXGroup;
 			children = (
 				F49183772B622B930051531F /* MemoApp.swift */,
-				F49183792B622B930051531F /* FlashCardsView.swift */,
-				F491837B2B622B950051531F /* Assets.xcassets */,
-				F491837D2B622B950051531F /* Preview Content */,
-				F4C1592C2B9DB3250035895F /* GroupView.swift */,
-				F410C5252BB41A5B0061282C /* DeckListView.swift */,
-				F410C5272BB41AE00061282C /* SettingsView.swift */,
+				F49183792B622B930051531F /* PracticeView.swift */,
+				F4C1592C2B9DB3250035895F /* DeckView.swift */,
+				F410C5252BB41A5B0061282C /* DecksView.swift */,
 				F410C5292BB41C5C0061282C /* DeckData.swift */,
 				F421D1122BB4415E00DBB875 /* EmojiTextFieldUI.swift */,
-				F4A70AAF2BB9994000D62CE6 /* CustomBackButton.swift */,
 				F4C9E2712BBC08FC00CCB32E /* CardView.swift */,
 			);
 			path = Memo;
-			sourceTree = "<group>";
-		};
-		F491837D2B622B950051531F /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				F491837E2B622B950051531F /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
-			sourceTree = "<group>";
-		};
-		F49183872B622B950051531F /* MemoTests */ = {
-			isa = PBXGroup;
-			children = (
-				F49183882B622B950051531F /* MemoTests.swift */,
-			);
-			path = MemoTests;
-			sourceTree = "<group>";
-		};
-		F49183912B622B950051531F /* MemoUITests */ = {
-			isa = PBXGroup;
-			children = (
-				F49183922B622B950051531F /* MemoUITests.swift */,
-				F49183942B622B950051531F /* MemoUITestsLaunchTests.swift */,
-			);
-			path = MemoUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -252,8 +207,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F491837F2B622B950051531F /* Preview Assets.xcassets in Resources */,
-				F491837C2B622B950051531F /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -278,13 +231,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F410C5282BB41AE00061282C /* SettingsView.swift in Sources */,
-				F4A70AB02BB9994000D62CE6 /* CustomBackButton.swift in Sources */,
 				F4C9E2722BBC08FC00CCB32E /* CardView.swift in Sources */,
-				F491837A2B622B930051531F /* FlashCardsView.swift in Sources */,
-				F4C1592D2B9DB3250035895F /* GroupView.swift in Sources */,
+				F491837A2B622B930051531F /* PracticeView.swift in Sources */,
+				F4C1592D2B9DB3250035895F /* DeckView.swift in Sources */,
 				F410C52A2BB41C5C0061282C /* DeckData.swift in Sources */,
-				F410C5262BB41A5B0061282C /* DeckListView.swift in Sources */,
+				F410C5262BB41A5B0061282C /* DecksView.swift in Sources */,
 				F49183782B622B930051531F /* MemoApp.swift in Sources */,
 				F421D1132BB4415E00DBB875 /* EmojiTextFieldUI.swift in Sources */,
 			);
@@ -294,7 +245,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F49183892B622B950051531F /* MemoTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -302,8 +252,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F49183952B622B950051531F /* MemoUITestsLaunchTests.swift in Sources */,
-				F49183932B622B950051531F /* MemoUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -449,7 +397,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Memo/Preview Content\"";
 				DEVELOPMENT_TEAM = M7658Z3ZA9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -485,7 +432,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Memo/Preview Content\"";
 				DEVELOPMENT_TEAM = M7658Z3ZA9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
