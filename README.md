@@ -6,7 +6,7 @@
 
 # Memo Flash Cards
 
-Memo Flash Cards is an iOS app designed to enhance your learning experience by using customizable flash cards. Whether you're learning a new language, studying complex terms, or memorizing facts, Memo Flash Cards provides a simple, user-friendly interface to create, manage, and practice with your own flash card decks.
+Designed to enhance your learning experience by using customizable flash cards. Whether you're learning a new language, studying complex terms, or memorizing facts, Memo Flash Cards provides a simple, user-friendly interface to create, manage, and practice with your own flash card decks.
 
 <p align="center"> 
   <img src="https://github.com/javier-games/app-memo/blob/7aee97544898cb6218156752bda6733306ada3dc/Documentation.docc/Resources/memo_github_branding-screen_shots.png"/>
