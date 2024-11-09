@@ -56,7 +56,11 @@ where FrontContent: View, BackContent:View {
         .offset(offset)
         .gesture(dragGesture)
         .gesture(tapGesture)
-        .onChange(of: flip){ if flip { doFlip() } }
+        .onChange(of: flip) { newValue in
+            if newValue {
+                doFlip()
+            }
+        }
         .onAppear(){ if flip { doFlip() } }
     }
     

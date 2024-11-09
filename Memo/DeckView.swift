@@ -84,7 +84,7 @@ struct DeckView: View {
                 NavigationLink(destination: PracticeView(deck: $deck)) {
                     HStack(){
                         Image(systemName:"play.square.stack.fill")
-                            .symbolEffect(.bounce.up.byLayer, value: isPresenting )
+//                            .symbolEffect(.bounce.up.byLayer, value: isPresenting )
                         Text("Practice")
                     }
                     .padding(.vertical, 5)
