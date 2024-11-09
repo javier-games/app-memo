@@ -12,7 +12,6 @@
 		F421D1132BB4415E00DBB875 /* EmojiTextFieldUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F421D1122BB4415E00DBB875 /* EmojiTextFieldUI.swift */; };
 		F49183782B622B930051531F /* MemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183772B622B930051531F /* MemoApp.swift */; };
 		F491837A2B622B930051531F /* PracticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183792B622B930051531F /* PracticeView.swift */; };
-		F4A0D5A52CDFA3C100838F4E /* Documentation.docc in Sources */ = {isa = PBXBuildFile; fileRef = F4A0D5A42CDFA3C100838F4E /* Documentation.docc */; };
 		F4C1592D2B9DB3250035895F /* DeckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C1592C2B9DB3250035895F /* DeckView.swift */; };
 		F4C9E2722BBC08FC00CCB32E /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C9E2712BBC08FC00CCB32E /* CardView.swift */; };
 /* End PBXBuildFile section */
@@ -43,7 +42,6 @@
 		F49183792B622B930051531F /* PracticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeView.swift; sourceTree = "<group>"; };
 		F49183842B622B950051531F /* MemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F491838E2B622B950051531F /* MemoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MemoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		F4A0D5A42CDFA3C100838F4E /* Documentation.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = Documentation.docc; sourceTree = "<group>"; };
 		F4C1592C2B9DB3250035895F /* DeckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckView.swift; sourceTree = "<group>"; };
 		F4C9E2712BBC08FC00CCB32E /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -76,7 +74,6 @@
 		F491836B2B622B930051531F = {
 			isa = PBXGroup;
 			children = (
-				F4A0D5A42CDFA3C100838F4E /* Documentation.docc */,
 				F49183762B622B930051531F /* Memo */,
 				F49183752B622B930051531F /* Products */,
 			);
@@ -237,7 +234,6 @@
 				F4C9E2722BBC08FC00CCB32E /* CardView.swift in Sources */,
 				F491837A2B622B930051531F /* PracticeView.swift in Sources */,
 				F4C1592D2B9DB3250035895F /* DeckView.swift in Sources */,
-				F4A0D5A52CDFA3C100838F4E /* Documentation.docc in Sources */,
 				F410C52A2BB41C5C0061282C /* DeckData.swift in Sources */,
 				F410C5262BB41A5B0061282C /* DecksView.swift in Sources */,
 				F49183782B622B930051531F /* MemoApp.swift in Sources */,
