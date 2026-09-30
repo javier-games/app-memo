@@ -6,41 +6,39 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct MemoApp: App {
-    
-    @ObservedObject static var decks = DecksData()
+
+    /// The single source of truth for the whole app.
+    ///
+    /// Views reach it through `@Environment(\.modelContext)` and `@Query`, so
+    /// there is no global mutable state and no manual save calls scattered
+    /// through the UI layer.
+    private let modelContainer: ModelContainer
+
+    /// Practice rules live alongside the store rather than inside it: they are
+    /// per-device preferences, not user content, so they are not synced.
+    @State private var practiceSettings = PracticeSettingsStore()
 
     init() {
-        MemoApp.decks = MemoApp.loadDecksData()
-    }
-    
-    var body: some Scene {
-        WindowGroup {
-            DecksView(deckList: MemoApp.$decks.deckList)
-        }
-    }
-    
-    
-    static func saveDecksData() {
-        do {
-            let data = try JSONEncoder().encode(decks)
-            UserDefaults.standard.set(data, forKey: "DeckList")
-        } catch {
-            print("Error saving deck list: \(error)")
-        }
+        let container = MemoModelContainer.make()
+        LegacyStoreImport.runIfNeeded(in: container.mainContext)
+        self.modelContainer = container
     }
 
-    private static func loadDecksData() -> DecksData {
-        if let data = UserDefaults.standard.data(forKey: "DeckList") {
-            do {
-                let deckList = try JSONDecoder().decode(DecksData.self, from: data)
-                return deckList
-            } catch {
-                print("Error loading deck list: \(error)")
-            }
+    var body: some Scene {
+        WindowGroup {
+            DecksView()
+                .environment(practiceSettings)
+                .task {
+                    // Logged at launch so "my decks didn't sync" is
+                    // diagnosable: the store opens fine whether or not sync is
+                    // actually running, so the account status is the real signal.
+                    _ = await CloudSyncStatus.current()
+                }
         }
-        return DecksData()
+        .modelContainer(modelContainer)
     }
 }

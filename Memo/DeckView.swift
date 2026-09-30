@@ -1,266 +1,251 @@
 //
-//  CardSlotView.swift
+//  DeckView.swift
 //  Memo
 //
 //  Created by Francisco Javier García Gutiérrez on 2024/03/10.
 //
 
 import SwiftUI
-
-
+import SwiftData
 
 struct DeckView: View {
-    
-    private enum Sheets{
-        case None, AddCard, EditCard
-    }
-    
-    @Binding var deck: DeckData
-    
-    @State private var isPresenting = false
-    @State private var sheetSelection: Sheets = .None
-    
-    @State private var cardSelected : CardData = CardData(frontText: "", backText: "")
-    
-    
+
+    @Environment(\.modelContext) private var modelContext
+    @Environment(PracticeSettingsStore.self) private var practiceSettings
+
+    let deck: Deck
+
+    @State private var presentedSheet: CardSheet?
+    @State private var isPresentingPracticeOptions = false
+    @State private var isPresentingDeckEditor = false
+
+    private var cards: [Card] { deck.orderedCards }
+
     var body: some View {
-        
-        
-        ZStack{
-            VStack{
-                
-                List{
-                    
-                    Section{
-                        ForEach(deck.cardList) { card in
-                            Button (
-                                action: {
-                                    openEditCardView(card: card)
-                                },
-                                label: {
-                                    HStack {
-                                        Text(card.backText)
-                                        Spacer()
-                                        Text(card.frontText).fontWeight(.light)
-                                    }
-                                }
-                            )
-                        }
-                        .onDelete(perform: deleteCard)
-                    } header: {
-                        if deck.cardList.isEmpty || deck.cardList.count == 0 {
-                            Text("This deck is empty. Add some cards to start practicing!")
-                        }
-                        else{
+
+        List {
+
+            Section {
+                ForEach(cards) { card in
+                    Button {
+                        presentedSheet = .edit(card)
+                    } label: {
+                        HStack {
+                            Text(card.backText)
                             Spacer()
+                            Text(card.frontText)
+                                .fontWeight(.light)
+
+                            // Otherwise the target would be a number the user
+                            // sets and never sees the effect of.
+                            if let standing = progressLabel(for: card) {
+                                Text(standing.text)
+                                    .font(.caption)
+                                    .monospacedDigit()
+                                    .foregroundStyle(standing.isFulfilled ? Color.green : .secondary)
+                            }
                         }
                     }
-                    
-                    Button (
-                        action: openAddCardView,
-                        label: { Label("Add", systemImage: "plus") }
-                    )
                 }
-                
-                .sheet(
-                    isPresented: $isPresenting,
-                    onDismiss: onDismiss
-                ){
-                    if sheetSelection == .AddCard {
-                        AddCardView(action: addCard)
-                    }
-                    else if sheetSelection == .EditCard {
-                        EditCardView(card: $cardSelected)
-                    }
+                .onDelete(perform: deleteCards)
+                .onMove(perform: moveCards)
+            } header: {
+                if cards.isEmpty {
+                    Text("This deck is empty. Add some cards to start practicing!")
+                } else {
+                    Spacer()
                 }
-                
-                
+            }
+
+            Button {
+                presentedSheet = .add
+            } label: {
+                Label("Add", systemImage: "plus")
             }
         }
-        
-        .navigationTitle(deck.icon + " " + deck.name)
+        .navigationTitle("\(deck.icon) \(deck.name)")
         .toolbar {
-            ToolbarItem(placement: .bottomBar){
-                NavigationLink(destination: PracticeView(deck: $deck)) {
-                    HStack(){
-                        Image(systemName:"play.square.stack.fill")
-//                            .symbolEffect(.bounce.up.byLayer, value: isPresenting )
+            ToolbarItem(placement: .bottomBar) {
+                // Styled by the system rather than by hand. The previous
+                // version drew its own blue rounded rectangle and nudged it
+                // with an offset, which sat on top of the toolbar's material
+                // instead of belonging to it — conspicuously so against the
+                // Liquid Glass bar on iOS 26.
+                NavigationLink(
+                    destination: PracticeView(deck: deck, settings: practiceSettings.settings)
+                ) {
+                    // An explicit HStack rather than a Label: a toolbar Label
+                    // collapses to its icon, and on iOS 26 that leaves the
+                    // screen's primary action as an unlabelled glyph.
+                    HStack(spacing: 6) {
+                        Image(systemName: "play.fill")
                         Text("Practice")
                     }
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 20)
-                    .foregroundColor(.white)
-                    .background(Color.blue)
-                    .cornerRadius(10)
+                    // Widened past its intrinsic size: this is the screen's
+                    // primary action and reads as an afterthought when it
+                    // shrink-wraps the word.
+                    .padding(.horizontal, 30)
+                    // Pinned rather than inherited. A prominent button picks
+                    // its own foreground from the tint, and against this blue
+                    // it chooses black in dark mode — which clashed with the
+                    // white icons on the practice screen it leads to.
+                    .foregroundStyle(.white)
                 }
-                .offset(CGSize(width: 0, height: 5))
+                .buttonStyle(.borderedProminent)
+                .disabled(!deck.hasPractisableCards)
             }
-        }
-    }
-    
-    func openAddCardView(){
-        sheetSelection = .AddCard
-        isPresenting = true
-    }
-    
-    func openEditCardView(card: CardData){
-        sheetSelection = .EditCard
-        cardSelected = card
-        isPresenting = true
-    }
-    
-    func addCard(newCard: CardData){
-        withAnimation {
-            deck.cardList.append(newCard)
-        }
-        
-        MemoApp.saveDecksData()
-    }
-    
-    func deleteCard(at offsets: IndexSet){
-        withAnimation {
-            deck.cardList.remove(atOffsets: offsets)
-        }
-        
-        MemoApp.saveDecksData()
-    }
-    
-    func onDismiss(){
-        sheetSelection = .None
-        print(sheetSelection)
-    }
-}
 
-
-
-struct AddCardView: View {
-    
-    @Environment(\.dismiss) var dismiss
-    
-    let action: (CardData) -> Void
-    
-    @State private var frontText : String = ""
-    @State private var frontHintText : String = ""
-    @State private var backText : String = ""
-    @State private var backHintText : String = ""
-    
-    var body: some View {
-        
-        NavigationView {
-            Form {
-                
-                Section{
-                    TextField("Back", text: $backText)
-                    TextField("Hint", text: $backHintText)
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    isPresentingPracticeOptions = true
+                } label: {
+                    Label("Practice Options", systemImage: "slider.horizontal.3")
                 }
-                
-                Section{
-                    TextField("Front", text: $frontText)
-                    TextField("Hint", text: $frontHintText)
+            }
+
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    isPresentingDeckEditor = true
+                } label: {
+                    Label("Deck Settings", systemImage: "pencil")
                 }
-                
-                Section{
-                    HStack{
-                        Spacer()
-                        
-                        Button("Add", action: addCard)
-                            .disabled(frontText.isEmpty||backText.isEmpty)
-                        
-                        Spacer()
+            }
+
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    ShareLink(
+                        item: jsonExport,
+                        preview: SharePreview(deck.name)
+                    ) {
+                        Label("JSON", systemImage: "curlybraces")
                     }
-                }
-                
-            }
-            .navigationBarItems(leading: Button("Cancel", action: cancelDeck))
-            .navigationBarTitle("New Card", displayMode: .inline)
-        }
-    }
-    
-    func addCard() {
-        action(CardData(frontText: frontText, backText: backText, frontHintText: frontHintText, backHintText: backHintText))
-        dismiss()
-    }
-    
-    func cancelDeck(){
-        dismiss()
-    }
-}
 
-struct EditCardView: View {
-    
-    @Environment(\.dismiss) var dismiss
-    
-    @Binding var card : CardData
-    
-    @State private var frontText : String = ""
-    @State private var frontHintText : String = ""
-    @State private var backText : String = ""
-    @State private var backHintText : String = ""
-
-    
-    var body: some View {
-        
-        NavigationView {
-            Form {
-                
-                Section{
-                    TextField("Back", text: $backText)
-                    TextField("Hint", text: $backHintText)
-                }
-                
-                Section{
-                    TextField("Front", text: $frontText)
-                    TextField("Hint", text: $frontHintText)
-                }
-                
-                .onAppear(){
-                    backText = card.backText
-                    frontText = card.frontText
-                    backHintText = card.backHintText
-                    frontHintText = card.frontHintText
-                }
-                
-                
-                Section{
-                    HStack{
-                        Spacer()
-                        
-                        Button("Save", action: editCard)
-                            .disabled(card.frontText.isEmpty||card.backText.isEmpty)
-                        
-                        Spacer()
+                    ShareLink(
+                        item: csvExport,
+                        preview: SharePreview(deck.name)
+                    ) {
+                        Label("CSV", systemImage: "tablecells")
                     }
+                } label: {
+                    Label("Share Deck", systemImage: "square.and.arrow.up")
                 }
-                
+                .disabled(cards.isEmpty)
             }
-            .navigationBarItems(leading: Button("Cancel", action: cancelDeck))
-            .navigationBarTitle("Edit Card", displayMode: .inline)
+        }
+        // `sheet(item:)` rather than a Bool plus a separate enum: the presented
+        // value and the presentation state cannot drift out of step.
+        .sheet(isPresented: $isPresentingPracticeOptions) {
+            PracticeSettingsView(deckCardCount: deck.practisableCards.count)
+        }
+        .sheet(isPresented: $isPresentingDeckEditor) {
+            DeckEditorView(
+                title: "Deck Settings",
+                saveTitle: "Save",
+                draft: DeckDraft(deck: deck)
+            ) { draft in
+                draft.apply(to: deck)
+            }
+        }
+        .sheet(item: $presentedSheet) { sheet in
+            switch sheet {
+            case .add:
+                CardEditorView(
+                    title: "New Card",
+                    saveTitle: "Add",
+                    draft: CardDraft()
+                ) { draft in
+                    addCard(from: draft)
+                }
+
+            case .edit(let card):
+                CardEditorView(
+                    title: "Edit Card",
+                    saveTitle: "Save",
+                    draft: CardDraft(card: card)
+                ) { draft in
+                    draft.apply(to: card)
+                }
+            }
         }
     }
-    
-    func editCard() {
-        card.backText = backText
-        card.frontText = frontText
-        card.backHintText = backHintText
-        card.frontHintText = frontHintText
-        
-        MemoApp.saveDecksData()
-        
-        dismiss()
+
+    // MARK: - Exporting
+
+    /// Encoding a handful of strings cannot realistically fail, and a share
+    /// sheet is no place to raise it if it somehow did.
+    private var jsonExport: ExportedDeckJSON {
+        ExportedDeckJSON(
+            data: (try? DeckExporter.jsonData(for: deck)) ?? Data(),
+            fileName: DeckExporter.fileName(for: deck, kind: .json)
+        )
     }
-    
-    func cancelDeck(){
-        dismiss()
+
+    private var csvExport: ExportedDeckCSV {
+        ExportedDeckCSV(
+            text: DeckExporter.csvText(for: deck),
+            fileName: DeckExporter.fileName(for: deck, kind: .csv)
+        )
+    }
+
+    private func progressLabel(for card: Card) -> (text: String, isFulfilled: Bool)? {
+        let progress = practiceSettings.settings.progress(for: card)
+        guard let text = progress.shortDescription else { return nil }
+        return (text, progress.isFulfilled)
+    }
+
+    private func addCard(from draft: CardDraft) {
+        let card = Card()
+        draft.apply(to: card)
+
+        withAnimation {
+            modelContext.insert(card)
+            deck.append(card)
+        }
+    }
+
+    /// Reorders the deck.
+    ///
+    /// `onMove` supplies the long-press drag on its own; the list needs no edit
+    /// mode and no control of its own for it. Card order is user-visible in the
+    /// In Order practice mode, not only in this list.
+    private func moveCards(from source: IndexSet, to destination: Int) {
+        withAnimation {
+            cards.applyMove(from: source, to: destination)
+        }
+    }
+
+    private func deleteCards(at offsets: IndexSet) {
+        let ordered = cards
+
+        withAnimation {
+            for index in offsets {
+                modelContext.delete(ordered[index])
+            }
+        }
     }
 }
 
-struct CardSlotView_Previews: PreviewProvider {
-    static var previews: some View {
-        
-        let deck = DeckData(name: "My Deck", icon: "🤓", color: Color.red)
-        deck.cardList.append(CardData(frontText: "Front1", backText: "Back1"))
-        deck.cardList.append(CardData(frontText: "Front2", backText: "Back2"))
-        return  NavigationView {DeckView(deck: .constant(deck))}
-       
+// MARK: - Sheet routing
+
+private enum CardSheet: Identifiable {
+    case add
+    case edit(Card)
+
+    var id: String {
+        switch self {
+        case .add: "add"
+        case .edit(let card): card.uuid.uuidString
+        }
     }
+}
+
+#Preview {
+    let container = PreviewData.container()
+    return NavigationStack {
+        DeckView(deck: PreviewData.sampleDeck(in: container))
+    }
+    .modelContainer(container)
+    .environment(PracticeSettingsStore(
+        defaults: UserDefaults(suiteName: "preview.practice.settings")!
+    ))
 }

@@ -7,8 +7,37 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E6E73DEC4915BB2596461DB7 /* DeckEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D198E6451FDCC727584A9A /* DeckEditorView.swift */; };
+		75FED3B78920FDF5C57F2854 /* DeckTransferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D05C2182AE53FB30E3B4D500 /* DeckTransferTests.swift */; };
+		6EB9C5C8D6E2CB8D41295675 /* DeckExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06E5E5C55257B9702C3D24CD /* DeckExporter.swift */; };
+		AC18781D6AE2C10323E98859 /* DeckImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495041363AA400C41DF8D836 /* DeckImporter.swift */; };
+		AA3988DBD65BA5F25CF86764 /* DeckCSVFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3323348FE7108D16A54E1D56 /* DeckCSVFormat.swift */; };
+		A04EC4DD20883DBC7E08D931 /* DeckTransferFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89903CBD36787EB75C82B396 /* DeckTransferFormat.swift */; };
+		411F05A4A5D6C72780B15CC0 /* CardPracticeProgressTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 073A51012FC7992EEB1510CE /* CardPracticeProgressTests.swift */; };
+		A0479D4C85727FF7D4DF646C /* CardEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FC2067B090D8C9278D50758 /* CardEditorView.swift */; };
+		4C671A8ED981E7CD4D4D68DA /* CardPracticeProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36AC82E452BFE62B38C7B265 /* CardPracticeProgress.swift */; };
+		8ADD1C1684690F2C7F57D83A /* MemoUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FBD2CE05CFD98EEB0305034 /* MemoUITests.swift */; };
+		15A6689AB39D5CA3C1827F47 /* LegacyStoreImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52AD989219877741EED8F43A /* LegacyStoreImportTests.swift */; };
+		6D2FE8E061B9F24F5E7BEEBB /* SortIndexedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 003548B3F8CF85A99D2148CD /* SortIndexedTests.swift */; };
+		E5237B44299BD97AC38FF11F /* PracticeSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CACDFFC3B2C44B4B53080E43 /* PracticeSettingsTests.swift */; };
+		F47FB4B91BF44840839F3166 /* PracticeSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCE7896AF372DD4AC9382622 /* PracticeSessionTests.swift */; };
+		08CF39FA41B4693A2D28EF49 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 87857433467730D1440934B3 /* Assets.xcassets */; };
+		156EC7EA1C59CFB9C8BCB6CB /* SortIndexed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 309D36D89EA52084536A4031 /* SortIndexed.swift */; };
+		01C70B641A385704B707883B /* PracticeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E111DDCE17080F2E5150989 /* PracticeSettingsView.swift */; };
+		CE7A0CF15025C95273A7567B /* PracticeSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4D42DF966D98257AFDF16E /* PracticeSettingsStore.swift */; };
+		AE519555A4E3CB2B0F466C5A /* PracticePlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00381C0F543960D1B2CAB4DD /* PracticePlanner.swift */; };
+		69B5E7181D2773F9AC99D622 /* PracticeSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D690E6D8D16C1C18686779C /* PracticeSettings.swift */; };
+		49AA5BABC6CE0AD4D5E552D8 /* PracticeResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816FD4CB07057DBA31D88990 /* PracticeResultsView.swift */; };
+		AFFA949187517945C2269959 /* PracticeSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12322F249CB1B5C4658F604C /* PracticeSession.swift */; };
+		16A1D2B2FBC62E8663C41DF9 /* LegacyStoreImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8EA7EFBCD9E82799B9E895E /* LegacyStoreImport.swift */; };
+		9EAF5A97CA9FBDA3670773B8 /* AppConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161907CCB573DC509546756A /* AppConfiguration.swift */; };
+		B5053D7317F974AB0E81EB55 /* PreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5078CFCAA79A93C3B7CC2619 /* PreviewData.swift */; };
+		B8368D94557801165C093BF4 /* Color+Memo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35A2084F9E30BA0899477F91 /* Color+Memo.swift */; };
+		C16D5A22CA78684DEA1B7602 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34901B269B68CECE9F0FA098 /* Card.swift */; };
+		D9CEECA341D5026BAACFB55E /* MemoModelContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22D8F1E608C20F6BCE7F3B7E /* MemoModelContainer.swift */; };
+		DE23459A6F496F2C2439E6A0 /* Deck.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2D436FEA185699A975E2AD3 /* Deck.swift */; };
+		E4AF48D743690FE0DE22054C /* CloudSyncStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE77390A239A1FDF8F915001 /* CloudSyncStatus.swift */; };
 		F410C5262BB41A5B0061282C /* DecksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F410C5252BB41A5B0061282C /* DecksView.swift */; };
-		F410C52A2BB41C5C0061282C /* DeckData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F410C5292BB41C5C0061282C /* DeckData.swift */; };
 		F421D1132BB4415E00DBB875 /* EmojiTextFieldUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F421D1122BB4415E00DBB875 /* EmojiTextFieldUI.swift */; };
 		F49183782B622B930051531F /* MemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183772B622B930051531F /* MemoApp.swift */; };
 		F491837A2B622B930051531F /* PracticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183792B622B930051531F /* PracticeView.swift */; };
@@ -34,8 +63,38 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		38D198E6451FDCC727584A9A /* DeckEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeckEditorView.swift"; sourceTree = "<group>"; };
+		D05C2182AE53FB30E3B4D500 /* DeckTransferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeckTransferTests.swift"; sourceTree = "<group>"; };
+		06E5E5C55257B9702C3D24CD /* DeckExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeckExporter.swift"; sourceTree = "<group>"; };
+		495041363AA400C41DF8D836 /* DeckImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeckImporter.swift"; sourceTree = "<group>"; };
+		3323348FE7108D16A54E1D56 /* DeckCSVFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeckCSVFormat.swift"; sourceTree = "<group>"; };
+		89903CBD36787EB75C82B396 /* DeckTransferFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeckTransferFormat.swift"; sourceTree = "<group>"; };
+		073A51012FC7992EEB1510CE /* CardPracticeProgressTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CardPracticeProgressTests.swift"; sourceTree = "<group>"; };
+		8FC2067B090D8C9278D50758 /* CardEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CardEditorView.swift"; sourceTree = "<group>"; };
+		36AC82E452BFE62B38C7B265 /* CardPracticeProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CardPracticeProgress.swift"; sourceTree = "<group>"; };
+		0FBD2CE05CFD98EEB0305034 /* MemoUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MemoUITests.swift"; sourceTree = "<group>"; };
+		52AD989219877741EED8F43A /* LegacyStoreImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LegacyStoreImportTests.swift"; sourceTree = "<group>"; };
+		003548B3F8CF85A99D2148CD /* SortIndexedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SortIndexedTests.swift"; sourceTree = "<group>"; };
+		CACDFFC3B2C44B4B53080E43 /* PracticeSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PracticeSettingsTests.swift"; sourceTree = "<group>"; };
+		BCE7896AF372DD4AC9382622 /* PracticeSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PracticeSessionTests.swift"; sourceTree = "<group>"; };
+		87857433467730D1440934B3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		309D36D89EA52084536A4031 /* SortIndexed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SortIndexed.swift"; sourceTree = "<group>"; };
+		1E111DDCE17080F2E5150989 /* PracticeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PracticeSettingsView.swift"; sourceTree = "<group>"; };
+		0D4D42DF966D98257AFDF16E /* PracticeSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PracticeSettingsStore.swift"; sourceTree = "<group>"; };
+		00381C0F543960D1B2CAB4DD /* PracticePlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PracticePlanner.swift"; sourceTree = "<group>"; };
+		1D690E6D8D16C1C18686779C /* PracticeSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PracticeSettings.swift"; sourceTree = "<group>"; };
+		816FD4CB07057DBA31D88990 /* PracticeResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PracticeResultsView.swift"; sourceTree = "<group>"; };
+		12322F249CB1B5C4658F604C /* PracticeSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PracticeSession.swift"; sourceTree = "<group>"; };
+		161907CCB573DC509546756A /* AppConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfiguration.swift; sourceTree = "<group>"; };
+		1E1877EAB0B76CF7C40CB5F5 /* Memo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Memo.entitlements; sourceTree = "<group>"; };
+		22D8F1E608C20F6BCE7F3B7E /* MemoModelContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoModelContainer.swift; sourceTree = "<group>"; };
+		34901B269B68CECE9F0FA098 /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
+		35A2084F9E30BA0899477F91 /* Color+Memo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Memo.swift"; sourceTree = "<group>"; };
+		5078CFCAA79A93C3B7CC2619 /* PreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewData.swift; sourceTree = "<group>"; };
+		B2D436FEA185699A975E2AD3 /* Deck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deck.swift; sourceTree = "<group>"; };
+		C8EA7EFBCD9E82799B9E895E /* LegacyStoreImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyStoreImport.swift; sourceTree = "<group>"; };
+		CE77390A239A1FDF8F915001 /* CloudSyncStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncStatus.swift; sourceTree = "<group>"; };
 		F410C5252BB41A5B0061282C /* DecksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecksView.swift; sourceTree = "<group>"; };
-		F410C5292BB41C5C0061282C /* DeckData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckData.swift; sourceTree = "<group>"; };
 		F421D1122BB4415E00DBB875 /* EmojiTextFieldUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiTextFieldUI.swift; sourceTree = "<group>"; };
 		F49183742B622B930051531F /* Memo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Memo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F49183772B622B930051531F /* MemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoApp.swift; sourceTree = "<group>"; };
@@ -71,9 +130,88 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9D13033938681367210A0106 /* Transfer */ = {
+			isa = PBXGroup;
+			children = (
+				89903CBD36787EB75C82B396 /* DeckTransferFormat.swift */,
+				3323348FE7108D16A54E1D56 /* DeckCSVFormat.swift */,
+				495041363AA400C41DF8D836 /* DeckImporter.swift */,
+				06E5E5C55257B9702C3D24CD /* DeckExporter.swift */,
+			);
+			path = Transfer;
+			sourceTree = "<group>";
+		};
+		414072DB4E47D110E1179CC4 /* MemoUITests */ = {
+			isa = PBXGroup;
+			children = (
+				0FBD2CE05CFD98EEB0305034 /* MemoUITests.swift */,
+			);
+			path = MemoUITests;
+			sourceTree = "<group>";
+		};
+		2B2D6B0B0EC265D54C290522 /* MemoTests */ = {
+			isa = PBXGroup;
+			children = (
+				D05C2182AE53FB30E3B4D500 /* DeckTransferTests.swift */,
+				073A51012FC7992EEB1510CE /* CardPracticeProgressTests.swift */,
+				BCE7896AF372DD4AC9382622 /* PracticeSessionTests.swift */,
+				CACDFFC3B2C44B4B53080E43 /* PracticeSettingsTests.swift */,
+				003548B3F8CF85A99D2148CD /* SortIndexedTests.swift */,
+				52AD989219877741EED8F43A /* LegacyStoreImportTests.swift */,
+			);
+			path = MemoTests;
+			sourceTree = "<group>";
+		};
+		735894202308D0E4D8B161AF /* Practice */ = {
+			isa = PBXGroup;
+			children = (
+				36AC82E452BFE62B38C7B265 /* CardPracticeProgress.swift */,
+				1D690E6D8D16C1C18686779C /* PracticeSettings.swift */,
+				00381C0F543960D1B2CAB4DD /* PracticePlanner.swift */,
+				12322F249CB1B5C4658F604C /* PracticeSession.swift */,
+				0D4D42DF966D98257AFDF16E /* PracticeSettingsStore.swift */,
+				1E111DDCE17080F2E5150989 /* PracticeSettingsView.swift */,
+				F49183792B622B930051531F /* PracticeView.swift */,
+				816FD4CB07057DBA31D88990 /* PracticeResultsView.swift */,
+			);
+			path = Practice;
+			sourceTree = "<group>";
+		};
+		138F8A74C8EBA98FE0BC40B4 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				B2D436FEA185699A975E2AD3 /* Deck.swift */,
+				34901B269B68CECE9F0FA098 /* Card.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		876186C65EAB09CA84F1ECF9 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				309D36D89EA52084536A4031 /* SortIndexed.swift */,
+				161907CCB573DC509546756A /* AppConfiguration.swift */,
+				35A2084F9E30BA0899477F91 /* Color+Memo.swift */,
+				5078CFCAA79A93C3B7CC2619 /* PreviewData.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		93BBCF055CD8328C3D34F713 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				CE77390A239A1FDF8F915001 /* CloudSyncStatus.swift */,
+				22D8F1E608C20F6BCE7F3B7E /* MemoModelContainer.swift */,
+				C8EA7EFBCD9E82799B9E895E /* LegacyStoreImport.swift */,
+			);
+			path = Persistence;
+			sourceTree = "<group>";
+		};
 		F491836B2B622B930051531F = {
 			isa = PBXGroup;
 			children = (
+				414072DB4E47D110E1179CC4 /* MemoUITests */,
+				2B2D6B0B0EC265D54C290522 /* MemoTests */,
 				F49183762B622B930051531F /* Memo */,
 				F49183752B622B930051531F /* Products */,
 			);
@@ -92,11 +230,18 @@
 		F49183762B622B930051531F /* Memo */ = {
 			isa = PBXGroup;
 			children = (
+				38D198E6451FDCC727584A9A /* DeckEditorView.swift */,
+				9D13033938681367210A0106 /* Transfer */,
+				8FC2067B090D8C9278D50758 /* CardEditorView.swift */,
+				87857433467730D1440934B3 /* Assets.xcassets */,
+				735894202308D0E4D8B161AF /* Practice */,
+				1E1877EAB0B76CF7C40CB5F5 /* Memo.entitlements */,
+				138F8A74C8EBA98FE0BC40B4 /* Models */,
+				93BBCF055CD8328C3D34F713 /* Persistence */,
+				876186C65EAB09CA84F1ECF9 /* Shared */,
 				F49183772B622B930051531F /* MemoApp.swift */,
-				F49183792B622B930051531F /* PracticeView.swift */,
 				F4C1592C2B9DB3250035895F /* DeckView.swift */,
 				F410C5252BB41A5B0061282C /* DecksView.swift */,
-				F410C5292BB41C5C0061282C /* DeckData.swift */,
 				F421D1122BB4415E00DBB875 /* EmojiTextFieldUI.swift */,
 				F4C9E2712BBC08FC00CCB32E /* CardView.swift */,
 			);
@@ -207,6 +352,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				08CF39FA41B4693A2D28EF49 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -231,10 +377,31 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E6E73DEC4915BB2596461DB7 /* DeckEditorView.swift in Sources */,
+				6EB9C5C8D6E2CB8D41295675 /* DeckExporter.swift in Sources */,
+				AC18781D6AE2C10323E98859 /* DeckImporter.swift in Sources */,
+				AA3988DBD65BA5F25CF86764 /* DeckCSVFormat.swift in Sources */,
+				A04EC4DD20883DBC7E08D931 /* DeckTransferFormat.swift in Sources */,
+				A0479D4C85727FF7D4DF646C /* CardEditorView.swift in Sources */,
+				4C671A8ED981E7CD4D4D68DA /* CardPracticeProgress.swift in Sources */,
+				156EC7EA1C59CFB9C8BCB6CB /* SortIndexed.swift in Sources */,
+				01C70B641A385704B707883B /* PracticeSettingsView.swift in Sources */,
+				CE7A0CF15025C95273A7567B /* PracticeSettingsStore.swift in Sources */,
+				AE519555A4E3CB2B0F466C5A /* PracticePlanner.swift in Sources */,
+				69B5E7181D2773F9AC99D622 /* PracticeSettings.swift in Sources */,
+				49AA5BABC6CE0AD4D5E552D8 /* PracticeResultsView.swift in Sources */,
+				AFFA949187517945C2269959 /* PracticeSession.swift in Sources */,
+				9EAF5A97CA9FBDA3670773B8 /* AppConfiguration.swift in Sources */,
+				E4AF48D743690FE0DE22054C /* CloudSyncStatus.swift in Sources */,
+				DE23459A6F496F2C2439E6A0 /* Deck.swift in Sources */,
+				C16D5A22CA78684DEA1B7602 /* Card.swift in Sources */,
+				D9CEECA341D5026BAACFB55E /* MemoModelContainer.swift in Sources */,
+				16A1D2B2FBC62E8663C41DF9 /* LegacyStoreImport.swift in Sources */,
+				B8368D94557801165C093BF4 /* Color+Memo.swift in Sources */,
+				B5053D7317F974AB0E81EB55 /* PreviewData.swift in Sources */,
 				F4C9E2722BBC08FC00CCB32E /* CardView.swift in Sources */,
 				F491837A2B622B930051531F /* PracticeView.swift in Sources */,
 				F4C1592D2B9DB3250035895F /* DeckView.swift in Sources */,
-				F410C52A2BB41C5C0061282C /* DeckData.swift in Sources */,
 				F410C5262BB41A5B0061282C /* DecksView.swift in Sources */,
 				F49183782B622B930051531F /* MemoApp.swift in Sources */,
 				F421D1132BB4415E00DBB875 /* EmojiTextFieldUI.swift in Sources */,
@@ -245,6 +412,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				75FED3B78920FDF5C57F2854 /* DeckTransferTests.swift in Sources */,
+				411F05A4A5D6C72780B15CC0 /* CardPracticeProgressTests.swift in Sources */,
+				15A6689AB39D5CA3C1827F47 /* LegacyStoreImportTests.swift in Sources */,
+				6D2FE8E061B9F24F5E7BEEBB /* SortIndexedTests.swift in Sources */,
+				E5237B44299BD97AC38FF11F /* PracticeSettingsTests.swift in Sources */,
+				F47FB4B91BF44840839F3166 /* PracticeSessionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -252,6 +425,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8ADD1C1684690F2C7F57D83A /* MemoUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -407,7 +581,6 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -442,7 +615,6 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

@@ -5,50 +5,71 @@
 //  Created by Francisco Javier García Gutiérrez on 2024/04/02.
 //
 
-import Foundation
 import SwiftUI
 
-enum CardInteractivity {
-    case flipTap, flipDrag, horizontalDrag
+/// Which gestures a card currently responds to.
+///
+/// An `OptionSet` rather than an array: this is a set of independent flags, and
+/// modelling it as an array meant every read and write went through
+/// `contains` / `append` / `removeAll`, with nothing preventing duplicates.
+struct CardInteractivity: OptionSet {
+
+    let rawValue: Int
+
+    static let flipTap        = CardInteractivity(rawValue: 1 << 0)
+    static let flipDrag       = CardInteractivity(rawValue: 1 << 1)
+    static let horizontalDrag = CardInteractivity(rawValue: 1 << 2)
 }
 
-struct CardView<FrontContent,BackContent>: View
-where FrontContent: View, BackContent:View {
-    
+struct CardView<FrontContent: View, BackContent: View>: View {
+
     @Binding var flip: Bool
-    
+
     let frontView: FrontContent
     let backView: BackContent
-    
-    @Binding var interactivity: [CardInteractivity]
-    
+
+    @Binding var interactivity: CardInteractivity
+
     @Binding var offset: CGSize
     @Binding var scale: CGFloat
-    
+
     @State var flipAngle: CGFloat = 0
-    
+
     @State private var rotationAngle: CGFloat = 0
     @State private var lastDrag: CGSize = .zero
     @State private var startDraggedAngle: CGFloat = 0
 
-    let onFlip: (_ isReveled : Bool) -> Void
-    let onRelease: (_ isReveled : Bool) -> Void
-    
+    let onFlip: (_ isRevealed: Bool) -> Void
+    let onRelease: (_ isRevealed: Bool) -> Void
+
+    /// Horizontal distance treated as a "full" drag when converting a gesture
+    /// into rotation.
+    ///
+    /// A fixed reference rather than the live screen width: this only sets
+    /// gesture sensitivity, so it does not need to track the device, and
+    /// reading `UIScreen.main.bounds` for it was both deprecated and wrong
+    /// whenever the app was not full-screen.
+    var referenceWidth: CGFloat = 393
+
+    // Computed rather than stored: this type is generic, and generic types
+    // cannot hold static stored properties.
+    private static var cardSize: CGSize { CGSize(width: 200, height: 300) }
+
     var body: some View {
-        
+
         ZStack {
-            if isReveled() {
+            if isRevealed {
                 frontView
             } else {
                 backView.rotation3DEffect(
-                    .degrees(180.0),
-                    axis: (x: 0.0, y: 1.0, z: 0.0)
+                    .degrees(180),
+                    axis: (x: 0, y: 1, z: 0)
                 )
             }
         }
         .background(.white)
-        .frame(width: 200, height: 300)
-        .cornerRadius(10)
+        .frame(width: Self.cardSize.width, height: Self.cardSize.height)
+        .clipShape(.rect(cornerRadius: 10))
         .shadow(radius: 10)
         .rotation3DEffect(.degrees(flipAngle), axis: (x: 0, y: 1, z: 0))
         .rotationEffect(.degrees(rotationAngle))
@@ -56,181 +77,123 @@ where FrontContent: View, BackContent:View {
         .offset(offset)
         .gesture(dragGesture)
         .gesture(tapGesture)
-        .onChange(of: flip) { newValue in
-            if newValue {
-                doFlip()
-            }
+        .onChange(of: flip) { _, newValue in
+            if newValue { doFlip() }
         }
-        .onAppear(){ if flip { doFlip() } }
+        .onAppear { if flip { doFlip() } }
     }
-    
-    var dragGesture: some Gesture {
-        
+
+    // MARK: - Gestures
+
+    private var dragGesture: some Gesture {
+
         DragGesture()
-        
             .onChanged { gesture in
-                
+
                 if lastDrag == .zero {
                     startDraggedAngle = flipAngle
                 }
-                
-                let currentDrag = gesture.translation;
-                let delta = CGSizeMake(
-                    currentDrag.width - lastDrag.width,
-                    currentDrag.height - lastDrag.height
+
+                let currentDrag = gesture.translation
+                let delta = CGSize(
+                    width: currentDrag.width - lastDrag.width,
+                    height: currentDrag.height - lastDrag.height
                 )
-                
-                if interactivity.contains(.flipDrag){
-                
-                    
-                    let increment = map(
-                        value: delta.width,
-                        fromMax: UIScreen.main.bounds.width,
-                        toMax: 200.0
-                    )
-                    
-                    flipAngle += increment
+
+                if interactivity.contains(.flipDrag) {
+                    flipAngle += map(value: delta.width, toMax: 200)
+
                     if flipAngle > 360 {
                         flipAngle -= 360
                     } else if flipAngle < -360 {
                         flipAngle += 360
                     }
                 }
-                
-                if interactivity.contains(.horizontalDrag){
-                    rotationAngle = map(
-                        value: Double(currentDrag.width),
-                        fromMax: Double(UIScreen.main.bounds.width),
-                        toMax:15.0
-                    )
-                    
-                    offset.width += delta.width                }
-                
+
+                if interactivity.contains(.horizontalDrag) {
+                    rotationAngle = map(value: currentDrag.width, toMax: 15)
+                    offset.width += delta.width
+                }
+
                 lastDrag = currentDrag
             }
-        
-            .onEnded { gesture in
-                
+            .onEnded { _ in
+
                 lastDrag = .zero
-                
-                let angle = map(
-                    value: gesture.translation.width,
-                    fromMax: UIScreen.main.bounds.width,
-                    toMax: 180
-                )
-                
-                if interactivity.contains(.flipDrag){
-                    
-                    withAnimation {
-                        if flipAngle > 270 && flipAngle < 360 {
-                            flipAngle = 360
-                        }
-                        else if flipAngle > 90 && flipAngle < 270 {
-                            flipAngle = 180
-                        }
-                        else if flipAngle > -90 && flipAngle < 90 {
-                            flipAngle = 0
-                        }
-                        else if flipAngle > -270 && flipAngle < -90{
-                            flipAngle = -180
-                        }
-                        else {
-                            flipAngle = -360
-                        }
-                    }
+
+                if interactivity.contains(.flipDrag) {
+                    withAnimation { flipAngle = settledAngle(from: flipAngle) }
                 }
-                
-                if interactivity.contains(.horizontalDrag){
-                    withAnimation{
-                        rotationAngle = 0
-                    }
+
+                if interactivity.contains(.horizontalDrag) {
+                    withAnimation { rotationAngle = 0 }
                 }
-                
+
                 if abs(startDraggedAngle - flipAngle) > 90 {
-                    onFlip(isReveled())
+                    onFlip(isRevealed)
                 }
-                
-                onRelease(isReveled())
+
+                onRelease(isRevealed)
             }
     }
-    
-    var tapGesture: some Gesture{
+
+    private var tapGesture: some Gesture {
         TapGesture().onEnded { _ in
-            
-            if interactivity.contains(.flipTap){
-                doFlip()
-            }
+            if interactivity.contains(.flipTap) { doFlip() }
         }
     }
-    
-    private func map(value : Double, fromMax: Double, toMax: Double) -> Double {
-        let newVal = (value / fromMax) * toMax
-        return min(toMax, max(-toMax, newVal))
+
+    // MARK: - Geometry
+
+    /// Scales a drag distance into a rotation, clamped to ±`toMax`.
+    private func map(value: CGFloat, toMax: CGFloat) -> CGFloat {
+        let scaled = (value / referenceWidth) * toMax
+        return min(toMax, max(-toMax, scaled))
     }
-    
-    public func isReveled() -> Bool {
-        return (flipAngle > -90 && flipAngle < 90)
-        || flipAngle > 270
-        || flipAngle < -270
+
+    /// Snaps a free-dragged angle to the nearest resting face.
+    private func settledAngle(from angle: CGFloat) -> CGFloat {
+        switch angle {
+        case 270..<360:   360
+        case 90..<270:    180
+        case -90..<90:    0
+        case -270 ..< -90: -180
+        default:          -360
+        }
     }
-    
-    public func doFlip(){
-        let isReveled = isReveled()
-        
-            withAnimation {
-                flipAngle = isReveled ? 180 : 0
-            }
-            
-            onFlip(!isReveled)
+
+    /// Whether the front face is the one currently pointing at the viewer.
+    var isRevealed: Bool {
+        (flipAngle > -90 && flipAngle < 90)
+            || flipAngle > 270
+            || flipAngle < -270
+    }
+
+    func doFlip() {
+        let revealed = isRevealed
+
+        withAnimation { flipAngle = revealed ? 180 : 0 }
+
+        onFlip(!revealed)
         flip = false
     }
 }
 
-struct MyView_Previews: PreviewProvider {
-    
-    @State static var interactivity: [CardInteractivity] = [.flipTap, .horizontalDrag]
-    
-    static let cardOrigin = CGPoint(
-        x: UIScreen.main.bounds.midX,
-        y: UIScreen.main.bounds.midY - 100
-    )
-    
-    static var backView : some View {
-        Text("backText")
-            .frame(width: 200, height: 300)
-            .background(Color.purple)
-    }
-    
-    static var frontView : some View {
-        Text("frontText")
-            .frame(width: 200, height: 300)
-            .background(Color.teal)
-    }
-    
-    static var previews: some View {
-        CardView (
-            flip: .constant(true),
-            frontView: frontView,
-            backView: backView,
-            interactivity: $interactivity,
-            offset: .constant(.zero),
-            scale: .constant(1),
-            onFlip: { isReveled in },
-            onRelease: { isReveled in }
-        )
-    }
-}
+#Preview {
+    @Previewable @State var interactivity: CardInteractivity = [.flipTap, .horizontalDrag]
 
-extension Color {
-    func invertedColor() -> Color {
-        guard let ciColor = UIColor(self).cgColor.components else {
-            return self
-        }
-        
-        let invertedRed = 1.0 - ciColor[0]
-        let invertedGreen = 1.0 - ciColor[1]
-        let invertedBlue = 1.0 - ciColor[2]
-        
-        return Color(red: Double(invertedRed), green: Double(invertedGreen), blue: Double(invertedBlue))
-    }
+    CardView(
+        flip: .constant(false),
+        frontView: Text("Front")
+            .frame(width: 200, height: 300)
+            .background(Color.teal),
+        backView: Text("Back")
+            .frame(width: 200, height: 300)
+            .background(Color.purple),
+        interactivity: $interactivity,
+        offset: .constant(.zero),
+        scale: .constant(1),
+        onFlip: { _ in },
+        onRelease: { _ in }
+    )
 }
