@@ -1,2 +1,27 @@
+# Xcode — user-specific state
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
 
-Memo.xcodeproj/project.xcworkspace/xcuserdata/home.xcuserdatad/UserInterfaceState.xcuserstate
+# Build products
+build/
+DerivedData/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Packages/
+Package.resolved
+
+# CocoaPods / Carthage, if ever added
+Pods/
+Carthage/Build/
+
+# macOS
+.DS_Store
