@@ -25,3 +25,7 @@ Carthage/Build/
 
 # macOS
 .DS_Store
+
+# fastlane
+fastlane/report.xml
+fastlane/README.md

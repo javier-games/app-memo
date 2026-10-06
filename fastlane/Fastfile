@@ -50,10 +50,16 @@ lane :remove_signing do
     filepath: ENV.fetch("ASC_KEY_PATH")
   )
 
-  Spaceship::ConnectAPI::Profile.all(filter: { name: PROFILE_NAME }).each(&:delete!)
+  Spaceship::ConnectAPI::Profile.all(filter: { name: PROFILE_NAME }).each do |profile|
+    profile.delete!
+    UI.message("Deleted profile #{profile.name}")
+  end
 
   cert_id = ENV["SIGNING_CERT_ID"].to_s
   unless cert_id.empty?
-    Spaceship::ConnectAPI::Certificate.all.select { |c| c.id == cert_id }.each(&:delete!)
+    Spaceship::ConnectAPI::Certificate.all.select { |c| c.id == cert_id }.each do |certificate|
+      certificate.delete!
+      UI.message("Revoked certificate #{certificate.id}")
+    end
   end
 end
