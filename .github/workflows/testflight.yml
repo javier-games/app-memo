@@ -22,6 +22,8 @@ jobs:
       APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      FASTLANE_SKIP_UPDATE_CHECK: "1"
+      FASTLANE_HIDE_CHANGELOG: "1"
     steps:
       - uses: actions/checkout@v5
 
@@ -40,14 +42,18 @@ jobs:
       # The runner context is not available in job-level env.
       - name: Set paths
         run: |
-          echo "ASC_KEY_PATH=$RUNNER_TEMP/AuthKey.p8" >> "$GITHUB_ENV"
-          echo "ARCHIVE_PATH=$RUNNER_TEMP/Memo.xcarchive" >> "$GITHUB_ENV"
+          password=$(uuidgen)
+          echo "::add-mask::$password"
+          {
+            echo "ASC_KEY_PATH=$RUNNER_TEMP/AuthKey.p8"
+            echo "ARCHIVE_PATH=$RUNNER_TEMP/Memo.xcarchive"
+            echo "SIGNING_DIR=$RUNNER_TEMP/signing"
+            echo "KEYCHAIN_PATH=$RUNNER_TEMP/signing.keychain-db"
+            echo "KEYCHAIN_PASSWORD=$password"
+          } >> "$GITHUB_ENV"
 
-      - name: Select Xcode
-        run: |
-          ls -d /Applications/Xcode*.app
-          sudo xcode-select -s /Applications/Xcode_26.5.app
-          xcodebuild -version
+      - name: Show Xcode version
+        run: xcodebuild -version
 
       - name: Write the App Store Connect API key
         env:
@@ -56,9 +62,7 @@ jobs:
           printf '%s\n' "$ASC_PRIVATE_KEY" > "$ASC_KEY_PATH"
           chmod 600 "$ASC_KEY_PATH"
 
-      # Signed for development here and re-signed for distribution at export.
-      # Xcode creates the certificate and profiles through the API key; the
-      # development profile needs at least one device registered on the team.
+      # Built unsigned; the app is signed by hand below.
       - name: Archive
         run: |
           set -o pipefail
@@ -68,69 +72,81 @@ jobs:
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -archivePath "$ARCHIVE_PATH" \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$ASC_KEY_PATH" \
-            -authenticationKeyID "$ASC_KEY_ID" \
-            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
-            INFOPLIST_KEY_ITSAppUsesNonExemptEncryption=NO
+            INFOPLIST_KEY_ITSAppUsesNonExemptEncryption=NO \
+            CODE_SIGNING_ALLOWED=NO
 
-      - name: Write export options
+      - name: Create a keychain
         run: |
-          cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 3600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH" \
+            $(security list-keychains -d user | tr -d '"')
+
+      - name: Create the certificate and profile
+        run: fastlane create_signing
+
+      # Signed with codesign rather than xcodebuild -exportArchive. Xcode
+      # writes the certificate's common name into the designated requirement in
+      # decomposed Unicode, which does not match the precomposed "í" in the
+      # certificate, and App Store Connect rejects the result as an invalid
+      # signature (error 90035). The requirement here names the team instead.
+      - name: Sign and package
+        run: |
+          app="$ARCHIVE_PATH/Products/Applications/Memo.app"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: \
+            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" > /dev/null
+          identity=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" | awk 'NR==1 {print $2}')
+
+          cat > "$RUNNER_TEMP/Distribution.entitlements" <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
           <dict>
-            <key>method</key>
-            <string>app-store-connect</string>
-            <key>destination</key>
-            <string>export</string>
-            <key>signingStyle</key>
-            <string>automatic</string>
-            <key>teamID</key>
+            <key>application-identifier</key>
+            <string>$APPLE_TEAM_ID.games.javier.memo</string>
+            <key>com.apple.developer.team-identifier</key>
             <string>$APPLE_TEAM_ID</string>
-            <key>manageAppVersionAndBuildNumber</key>
+            <key>beta-reports-active</key>
+            <true/>
+            <key>get-task-allow</key>
             <false/>
           </dict>
           </plist>
           EOF
 
-      - name: Sign for distribution
-        run: |
-          set -o pipefail
-          xcodebuild -exportArchive \
-            -archivePath "$ARCHIVE_PATH" \
-            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
-            -exportPath "$RUNNER_TEMP/export" \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$ASC_KEY_PATH" \
-            -authenticationKeyID "$ASC_KEY_ID" \
-            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+          cp "$SIGNING_DIR/Memo.mobileprovision" "$app/embedded.mobileprovision"
+          if [ -d "$app/Frameworks" ]; then
+            find "$app/Frameworks" -depth \( -name '*.framework' -o -name '*.dylib' \) \
+              -exec codesign --force --sign "$identity" --keychain "$KEYCHAIN_PATH" {} \;
+          fi
+          codesign --force --sign "$identity" --keychain "$KEYCHAIN_PATH" \
+            --entitlements "$RUNNER_TEMP/Distribution.entitlements" \
+            --generate-entitlement-der \
+            -r="designated => anchor apple generic and identifier \"games.javier.memo\" and certificate leaf[subject.OU] = \"$APPLE_TEAM_ID\" and certificate 1[field.1.2.840.113635.100.6.2.1] exists" \
+            "$app"
+          codesign --verify --strict --verbose=2 "$app"
 
-      - name: Show the distribution signature
-        run: |
-          ls -la "$RUNNER_TEMP/export"
-          unzip -q "$RUNNER_TEMP/export"/*.ipa -d "$RUNNER_TEMP/ipa"
-          app=$(echo "$RUNNER_TEMP"/ipa/Payload/*.app)
-          codesign -dvvv --entitlements - "$app" 2>&1 | grep -v '^Hash\|^CDHash\|^CandidateCDHash'
-          codesign --verify --strict --verbose=2 "$app" || true
-          codesign -d -r- "$app" 2>/dev/null | xxd | head -24
-          (cd "$RUNNER_TEMP" && codesign -d --extract-certificates=cert "$app" 2>/dev/null \
-            && openssl x509 -inform DER -in cert0 -noout -subject -issuer -dates -serial \
-            && openssl x509 -inform DER -in cert0 -noout -subject -nameopt utf8,sep_multiline | xxd | head -12)
-          xcodebuild -version; sw_vers
-          security cms -D -i "$app/embedded.mobileprovision" | grep -A1 -E '<key>(Name|ExpirationDate|TeamName)</key>'
+          mkdir -p "$RUNNER_TEMP/ipa/Payload"
+          cp -R "$app" "$RUNNER_TEMP/ipa/Payload/"
+          (cd "$RUNNER_TEMP/ipa" && zip -qry "$RUNNER_TEMP/Memo.ipa" Payload)
 
       - name: Upload to TestFlight
         run: |
           mkdir -p ~/.appstoreconnect/private_keys
           cp "$ASC_KEY_PATH" ~/.appstoreconnect/private_keys/"AuthKey_$ASC_KEY_ID.p8"
           xcrun altool --upload-app --type ios \
-            --file "$RUNNER_TEMP/export"/*.ipa \
+            --file "$RUNNER_TEMP/Memo.ipa" \
             --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
 
-      - name: Remove the API key
+      - name: Remove the certificate and profile
         if: always()
-        run: rm -rf "$ASC_KEY_PATH" ~/.appstoreconnect/private_keys
+        run: fastlane remove_signing
+
+      - name: Remove key material
+        if: always()
+        run: |
+          security delete-keychain "$KEYCHAIN_PATH" || true
+          rm -rf "$ASC_KEY_PATH" "$SIGNING_DIR" ~/.appstoreconnect/private_keys

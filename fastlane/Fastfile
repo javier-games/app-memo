@@ -1,0 +1,59 @@
+# Signing for the TestFlight workflow (.github/workflows/testflight.yml).
+#
+# Each run creates its own distribution certificate and App Store profile and
+# removes them afterwards, so no private key has to be stored anywhere.
+
+default_platform(:ios)
+
+BUNDLE_ID = "games.javier.memo"
+PROFILE_NAME = "Memo CI"
+
+def connect_api_key
+  app_store_connect_api_key(
+    key_id: ENV.fetch("ASC_KEY_ID"),
+    issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+    key_filepath: ENV.fetch("ASC_KEY_PATH")
+  )
+end
+
+lane :create_signing do
+  connect_api_key
+
+  cert(
+    development: false,
+    force: true,
+    output_path: ENV.fetch("SIGNING_DIR"),
+    keychain_path: ENV.fetch("KEYCHAIN_PATH"),
+    keychain_password: ENV.fetch("KEYCHAIN_PASSWORD")
+  )
+  cert_id = lane_context[SharedValues::CERT_CERTIFICATE_ID]
+
+  # Recorded before the profile is made, so a failure there still lets
+  # remove_signing revoke the certificate.
+  File.write(ENV.fetch("GITHUB_ENV"), "SIGNING_CERT_ID=#{cert_id}\n", mode: "a")
+
+  sigh(
+    app_identifier: BUNDLE_ID,
+    provisioning_name: PROFILE_NAME,
+    cert_id: cert_id,
+    force: true,
+    skip_install: true,
+    output_path: ENV.fetch("SIGNING_DIR"),
+    filename: "Memo.mobileprovision"
+  )
+end
+
+lane :remove_signing do
+  Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.create(
+    key_id: ENV.fetch("ASC_KEY_ID"),
+    issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+    filepath: ENV.fetch("ASC_KEY_PATH")
+  )
+
+  Spaceship::ConnectAPI::Profile.all(filter: { name: PROFILE_NAME }).each(&:delete!)
+
+  cert_id = ENV["SIGNING_CERT_ID"].to_s
+  unless cert_id.empty?
+    Spaceship::ConnectAPI::Certificate.all.select { |c| c.id == cert_id }.each(&:delete!)
+  end
+end
