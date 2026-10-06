@@ -46,8 +46,7 @@ jobs:
       - name: Select Xcode
         run: |
           ls -d /Applications/Xcode*.app
-          xc=$(ls -d /Applications/Xcode_26*.app | sort -V | head -1)
-          sudo xcode-select -s "$xc"
+          sudo xcode-select -s /Applications/Xcode_26.5.app
           xcodebuild -version
 
       - name: Write the App Store Connect API key
