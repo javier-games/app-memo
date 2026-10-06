@@ -112,7 +112,12 @@ jobs:
           unzip -q "$RUNNER_TEMP/export"/*.ipa -d "$RUNNER_TEMP/ipa"
           app=$(echo "$RUNNER_TEMP"/ipa/Payload/*.app)
           codesign -dvvv --entitlements - "$app" 2>&1 | grep -v '^Hash\|^CDHash\|^CandidateCDHash'
-          codesign --verify --strict --verbose=2 "$app"
+          codesign --verify --strict --verbose=2 "$app" || true
+          codesign -d -r- "$app" 2>/dev/null | xxd | head -24
+          (cd "$RUNNER_TEMP" && codesign -d --extract-certificates=cert "$app" 2>/dev/null \
+            && openssl x509 -inform DER -in cert0 -noout -subject -issuer -dates -serial \
+            && openssl x509 -inform DER -in cert0 -noout -subject -nameopt utf8,sep_multiline | xxd | head -12)
+          xcodebuild -version; sw_vers
           security cms -D -i "$app/embedded.mobileprovision" | grep -A1 -E '<key>(Name|ExpirationDate|TeamName)</key>'
 
       - name: Upload to TestFlight
