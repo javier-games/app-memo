@@ -1,0 +1,106 @@
+name: TestFlight
+
+# Run by hand from the Actions tab. Needs, in the repository settings:
+#
+#   Variables: APPLE_TEAM_ID             the 10-character Team ID
+#   Secrets:   ASC_KEY_ID                App Store Connect API key ID
+#              ASC_ISSUER_ID             App Store Connect issuer ID
+#              ASC_PRIVATE_KEY           contents of the AuthKey_XXXX.p8 file
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: testflight
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    name: Archive and upload
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_PATH: ${{ runner.temp }}/AuthKey.p8
+      ARCHIVE_PATH: ${{ runner.temp }}/Memo.xcarchive
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check configuration
+        env:
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+        run: |
+          for name in APPLE_TEAM_ID ASC_KEY_ID ASC_ISSUER_ID ASC_PRIVATE_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is not set in the repository settings"
+              missing=1
+            fi
+          done
+          [ -z "$missing" ]
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Write the App Store Connect API key
+        env:
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+        run: |
+          printf '%s\n' "$ASC_PRIVATE_KEY" > "$ASC_KEY_PATH"
+          chmod 600 "$ASC_KEY_PATH"
+
+      # Archived unsigned and signed at export: a development profile cannot be
+      # created for a team with no registered devices, and the distribution
+      # signature is the only one that ships. This works while the app carries
+      # no entitlements; once iCloud sync is turned on the archive step has to
+      # sign too, so the entitlements make it into the build.
+      - name: Archive
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project Memo.xcodeproj \
+            -scheme Memo \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$ARCHIVE_PATH" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            INFOPLIST_KEY_ITSAppUsesNonExemptEncryption=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Write export options
+        run: |
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>destination</key>
+            <string>upload</string>
+            <key>signingStyle</key>
+            <string>automatic</string>
+            <key>teamID</key>
+            <string>$APPLE_TEAM_ID</string>
+            <key>manageAppVersionAndBuildNumber</key>
+            <false/>
+          </dict>
+          </plist>
+          EOF
+
+      - name: Sign and upload to TestFlight
+        run: |
+          set -o pipefail
+          xcodebuild -exportArchive \
+            -archivePath "$ARCHIVE_PATH" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+      - name: Remove the API key
+        if: always()
+        run: rm -f "$ASC_KEY_PATH"
