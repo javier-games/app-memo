@@ -53,11 +53,25 @@ jobs:
           printf '%s\n' "$ASC_PRIVATE_KEY" > "$ASC_KEY_PATH"
           chmod 600 "$ASC_KEY_PATH"
 
-      # Archived unsigned and signed at export: a development profile cannot be
-      # created for a team with no registered devices, and the distribution
-      # signature is the only one that ships. This works while the app carries
-      # no entitlements; once iCloud sync is turned on the archive step has to
-      # sign too, so the entitlements make it into the build.
+      # A development profile cannot be created for a team with no registered
+      # devices, so the archive is signed ad hoc and re-signed for distribution
+      # at export. Export copies the entitlements from the archived signature,
+      # and App Store Connect rejects a build without these two.
+      - name: Write archive entitlements
+        run: |
+          cat > "$RUNNER_TEMP/Archive.entitlements" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>application-identifier</key>
+            <string>$APPLE_TEAM_ID.games.javier.memo</string>
+            <key>com.apple.developer.team-identifier</key>
+            <string>$APPLE_TEAM_ID</string>
+          </dict>
+          </plist>
+          EOF
+
       - name: Archive
         run: |
           set -o pipefail
@@ -70,7 +84,13 @@ jobs:
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
             INFOPLIST_KEY_ITSAppUsesNonExemptEncryption=NO \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY=- \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_ENTITLEMENTS="$RUNNER_TEMP/Archive.entitlements"
+
+      - name: Show archived signature
+        run: codesign -dvv --entitlements - "$ARCHIVE_PATH/Products/Applications/Memo.app" 2>&1 || true
 
       - name: Write export options
         run: |
