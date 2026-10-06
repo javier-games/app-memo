@@ -54,9 +54,10 @@ jobs:
           chmod 600 "$ASC_KEY_PATH"
 
       # A development profile cannot be created for a team with no registered
-      # devices, so the archive is signed ad hoc and re-signed for distribution
-      # at export. Export copies the entitlements from the archived signature,
-      # and App Store Connect rejects a build without these two.
+      # devices, and Xcode refuses to sign an iOS build ad hoc. So the archive
+      # is built unsigned, signed ad hoc by hand with the entitlements App
+      # Store Connect requires, and re-signed for distribution at export, which
+      # copies the entitlements from the archived signature.
       - name: Write archive entitlements
         run: |
           cat > "$RUNNER_TEMP/Archive.entitlements" <<EOF
@@ -84,13 +85,19 @@ jobs:
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
             INFOPLIST_KEY_ITSAppUsesNonExemptEncryption=NO \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY=- \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_ENTITLEMENTS="$RUNNER_TEMP/Archive.entitlements"
+            CODE_SIGNING_ALLOWED=NO
 
-      - name: Show archived signature
-        run: codesign -dvv --entitlements - "$ARCHIVE_PATH/Products/Applications/Memo.app" 2>&1 || true
+      - name: Sign the archive ad hoc
+        run: |
+          app="$ARCHIVE_PATH/Products/Applications/Memo.app"
+          if [ -d "$app/Frameworks" ]; then
+            find "$app/Frameworks" -depth \( -name '*.framework' -o -name '*.dylib' \) \
+              -exec codesign --force --sign - {} \;
+          fi
+          codesign --force --sign - \
+            --entitlements "$RUNNER_TEMP/Archive.entitlements" \
+            --generate-entitlement-der "$app"
+          codesign -dvv --entitlements - "$app"
 
       - name: Write export options
         run: |
