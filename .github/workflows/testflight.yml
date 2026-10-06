@@ -83,7 +83,7 @@ jobs:
             <key>method</key>
             <string>app-store-connect</string>
             <key>destination</key>
-            <string>upload</string>
+            <string>export</string>
             <key>signingStyle</key>
             <string>automatic</string>
             <key>teamID</key>
@@ -94,7 +94,7 @@ jobs:
           </plist>
           EOF
 
-      - name: Sign and upload to TestFlight
+      - name: Sign for distribution
         run: |
           set -o pipefail
           xcodebuild -exportArchive \
@@ -106,6 +106,23 @@ jobs:
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID"
 
+      - name: Show the distribution signature
+        run: |
+          ls -la "$RUNNER_TEMP/export"
+          unzip -q "$RUNNER_TEMP/export"/*.ipa -d "$RUNNER_TEMP/ipa"
+          app=$(echo "$RUNNER_TEMP"/ipa/Payload/*.app)
+          codesign -dvvv --entitlements - "$app" 2>&1 | grep -v '^Hash\|^CDHash\|^CandidateCDHash'
+          codesign --verify --strict --verbose=2 "$app"
+          security cms -D -i "$app/embedded.mobileprovision" | grep -A1 -E '<key>(Name|ExpirationDate|TeamName)</key>'
+
+      - name: Upload to TestFlight
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          cp "$ASC_KEY_PATH" ~/.appstoreconnect/private_keys/"AuthKey_$ASC_KEY_ID.p8"
+          xcrun altool --upload-app --type ios \
+            --file "$RUNNER_TEMP/export"/*.ipa \
+            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+
       - name: Remove the API key
         if: always()
-        run: rm -f "$ASC_KEY_PATH"
+        run: rm -rf "$ASC_KEY_PATH" ~/.appstoreconnect/private_keys
