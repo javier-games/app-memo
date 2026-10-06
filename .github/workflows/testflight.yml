@@ -53,26 +53,9 @@ jobs:
           printf '%s\n' "$ASC_PRIVATE_KEY" > "$ASC_KEY_PATH"
           chmod 600 "$ASC_KEY_PATH"
 
-      # A development profile cannot be created for a team with no registered
-      # devices, and Xcode refuses to sign an iOS build ad hoc. So the archive
-      # is built unsigned, signed ad hoc by hand with the entitlements App
-      # Store Connect requires, and re-signed for distribution at export, which
-      # copies the entitlements from the archived signature.
-      - name: Write archive entitlements
-        run: |
-          cat > "$RUNNER_TEMP/Archive.entitlements" <<EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>application-identifier</key>
-            <string>$APPLE_TEAM_ID.games.javier.memo</string>
-            <key>com.apple.developer.team-identifier</key>
-            <string>$APPLE_TEAM_ID</string>
-          </dict>
-          </plist>
-          EOF
-
+      # Signed for development here and re-signed for distribution at export.
+      # Xcode creates the certificate and profiles through the API key; the
+      # development profile needs at least one device registered on the team.
       - name: Archive
         run: |
           set -o pipefail
@@ -82,22 +65,13 @@ jobs:
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -archivePath "$ARCHIVE_PATH" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
-            INFOPLIST_KEY_ITSAppUsesNonExemptEncryption=NO \
-            CODE_SIGNING_ALLOWED=NO
-
-      - name: Sign the archive ad hoc
-        run: |
-          app="$ARCHIVE_PATH/Products/Applications/Memo.app"
-          if [ -d "$app/Frameworks" ]; then
-            find "$app/Frameworks" -depth \( -name '*.framework' -o -name '*.dylib' \) \
-              -exec codesign --force --sign - {} \;
-          fi
-          codesign --force --sign - \
-            --entitlements "$RUNNER_TEMP/Archive.entitlements" \
-            --generate-entitlement-der "$app"
-          codesign -dvv --entitlements - "$app"
+            INFOPLIST_KEY_ITSAppUsesNonExemptEncryption=NO
 
       - name: Write export options
         run: |
