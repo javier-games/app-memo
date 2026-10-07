@@ -41,6 +41,9 @@ final class Card {
     /// lightweight SwiftData migration for anyone upgrading.
     var practiceProgress: Int = 0
 
+    /// Marked by the user for the Bookmarked practice mode.
+    var isBookmarked: Bool = false
+
     var deck: Deck?
 
     init(

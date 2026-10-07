@@ -21,6 +21,11 @@ struct DeckView: View {
 
     private var cards: [Card] { deck.orderedCards }
 
+    /// This deck's options, or the defaults while it has none of its own.
+    private var settings: PracticeSettings {
+        deck.resolvedPracticeSettings(defaults: practiceSettings.settings)
+    }
+
     var body: some View {
 
         List {
@@ -31,6 +36,13 @@ struct DeckView: View {
                         presentedSheet = .edit(card)
                     } label: {
                         HStack {
+                            if card.isBookmarked {
+                                Image(systemName: "bookmark.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.orange)
+                                    .accessibilityLabel("Bookmarked")
+                            }
+
                             Text(card.backText)
                             Spacer()
                             Text(card.frontText)
@@ -45,6 +57,17 @@ struct DeckView: View {
                                     .foregroundStyle(standing.isFulfilled ? Color.green : .secondary)
                             }
                         }
+                    }
+                    .swipeActions(edge: .leading) {
+                        Button {
+                            card.isBookmarked.toggle()
+                        } label: {
+                            Label(
+                                card.isBookmarked ? "Remove Bookmark" : "Bookmark",
+                                systemImage: card.isBookmarked ? "bookmark.slash" : "bookmark"
+                            )
+                        }
+                        .tint(.orange)
                     }
                 }
                 .onDelete(perform: deleteCards)
@@ -72,7 +95,7 @@ struct DeckView: View {
                 // instead of belonging to it — conspicuously so against the
                 // Liquid Glass bar on iOS 26.
                 NavigationLink(
-                    destination: PracticeView(deck: deck, settings: practiceSettings.settings)
+                    destination: PracticeView(deck: deck, settings: settings)
                 ) {
                     // An explicit HStack rather than a Label: a toolbar Label
                     // collapses to its icon, and on iOS 26 that leaves the
@@ -135,7 +158,7 @@ struct DeckView: View {
         // `sheet(item:)` rather than a Bool plus a separate enum: the presented
         // value and the presentation state cannot drift out of step.
         .sheet(isPresented: $isPresentingPracticeOptions) {
-            PracticeSettingsView(deckCardCount: deck.practisableCards.count)
+            PracticeSettingsView(deck: deck)
         }
         .sheet(isPresented: $isPresentingDeckEditor) {
             DeckEditorView(
@@ -152,6 +175,7 @@ struct DeckView: View {
                 CardEditorView(
                     title: "New Card",
                     saveTitle: "Add",
+                    practiceTarget: settings.resolvedPracticeTarget,
                     draft: CardDraft()
                 ) { draft in
                     addCard(from: draft)
@@ -161,6 +185,7 @@ struct DeckView: View {
                 CardEditorView(
                     title: "Edit Card",
                     saveTitle: "Save",
+                    practiceTarget: settings.resolvedPracticeTarget,
                     draft: CardDraft(card: card)
                 ) { draft in
                     draft.apply(to: card)
@@ -188,7 +213,7 @@ struct DeckView: View {
     }
 
     private func progressLabel(for card: Card) -> (text: String, isFulfilled: Bool)? {
-        let progress = practiceSettings.settings.progress(for: card)
+        let progress = settings.progress(for: card)
         guard let text = progress.shortDescription else { return nil }
         return (text, progress.isFulfilled)
     }
