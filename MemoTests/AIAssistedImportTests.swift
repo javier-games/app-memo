@@ -280,6 +280,7 @@ final class AIAssistedImportTests: XCTestCase {
     func testConnectingStoresTheKeyAndPicksAModel() throws {
         let secrets = MemorySecretStore()
         let store = makeStore(secrets: secrets)
+        store.settings.provider = .claude
         XCTAssertFalse(store.isConnected)
 
         try store.connect(.claude, apiKey: "key", models: ["claude-haiku-4-5", "claude-opus-5-5"])
@@ -289,9 +290,20 @@ final class AIAssistedImportTests: XCTestCase {
         XCTAssertEqual(store.model(for: .claude), "claude-opus-5-5")
     }
 
+    func testNoAssistantIsSelectedByDefault() throws {
+        let store = makeStore(secrets: MemorySecretStore())
+        XCTAssertNil(store.settings.provider)
+
+        // A key alone is not enough: the tool also has to be the one chosen.
+        try store.connect(.claude, apiKey: "key", models: [])
+        XCTAssertFalse(store.isConnected)
+    }
+
     func testConnectionIsPerTool() throws {
         let store = makeStore(secrets: MemorySecretStore())
         try store.connect(.claude, apiKey: "key", models: [])
+        store.settings.provider = .claude
+        XCTAssertTrue(store.isConnected)
 
         store.settings.provider = .chatGPT
         XCTAssertFalse(store.isConnected)

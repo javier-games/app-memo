@@ -84,33 +84,29 @@ private struct AIToolsSettings: View {
     var body: some View {
 
         @Bindable var ai = ai
-        let provider = ai.settings.provider
 
         Section {
             Picker("Assistant", selection: $ai.settings.provider) {
+                Text("None").tag(AIProvider?.none)
+
                 ForEach(AIProvider.allCases) { provider in
-                    Text(provider.title).tag(provider)
+                    Text(provider.title).tag(AIProvider?.some(provider))
                 }
             }
             .disabled(isConnecting)
         } header: {
             Text("AI Tools")
         } footer: {
-            Text("Used to create decks from text files and PDFs.")
+            Text("Used to create decks from text files and PDFs. The assistant you connect charges your API account for every file you send, separately from any subscription you have with it.")
         }
 
-        Section {
-            Label {
-                Text("\(provider.company) charges your API account for every file you send. This is separate from any \(provider.title) subscription, and the amount depends on the model and the size of the file.")
-            } icon: {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.orange)
-            }
-            .font(.footnote)
-        } header: {
-            Text("Costs")
+        if let provider = ai.settings.provider {
+            connection(for: provider)
         }
+    }
 
+    @ViewBuilder
+    private func connection(for provider: AIProvider) -> some View {
         if ai.isConnected(provider) {
             Section {
                 LabeledContent("Method", value: String(localized: "API Key"))
@@ -180,7 +176,7 @@ private struct AIToolsSettings: View {
 
                 Link("Get an API Key", destination: provider.keysPage)
             } footer: {
-                Text("\(provider.title) is connected with an API key from \(provider.company). Signing in with a \(provider.title) subscription is not something \(provider.company) offers to other apps.")
+                Text("Your key is kept in this device's Keychain and is sent only to \(provider.company).")
             }
             .onChange(of: provider) {
                 draftKey = ""
