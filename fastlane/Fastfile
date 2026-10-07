@@ -1,7 +1,8 @@
 # Signing for the TestFlight workflow (.github/workflows/testflight.yml).
 #
-# Each run creates its own distribution certificate and App Store profile and
-# removes them afterwards, so no private key has to be stored anywhere.
+# The distribution certificate is a long-lived one, kept in the repository's
+# secrets and imported into a keychain by the workflow. Only the provisioning
+# profile is made here, fresh for each run.
 
 default_platform(:ios)
 
@@ -15,6 +16,10 @@ def device_build?
   ENV["DESTINATION"] == "device"
 end
 
+def profile_name
+  device_build? ? DEVICE_PROFILE_NAME : PROFILE_NAME
+end
+
 def connect_api_key
   app_store_connect_api_key(
     key_id: ENV.fetch("ASC_KEY_ID"),
@@ -23,31 +28,56 @@ def connect_api_key
   )
 end
 
-lane :create_signing do
+# For the calls made to App Store Connect directly rather than through an
+# action.
+def connect_spaceship
+  Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.create(
+    key_id: ENV.fetch("ASC_KEY_ID"),
+    issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+    filepath: ENV.fetch("ASC_KEY_PATH")
+  )
+end
+
+# The App Store Connect ID of the certificate the workflow imported, found by
+# its serial number so the profile is tied to that certificate and no other.
+# Nil if it cannot be found, which leaves the choice to sigh.
+def stored_certificate_id
+  normalize = ->(serial) { serial.to_s.upcase.sub(/\A0+/, "") }
+  wanted = normalize.call(ENV["SIGNING_CERT_SERIAL"])
+  return nil if wanted.empty?
+
+  connect_spaceship
+  match = Spaceship::ConnectAPI::Certificate.all.find do |certificate|
+    normalize.call(certificate.serial_number) == wanted
+  end
+
+  UI.important("The stored certificate was not found in App Store Connect") if match.nil?
+  match&.id
+end
+
+def delete_profiles(names)
+  connect_spaceship
+
+  names.each do |name|
+    Spaceship::ConnectAPI::Profile.all(filter: { name: name }).each do |profile|
+      profile.delete!
+      UI.message("Deleted profile #{profile.name}")
+    end
+  end
+end
+
+lane :create_profile do
   connect_api_key
 
   if device_build?
     register_device(name: "Memo test device", udid: ENV.fetch("DEVICE_UDID"))
   end
 
-  cert(
-    development: false,
-    force: true,
-    output_path: ENV.fetch("SIGNING_DIR"),
-    keychain_path: ENV.fetch("KEYCHAIN_PATH"),
-    keychain_password: ENV.fetch("KEYCHAIN_PASSWORD")
-  )
-  cert_id = lane_context[SharedValues::CERT_CERTIFICATE_ID]
-
-  # Recorded before the profile is made, so a failure there still lets
-  # remove_signing revoke the certificate.
-  File.write(ENV.fetch("GITHUB_ENV"), "SIGNING_CERT_ID=#{cert_id}\n", mode: "a")
-
   sigh(
     app_identifier: BUNDLE_ID,
-    provisioning_name: device_build? ? DEVICE_PROFILE_NAME : PROFILE_NAME,
+    provisioning_name: profile_name,
     adhoc: device_build?,
-    cert_id: cert_id,
+    cert_id: stored_certificate_id,
     force: true,
     skip_install: true,
     output_path: ENV.fetch("SIGNING_DIR"),
@@ -55,19 +85,15 @@ lane :create_signing do
   )
 end
 
-lane :remove_signing do
-  Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.create(
-    key_id: ENV.fetch("ASC_KEY_ID"),
-    issuer_id: ENV.fetch("ASC_ISSUER_ID"),
-    filepath: ENV.fetch("ASC_KEY_PATH")
-  )
+lane :remove_profile do
+  delete_profiles([profile_name])
+end
 
-  [PROFILE_NAME, DEVICE_PROFILE_NAME].each do |name|
-    Spaceship::ConnectAPI::Profile.all(filter: { name: name }).each do |profile|
-      profile.delete!
-      UI.message("Deleted profile #{profile.name}")
-    end
-  end
+# Revokes one certificate by ID and deletes both profiles. Only for clearing
+# out certificates left by the earlier one-per-build scheme; see the Revoke
+# Signing Certificate workflow.
+lane :remove_signing do
+  delete_profiles([PROFILE_NAME, DEVICE_PROFILE_NAME])
 
   cert_id = ENV["SIGNING_CERT_ID"].to_s
   unless cert_id.empty?
