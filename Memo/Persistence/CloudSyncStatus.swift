@@ -7,7 +7,8 @@ import Foundation
 import CloudKit
 import OSLog
 
-/// Reports whether iCloud sync can actually run right now.
+/// Reports whether iCloud sync can run right now. Whether it *is* running,
+/// and how the last attempt went, is ``CloudSyncMonitor``'s business.
 ///
 /// This is deliberately separate from ``MemoModelContainer/mode``. SwiftData
 /// will open a CloudKit-configured store even when the app has no iCloud
@@ -36,7 +37,7 @@ enum CloudSyncStatus: Equatable {
     /// A short line suitable for showing in a settings row.
     var userDescription: String {
         switch self {
-        case .available:            "Syncing with iCloud"
+        case .available:            "Signed in to iCloud"
         case .noAccount:            "Sign in to iCloud to sync your decks"
         case .restricted:           "iCloud is restricted on this device"
         case .unknown:              "Can't reach iCloud right now"

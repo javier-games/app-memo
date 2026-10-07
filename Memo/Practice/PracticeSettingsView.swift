@@ -7,8 +7,7 @@ import SwiftUI
 
 /// The controls for one set of practice options.
 ///
-/// Shared by the two places options are edited: a deck's own panel, and the
-/// app-wide defaults in Settings. Every control is driven by
+/// Every control is driven by
 /// ``PracticeSettings`` and ``PracticeMode``, so a new rule appears by adding
 /// it to those types rather than by rewiring either screen.
 struct PracticeOptionsSections: View {
@@ -126,8 +125,8 @@ struct PracticeOptionsSections: View {
 
 /// One deck's practice options.
 ///
-/// A deck follows the defaults from Settings until something here is changed,
-/// and goes back to following them when its options are reset.
+/// A deck starts on the standard options and keeps whatever is changed here
+/// for itself. Nothing here affects any other deck.
 struct PracticeSettingsView: View {
 
     @Environment(PracticeSettingsStore.self) private var store
@@ -146,16 +145,12 @@ struct PracticeSettingsView: View {
                 )
 
                 Section {
-                    Button("Use the Default Options", role: .destructive) {
+                    Button("Reset to Defaults", role: .destructive) {
                         deck.practiceSettings = nil
                     }
                     .disabled(deck.practiceSettings == nil)
                 } footer: {
-                    Text(
-                        deck.practiceSettings == nil
-                            ? "This deck uses the default options, which you can change in Settings."
-                            : "This deck has options of its own. The defaults in Settings do not affect it."
-                    )
+                    Text("These options belong to this deck only.")
                 }
             }
             .navigationTitle("Practice Options")
@@ -168,12 +163,20 @@ struct PracticeSettingsView: View {
         }
     }
 
-    /// Options that end up equal to the defaults are not kept as the deck's
-    /// own, so such a deck goes on following the defaults when they change.
+    private var bookmarkFallback: PracticeMode {
+        store.settings.bookmarkFallbackMode
+    }
+
+    /// Options that end up equal to the standard ones are not stored, so a
+    /// deck nobody has customised carries nothing.
     private var settingsBinding: Binding<PracticeSettings> {
         Binding(
-            get: { deck.resolvedPracticeSettings(defaults: store.settings) },
-            set: { deck.practiceSettings = $0 == store.settings ? nil : $0 }
+            get: { deck.resolvedPracticeSettings(bookmarkFallback: bookmarkFallback) },
+            set: { newValue in
+                var standard = PracticeSettings.default
+                standard.bookmarkFallbackMode = newValue.bookmarkFallbackMode
+                deck.practiceSettings = newValue == standard ? nil : newValue
+            }
         )
     }
 }

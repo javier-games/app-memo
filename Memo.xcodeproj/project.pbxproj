@@ -54,8 +54,10 @@
 		EDC333D9165F6B000105C95E /* AIImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F90851979099B89B02CD7A /* AIImportView.swift */; };
 		4283822301ED3D573CFBA3D0 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E4498A909F21F5E7EA5650 /* SettingsView.swift */; };
 		987545F8EE578C610EBBAC59 /* AIAssistedImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64570FBC942001B2BB90965B /* AIAssistedImportTests.swift */; };
-		CD195FB93298AE91BF698E3E /* DeckDefaultsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DB301C2A0449B7F7D3CD9CB /* DeckDefaultsSettingsView.swift */; };
+		CD195FB93298AE91BF698E3E /* DecksSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DB301C2A0449B7F7D3CD9CB /* DecksSettingsView.swift */; };
 		2654AAFA099D68701ACB9726 /* BookmarkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67288C8A85AAFF01B0C04664 /* BookmarkTests.swift */; };
+		CB16AB6B0521D00155BACF5A /* CloudSyncMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B944FEC82EB23E59B1B2C859 /* CloudSyncMonitor.swift */; };
+		4F0EF0097C3BC6877931D7F3 /* CloudSyncActivityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A294EF4B43CC79C0D72D273B /* CloudSyncActivityTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -127,8 +129,10 @@
 		87F90851979099B89B02CD7A /* AIImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AIImportView.swift"; sourceTree = "<group>"; };
 		D0E4498A909F21F5E7EA5650 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView.swift"; sourceTree = "<group>"; };
 		64570FBC942001B2BB90965B /* AIAssistedImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AIAssistedImportTests.swift"; sourceTree = "<group>"; };
-		9DB301C2A0449B7F7D3CD9CB /* DeckDefaultsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeckDefaultsSettingsView.swift"; sourceTree = "<group>"; };
+		9DB301C2A0449B7F7D3CD9CB /* DecksSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DecksSettingsView.swift"; sourceTree = "<group>"; };
 		67288C8A85AAFF01B0C04664 /* BookmarkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BookmarkTests.swift"; sourceTree = "<group>"; };
+		B944FEC82EB23E59B1B2C859 /* CloudSyncMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CloudSyncMonitor.swift"; sourceTree = "<group>"; };
+		A294EF4B43CC79C0D72D273B /* CloudSyncActivityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CloudSyncActivityTests.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -179,6 +183,7 @@
 			isa = PBXGroup;
 			children = (
 				D05C2182AE53FB30E3B4D500 /* DeckTransferTests.swift */,
+				A294EF4B43CC79C0D72D273B /* CloudSyncActivityTests.swift */,
 				67288C8A85AAFF01B0C04664 /* BookmarkTests.swift */,
 				64570FBC942001B2BB90965B /* AIAssistedImportTests.swift */,
 				073A51012FC7992EEB1510CE /* CardPracticeProgressTests.swift */,
@@ -229,6 +234,7 @@
 			isa = PBXGroup;
 			children = (
 				CE77390A239A1FDF8F915001 /* CloudSyncStatus.swift */,
+				B944FEC82EB23E59B1B2C859 /* CloudSyncMonitor.swift */,
 				22D8F1E608C20F6BCE7F3B7E /* MemoModelContainer.swift */,
 				C8EA7EFBCD9E82799B9E895E /* LegacyStoreImport.swift */,
 			);
@@ -298,7 +304,7 @@
 			isa = PBXGroup;
 			children = (
 				D0E4498A909F21F5E7EA5650 /* SettingsView.swift */,
-				9DB301C2A0449B7F7D3CD9CB /* DeckDefaultsSettingsView.swift */,
+				9DB301C2A0449B7F7D3CD9CB /* DecksSettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -445,7 +451,7 @@
 				2CB22D86C20864DABF618784 /* AIDeckGenerator.swift in Sources */,
 				EDC333D9165F6B000105C95E /* AIImportView.swift in Sources */,
 				4283822301ED3D573CFBA3D0 /* SettingsView.swift in Sources */,
-				CD195FB93298AE91BF698E3E /* DeckDefaultsSettingsView.swift in Sources */,
+				CD195FB93298AE91BF698E3E /* DecksSettingsView.swift in Sources */,
 				AA3988DBD65BA5F25CF86764 /* DeckCSVFormat.swift in Sources */,
 				A04EC4DD20883DBC7E08D931 /* DeckTransferFormat.swift in Sources */,
 				A0479D4C85727FF7D4DF646C /* CardEditorView.swift in Sources */,
@@ -459,6 +465,7 @@
 				AFFA949187517945C2269959 /* PracticeSession.swift in Sources */,
 				9EAF5A97CA9FBDA3670773B8 /* AppConfiguration.swift in Sources */,
 				E4AF48D743690FE0DE22054C /* CloudSyncStatus.swift in Sources */,
+				CB16AB6B0521D00155BACF5A /* CloudSyncMonitor.swift in Sources */,
 				DE23459A6F496F2C2439E6A0 /* Deck.swift in Sources */,
 				C16D5A22CA78684DEA1B7602 /* Card.swift in Sources */,
 				D9CEECA341D5026BAACFB55E /* MemoModelContainer.swift in Sources */,
@@ -479,6 +486,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				75FED3B78920FDF5C57F2854 /* DeckTransferTests.swift in Sources */,
+				4F0EF0097C3BC6877931D7F3 /* CloudSyncActivityTests.swift in Sources */,
 				2654AAFA099D68701ACB9726 /* BookmarkTests.swift in Sources */,
 				987545F8EE578C610EBBAC59 /* AIAssistedImportTests.swift in Sources */,
 				411F05A4A5D6C72780B15CC0 /* CardPracticeProgressTests.swift in Sources */,

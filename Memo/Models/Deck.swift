@@ -83,7 +83,8 @@ extension Deck {
         (cards ?? []).contains(where: \.isBookmarked)
     }
 
-    /// The options set for this deck, or `nil` while it follows the defaults.
+    /// The options set for this deck, or `nil` while it has none of its own
+    /// and uses ``PracticeSettings/default``.
     var practiceSettings: PracticeSettings? {
         get {
             practiceSettingsData.flatMap { try? JSONDecoder().decode(PracticeSettings.self, from: $0) }
@@ -95,15 +96,14 @@ extension Deck {
 
     /// The options a practice run of this deck uses.
     ///
-    /// What to do when a deck has no bookmarks is an app-wide choice, so it
-    /// always comes from the defaults, whatever the deck has set for itself.
-    func resolvedPracticeSettings(defaults: PracticeSettings) -> PracticeSettings {
-        var settings = practiceSettings ?? defaults
-        settings.bookmarkFallbackMode = defaults.bookmarkFallbackMode
+    /// What to do when a deck has no bookmarks is the one choice made for
+    /// every deck at once, in Settings, so it is passed in and replaces
+    /// whatever the deck's own options carry.
+    func resolvedPracticeSettings(bookmarkFallback: PracticeMode) -> PracticeSettings {
+        var settings = practiceSettings ?? .default
+        settings.bookmarkFallbackMode = bookmarkFallback
         return settings
     }
-
-    var isEmpty: Bool { cardCount == 0 }
 
     /// Appends a card, assigning it the next free sort index.
     func append(_ card: Card) {

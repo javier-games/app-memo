@@ -19,7 +19,7 @@ Designed to enhance your learning experience by using customizable flash cards. 
 - **Practice**: Cards appear one-by-one so you can focus on individual items.
     - **Mark as Correct, Wrong, or Skip**: Correct and wrong both settle a card; skipping sends it to the back of the deck for later, and does not count as an answer.
     - **Session results**: Finishing a deck shows how many you got right, wrong and skipped, and offers another run.
-- **Practice Options**: Five modes to practise in, an inverse mode that flips which side asks the question, and a limit so you can drill part of a deck. Set per deck, with defaults for the rest. See [Practice Options](#practice-options).
+- **Practice Options**: Five modes to practise in, an inverse mode that flips which side asks the question, and a limit so you can drill part of a deck. Each deck has its own. See [Practice Options](#practice-options).
 - **Bookmarks**: Mark the cards you want to come back to and practise only those.
 - **Progress per Card**: Each card counts consecutive correct answers towards a target. A wrong answer sends it back to zero, so the count reflects what you currently know rather than what you once did.
 - **Import and Export Decks**: Import decks from the **Add** menu on the deck list, and share a deck from the **share** button at the top of it. Both work in JSON and CSV.
@@ -62,10 +62,9 @@ Designed to enhance your learning experience by using customizable flash cards. 
 ## Practice Options
 
 Each deck has its own options, reached from the **sliders** button at the top of
-it. A deck that has not been given any uses the defaults, which you set in
-**Settings → Decks**; **Use the Default Options** puts a deck back on them. The
-options are captured when a run starts, so changing them mid-run will not
-reshape a session already in progress.
+it, and **Reset to Defaults** puts them back as they started. They are captured
+when a run starts, so changing them mid-run will not reshape a session already
+in progress.
 
 | Option | Default | What it does |
 | --- | --- | --- |
@@ -187,8 +186,9 @@ refused, not trimmed.
 Decks are stored in SwiftData and replicated across your devices through
 CloudKit, in the private database of the iCloud account signed in on the
 device. There is nothing to switch on: with an account signed in the decks
-sync, and with none they stay on the device until one is. Settings shows which
-of the two is happening.
+sync, and with none they stay on the device until one is. Settings shows the
+account, whether a sync is running, when the last one finished, and the error
+if it failed.
 
 The data model has the shape CloudKit requires: a default on every property,
 optional relationships with inverses, no unique constraints, explicit sort
@@ -220,7 +220,7 @@ account status at launch. With an account signed in:
 
 ```
 [<bundle-id>:Persistence] Opened store with CloudKit configuration.
-[<bundle-id>:Sync] iCloud account status: Syncing with iCloud
+[<bundle-id>:Sync] iCloud account status: Signed in to iCloud
 ```
 
 The first line only reports how the store was *configured*. SwiftData opens a
@@ -246,7 +246,7 @@ Memo/
 ├── Models/       Deck and Card, the SwiftData models
 ├── Persistence/  the store, its CloudKit configuration, the one-time migration
 ├── Practice/     the practice rules, the session, and the screens that use them
-├── Settings/     the app-wide settings: deck defaults and the AI connection
+├── Settings/     the app-wide settings: decks, the AI connection, iCloud status
 ├── Transfer/     the JSON and CSV file formats, import and export
 └── Shared/       small pieces used in more than one place
 ```

@@ -95,30 +95,25 @@ final class BookmarkTests: XCTestCase {
 
     // MARK: - Per-deck options
 
-    func testADeckFollowsTheDefaultsUntilItHasItsOwnOptions() {
-        var defaults = PracticeSettings()
-        defaults.mode = .inOrder
-
+    func testADeckUsesTheStandardOptionsUntilItHasItsOwn() {
         let deck = Deck(name: "Food")
         XCTAssertNil(deck.practiceSettings)
-        XCTAssertEqual(deck.resolvedPracticeSettings(defaults: defaults), defaults)
+        XCTAssertEqual(deck.resolvedPracticeSettings(bookmarkFallback: .random), .default)
 
         var own = PracticeSettings()
         own.mode = .leastPracticed
         own.isInverted = true
         deck.practiceSettings = own
 
-        XCTAssertEqual(deck.resolvedPracticeSettings(defaults: defaults).mode, .leastPracticed)
-        XCTAssertTrue(deck.resolvedPracticeSettings(defaults: defaults).isInverted)
+        let resolved = deck.resolvedPracticeSettings(bookmarkFallback: .random)
+        XCTAssertEqual(resolved.mode, .leastPracticed)
+        XCTAssertTrue(resolved.isInverted)
 
         deck.practiceSettings = nil
-        XCTAssertEqual(deck.resolvedPracticeSettings(defaults: defaults), defaults)
+        XCTAssertEqual(deck.resolvedPracticeSettings(bookmarkFallback: .random), .default)
     }
 
-    func testTheBookmarkFallbackAlwaysComesFromTheDefaults() {
-        var defaults = PracticeSettings()
-        defaults.bookmarkFallbackMode = .inOrder
-
+    func testTheBookmarkFallbackAlwaysComesFromSettings() {
         var own = PracticeSettings()
         own.mode = .bookmarked
         own.bookmarkFallbackMode = .leastPracticed
@@ -126,9 +121,15 @@ final class BookmarkTests: XCTestCase {
         let deck = Deck(name: "Food")
         deck.practiceSettings = own
 
-        let resolved = deck.resolvedPracticeSettings(defaults: defaults)
+        let resolved = deck.resolvedPracticeSettings(bookmarkFallback: .inOrder)
         XCTAssertEqual(resolved.mode, .bookmarked)
         XCTAssertEqual(resolved.bookmarkFallbackMode, .inOrder)
+
+        // A deck with no options of its own gets it too.
+        XCTAssertEqual(
+            Deck(name: "Verbs").resolvedPracticeSettings(bookmarkFallback: .inOrder).bookmarkFallbackMode,
+            .inOrder
+        )
     }
 
     func testEditingACardKeepsItsBookmark() {

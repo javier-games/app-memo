@@ -6,7 +6,12 @@
 import Foundation
 import OSLog
 
-/// Holds the practice settings and keeps them on disk.
+/// Holds the practice settings that are not a deck's own, and keeps them on
+/// disk.
+///
+/// Each deck carries its own options. What is read from here is the one
+/// choice made for every deck at once: the mode a deck with no bookmarks falls
+/// back to.
 ///
 /// `UserDefaults` is the right home for these: they are small, per-device
 /// preferences rather than user content. They are stored as one encoded value

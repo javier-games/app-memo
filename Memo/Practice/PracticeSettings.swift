@@ -116,7 +116,7 @@ struct PracticeSettings: Codable, Equatable {
     /// bookmarks.
     ///
     /// An app-wide choice: a deck's own options never override it. See
-    /// ``Deck/resolvedPracticeSettings(defaults:)``.
+    /// ``Deck/resolvedPracticeSettings(bookmarkFallback:)``.
     var bookmarkFallbackMode: PracticeMode = .random
 
     static let `default` = PracticeSettings()
