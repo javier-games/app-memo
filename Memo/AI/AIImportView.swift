@@ -48,7 +48,9 @@ struct AIImportView: View {
                     }
                     .disabled(isGenerating)
                 } footer: {
-                    Text("The file is sent to \(provider.title) with your API key, and \(provider.company) charges your account for it.")
+                    if let provider {
+                        Text("The file is sent to \(provider.title) with your API key, and \(provider.company) charges your account for it.")
+                    }
                 }
 
                 Section {
@@ -135,7 +137,7 @@ struct AIImportView: View {
         }
     }
 
-    private var provider: AIProvider { ai.settings.provider }
+    private var provider: AIProvider? { ai.settings.provider }
 
     private var isGenerating: Bool {
         if case .generating = phase { return true }
@@ -158,7 +160,7 @@ struct AIImportView: View {
     private func generate() {
         guard let document else { return }
 
-        guard let apiKey = ai.apiKey(for: provider) else {
+        guard let provider, let apiKey = ai.apiKey(for: provider) else {
             errorMessage = AIFailure.notConnected.localizedDescription
             return
         }
