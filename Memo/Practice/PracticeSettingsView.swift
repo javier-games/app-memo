@@ -80,6 +80,13 @@ struct PracticeOptionsSections: View {
                         .monospacedDigit()
                 }
             }
+
+            Picker("After a Wrong Answer", selection: $settings.errorPenalty) {
+                ForEach(PracticeErrorPenalty.allCases) { penalty in
+                    Text(penalty.title).tag(penalty)
+                }
+            }
+            .disabled(settings.practiceTarget == 0)
         } footer: {
             Text(practiceTargetFooter)
         }
@@ -119,7 +126,7 @@ struct PracticeOptionsSections: View {
     private var practiceTargetFooter: String {
         settings.practiceTarget == 0
             ? String(localized: "Progress is not recorded for any card.")
-            : String(localized: "Correct answers a card needs before it counts as learned. A wrong answer sends it back to zero.")
+            : String(localized: "Correct answers a card needs before it counts as learned. \(settings.errorPenalty.explanation)")
     }
 }
 

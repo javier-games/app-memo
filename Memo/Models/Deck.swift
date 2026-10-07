@@ -35,6 +35,10 @@ final class Deck {
 
     var createdAt: Date = Date.distantPast
 
+    /// When the deck's name, icon or colour was last changed. See
+    /// ``Card/modifiedAt``.
+    var modifiedAt: Date = Date.distantPast
+
     /// This deck's own practice options, encoded, or `nil` while it follows
     /// the app-wide defaults. Read and written through ``practiceSettings``.
     ///
@@ -52,13 +56,15 @@ final class Deck {
         name: String = "",
         icon: String = "",
         sortIndex: Int = 0,
-        createdAt: Date = Date()
+        createdAt: Date = Date(),
+        modifiedAt: Date = Date()
     ) {
         self.uuid = uuid
         self.name = name
         self.icon = icon
         self.sortIndex = sortIndex
         self.createdAt = createdAt
+        self.modifiedAt = modifiedAt
         self.cards = []
     }
 }

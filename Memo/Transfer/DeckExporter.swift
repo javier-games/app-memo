@@ -7,44 +7,37 @@ import Foundation
 import CoreTransferable
 import UniformTypeIdentifiers
 
-/// Turns a stored deck back into file contents.
+/// Turns stored decks back into file contents.
 enum DeckExporter {
 
-    /// The deck as the documented JSON shape.
+    /// The decks as the documented JSON shape.
     ///
-    /// `practiceProgress` is left out so an exported file matches the format
-    /// published in the README exactly. Including it would make a round trip
-    /// lossless but would put a field in the file that the documented schema
-    /// does not mention.
-    static func transferFile(for deck: Deck) -> DeckTransferFile {
-        DeckTransferFile(deckList: [
-            DeckTransferDeck(
-                name: deck.name,
-                icon: deck.icon,
-                color: DeckTransferColor.string(
-                    red: deck.colorRed,
-                    green: deck.colorGreen,
-                    blue: deck.colorBlue,
-                    alpha: deck.colorAlpha
-                ),
-                cardList: deck.orderedCards.map {
-                    DeckTransferCard(
-                        frontText: $0.frontText,
-                        frontHintText: $0.frontHintText,
-                        backText: $0.backText,
-                        backHintText: $0.backHintText
-                    )
-                }
-            )
-        ])
+    /// Each deck and card carries its identifier and the date it was last
+    /// edited, so the file can be imported again as an update. Practice
+    /// progress is left out: it belongs to the person practising, not to the
+    /// deck, and a shared file should not carry it.
+    static func transferFile(for decks: [Deck]) -> DeckTransferFile {
+        DeckTransferFile(deckList: decks.map { deck in
+            var transfer = DeckTransferDeck(details: deck)
+            transfer.cardList = deck.orderedCards.map { DeckTransferCard(card: $0) }
+            return transfer
+        })
     }
 
-    static func jsonData(for deck: Deck) throws -> Data {
+    static func transferFile(for deck: Deck) -> DeckTransferFile {
+        transferFile(for: [deck])
+    }
+
+    static func jsonData(for decks: [Deck]) throws -> Data {
         let encoder = JSONEncoder()
         // Readable, stable, and without the escaped slashes and \uXXXX that
         // would mangle the emoji and accents these decks are full of.
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
-        return try encoder.encode(transferFile(for: deck))
+        return try encoder.encode(transferFile(for: decks))
+    }
+
+    static func jsonData(for deck: Deck) throws -> Data {
+        try jsonData(for: [deck])
     }
 
     static func csvText(for deck: Deck) -> String {
@@ -69,6 +62,41 @@ enum DeckExporter {
 
         let name = cleaned.isEmpty ? String(localized: "Deck") : cleaned
         return "\(name).\(kind.fileExtension)"
+    }
+}
+
+// MARK: - From the models
+
+extension DeckTransferDeck {
+
+    /// The deck's own details, without its cards.
+    init(details deck: Deck) {
+        self.init(
+            id: deck.uuid.uuidString,
+            modifiedAt: DeckTransferDate.string(from: deck.modifiedAt),
+            name: deck.name,
+            icon: deck.icon,
+            color: DeckTransferColor.string(
+                red: deck.colorRed,
+                green: deck.colorGreen,
+                blue: deck.colorBlue,
+                alpha: deck.colorAlpha
+            )
+        )
+    }
+}
+
+extension DeckTransferCard {
+
+    init(card: Card) {
+        self.init(
+            id: card.uuid.uuidString,
+            modifiedAt: DeckTransferDate.string(from: card.modifiedAt),
+            frontText: card.frontText,
+            frontHintText: card.frontHintText,
+            backText: card.backText,
+            backHintText: card.backHintText
+        )
     }
 }
 

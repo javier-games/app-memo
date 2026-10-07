@@ -88,6 +88,37 @@ enum PracticeMode: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+/// What a wrong answer does to a card's progress.
+enum PracticeErrorPenalty: String, Codable, CaseIterable, Identifiable {
+
+    /// Nothing: progress only ever goes up.
+    case none
+
+    /// One correct answer is taken back.
+    case decrease
+
+    /// The card starts again from zero.
+    case reset
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .none:     String(localized: "Keep Progress")
+        case .decrease: String(localized: "Lose One")
+        case .reset:    String(localized: "Back to Zero")
+        }
+    }
+
+    var explanation: String {
+        switch self {
+        case .none:     String(localized: "A wrong answer leaves the card's progress as it is.")
+        case .decrease: String(localized: "A wrong answer takes one correct answer back.")
+        case .reset:    String(localized: "A wrong answer sends the card back to zero.")
+        }
+    }
+}
+
 /// User-adjustable options for practice.
 struct PracticeSettings: Codable, Equatable {
 
@@ -118,6 +149,9 @@ struct PracticeSettings: Codable, Equatable {
     /// An app-wide choice: a deck's own options never override it. See
     /// ``Deck/resolvedPracticeSettings(bookmarkFallback:)``.
     var bookmarkFallbackMode: PracticeMode = .random
+
+    /// What a wrong answer does to a card's progress.
+    var errorPenalty: PracticeErrorPenalty = .none
 
     static let `default` = PracticeSettings()
 
@@ -172,7 +206,7 @@ struct PracticeSettings: Codable, Equatable {
 extension PracticeSettings {
 
     private enum CodingKeys: String, CodingKey {
-        case isInverted, mode, cardLimit, practiceTarget, bookmarkFallbackMode
+        case isInverted, mode, cardLimit, practiceTarget, bookmarkFallbackMode, errorPenalty
     }
 
     /// Decodes leniently: any rule absent from a stored payload takes its
@@ -197,7 +231,9 @@ extension PracticeSettings {
                 ?? fallback.practiceTarget,
             cardLimit: try container.decodeIfPresent(Int.self, forKey: .cardLimit),
             bookmarkFallbackMode: (try? container.decode(PracticeMode.self, forKey: .bookmarkFallbackMode))
-                ?? fallback.bookmarkFallbackMode
+                ?? fallback.bookmarkFallbackMode,
+            errorPenalty: (try? container.decode(PracticeErrorPenalty.self, forKey: .errorPenalty))
+                ?? fallback.errorPenalty
         )
     }
 }

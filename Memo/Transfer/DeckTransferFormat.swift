@@ -4,7 +4,12 @@
 //
 //  The on-disk shape of a deck file, exactly as the README documents it:
 //
-//      { "deckList": [ { "name", "icon", "color", "cardList": [ … ] } ] }
+//      { "deckList": [ { "id", "modifiedAt", "name", "icon", "color",
+//                        "cardList": [ { "id", "modifiedAt", … } ] } ] }
+//
+//  `id` and `modifiedAt` are what let a file be imported a second time as an
+//  update rather than as a copy. Both are optional: a hand-written file has
+//  neither and always imports as new decks.
 //
 //  Kept apart from the SwiftData models on purpose. `@Model` types are not
 //  Codable, and tying the file format to them would mean every future model
@@ -20,6 +25,11 @@ struct DeckTransferFile: Codable {
 
 struct DeckTransferDeck: Codable {
 
+    /// The deck's ``Deck/uuid``, as text.
+    var id: String?
+    /// When the deck's details were last edited, in ISO 8601.
+    var modifiedAt: String?
+
     var name: String
     var icon: String
     /// `"r,g,b,a"`, each 0...255, as the documented format stores colour.
@@ -27,21 +37,30 @@ struct DeckTransferDeck: Codable {
     var cardList: [DeckTransferCard]
 
     init(
+        id: String? = nil,
+        modifiedAt: String? = nil,
         name: String = "",
         icon: String = "",
         color: String = "",
         cardList: [DeckTransferCard] = []
     ) {
+        self.id = id
+        self.modifiedAt = modifiedAt
         self.name = name
         self.icon = icon
         self.color = color
         self.cardList = cardList
     }
 
+    var uuid: UUID? { id.flatMap(UUID.init(uuidString:)) }
+    var modifiedDate: Date? { modifiedAt.flatMap(DeckTransferDate.date(from:)) }
+
     /// Everything but the name is optional, so a hand-written file needs only
     /// what the author cares about.
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try? container.decode(String.self, forKey: .id)
+        modifiedAt = try? container.decode(String.self, forKey: .modifiedAt)
         name = (try? container.decode(String.self, forKey: .name)) ?? ""
         icon = (try? container.decode(String.self, forKey: .icon)) ?? ""
         color = (try? container.decode(String.self, forKey: .color)) ?? ""
@@ -50,6 +69,11 @@ struct DeckTransferDeck: Codable {
 }
 
 struct DeckTransferCard: Codable {
+
+    /// The card's ``Card/uuid``, as text.
+    var id: String?
+    /// When the card's text was last edited, in ISO 8601.
+    var modifiedAt: String?
 
     var frontText: String
     var frontHintText: String
@@ -62,12 +86,16 @@ struct DeckTransferCard: Codable {
     var practiceProgress: Int?
 
     init(
+        id: String? = nil,
+        modifiedAt: String? = nil,
         frontText: String = "",
         frontHintText: String = "",
         backText: String = "",
         backHintText: String = "",
         practiceProgress: Int? = nil
     ) {
+        self.id = id
+        self.modifiedAt = modifiedAt
         self.frontText = frontText
         self.frontHintText = frontHintText
         self.backText = backText
@@ -79,6 +107,8 @@ struct DeckTransferCard: Codable {
     /// it and are missing from older payloads.
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try? container.decode(String.self, forKey: .id)
+        modifiedAt = try? container.decode(String.self, forKey: .modifiedAt)
         frontText = (try? container.decode(String.self, forKey: .frontText)) ?? ""
         backText = (try? container.decode(String.self, forKey: .backText)) ?? ""
         frontHintText = (try? container.decode(String.self, forKey: .frontHintText)) ?? ""
@@ -86,11 +116,37 @@ struct DeckTransferCard: Codable {
         practiceProgress = try? container.decode(Int.self, forKey: .practiceProgress)
     }
 
+    var uuid: UUID? { id.flatMap(UUID.init(uuidString:)) }
+    var modifiedDate: Date? { modifiedAt.flatMap(DeckTransferDate.date(from:)) }
+
     /// A card with no front or no back cannot be practised, so it is not worth
     /// importing.
     var isComplete: Bool {
         !frontText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && !backText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+}
+
+/// Converts the format's dates, which are ISO 8601 text.
+enum DeckTransferDate {
+
+    static func string(from date: Date) -> String {
+        formatter(fractionalSeconds: true).string(from: date)
+    }
+
+    /// Accepts dates with or without fractional seconds, since a file edited
+    /// by hand or by another tool may have either.
+    static func date(from string: String) -> Date? {
+        formatter(fractionalSeconds: true).date(from: string)
+            ?? formatter(fractionalSeconds: false).date(from: string)
+    }
+
+    private static func formatter(fractionalSeconds: Bool) -> ISO8601DateFormatter {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = fractionalSeconds
+            ? [.withInternetDateTime, .withFractionalSeconds]
+            : [.withInternetDateTime]
+        return formatter
     }
 }
 
