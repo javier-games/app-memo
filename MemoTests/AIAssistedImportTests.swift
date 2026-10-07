@@ -314,6 +314,13 @@ final class AIAssistedImportTests: XCTestCase {
         XCTAssertEqual(store.model(for: .claude), "claude-opus-5-5")
     }
 
+    func testModelsAreGroupedIntoKnownAndOther() {
+        let groups = AIProvider.chatGPT.grouped(["gpt-4o", "gpt-9-preview", "gpt-5"])
+
+        XCTAssertEqual(groups.known, ["gpt-5", "gpt-4o"])
+        XCTAssertEqual(groups.other, ["gpt-9-preview"])
+    }
+
     func testPreferredModelFallsBackToWhatTheKeyHas() {
         XCTAssertEqual(AIProvider.chatGPT.preferredModel(among: ["gpt-5", "gpt-4o"]), "gpt-5")
         XCTAssertEqual(AIProvider.chatGPT.preferredModel(among: ["gpt-4o"]), "gpt-4o")

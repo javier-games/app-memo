@@ -79,9 +79,24 @@ private struct AIToolsSettings: View {
                 if models.isEmpty {
                     LabeledContent("Model", value: ai.model(for: provider))
                 } else {
+                    let groups = provider.grouped(models)
+
                     Picker("Model", selection: modelBinding(for: provider)) {
-                        ForEach(models, id: \.self) { model in
-                            Text(model).tag(model)
+                        Section("Recommended") {
+                            ForEach(groups.known, id: \.self) { model in
+                                Text(model).tag(model)
+                            }
+                        }
+
+                        // Not checked by Memo. One that cannot read files
+                        // fails on the first import with the service's own
+                        // message.
+                        if !groups.other.isEmpty {
+                            Section("Other") {
+                                ForEach(groups.other, id: \.self) { model in
+                                    Text(model).tag(model)
+                                }
+                            }
                         }
                     }
                 }

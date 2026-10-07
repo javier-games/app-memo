@@ -33,13 +33,20 @@ enum AIProvider: String, CaseIterable, Identifiable, Codable {
     }
 
     /// Used until the service has reported which models the key can reach.
-    var defaultModel: String { preferredModels[0] }
+    var defaultModel: String { knownModels[0] }
 
-    /// Best first. The first one the key has access to becomes the selection.
-    var preferredModels: [String] {
+    /// Models known to read a file and answer in text, best first.
+    ///
+    /// OpenAI's model list says nothing about what a model can do, and holds
+    /// speech, image and embedding models alongside the chat ones, so the
+    /// models worth offering have to be named here. The first one the key has
+    /// access to becomes the selection.
+    var knownModels: [String] {
         switch self {
-        case .claude:  ["claude-opus-5-5"]
-        case .chatGPT: ["gpt-5.5", "gpt-5.4", "gpt-5"]
+        case .claude:
+            ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-4-5", "claude-fable-5-1"]
+        case .chatGPT:
+            ["gpt-5.5", "gpt-5.4", "gpt-5", "gpt-5-mini", "gpt-4.1", "gpt-4o"]
         }
     }
 
@@ -59,7 +66,16 @@ enum AIProvider: String, CaseIterable, Identifiable, Codable {
     }
 
     func preferredModel(among available: [String]) -> String {
-        preferredModels.first { available.contains($0) } ?? available.first ?? defaultModel
+        knownModels.first { available.contains($0) } ?? available.first ?? defaultModel
+    }
+
+    /// Splits what the key can use into the models named in ``knownModels``,
+    /// in that order, and the rest, which may or may not suit the job.
+    func grouped(_ available: [String]) -> (known: [String], other: [String]) {
+        (
+            knownModels.filter { available.contains($0) },
+            available.filter { !knownModels.contains($0) }
+        )
     }
 
     func makeClient() -> AIClient {
