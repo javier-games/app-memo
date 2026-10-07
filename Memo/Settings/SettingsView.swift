@@ -17,7 +17,7 @@ struct SettingsView: View {
             List {
                 Section {
                     NavigationLink {
-                        DeckDefaultsSettingsView()
+                        DecksSettingsView()
                     } label: {
                         Label("Decks", systemImage: "rectangle.stack")
                     }
@@ -59,13 +59,34 @@ private struct AIConnectionSettingsView: View {
 /// follows the iCloud account signed in on the device.
 private struct CloudSyncSettings: View {
 
-    @State private var status: CloudSyncStatus?
+    @Environment(CloudSyncMonitor.self) private var monitor
+
+    @State private var account: CloudSyncStatus?
 
     var body: some View {
 
+        let activity = monitor.activity
+
         Section {
-            LabeledContent("Status", value: status?.userDescription ?? "…")
-                .task { status = await CloudSyncStatus.current() }
+            LabeledContent("Account", value: account?.userDescription ?? "…")
+                .task { account = await CloudSyncStatus.current() }
+
+            if account == .available {
+                LabeledContent("Sync", value: activity.summary)
+
+                if let lastSuccess = activity.lastSuccess {
+                    LabeledContent(
+                        "Last Synced",
+                        value: lastSuccess.formatted(date: .abbreviated, time: .shortened)
+                    )
+                }
+
+                if let error = activity.lastError {
+                    Text(error)
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                }
+            }
         } header: {
             Text("iCloud")
         } footer: {
@@ -231,6 +252,10 @@ private struct AIToolsSettings: View {
 
 #Preview {
     SettingsView()
+        .environment(CloudSyncMonitor())
+        .environment(PracticeSettingsStore(
+            defaults: UserDefaults(suiteName: "preview.practice.settings")!
+        ))
         .environment(AISettingsStore(
             defaults: UserDefaults(suiteName: "preview.ai.settings")!
         ))

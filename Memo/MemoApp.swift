@@ -26,6 +26,9 @@ struct MemoApp: App {
     /// same reason, and because the key behind it never leaves the Keychain.
     @State private var aiSettings = AISettingsStore()
 
+    /// Created before the store, so no sync event is missed.
+    @State private var syncMonitor = CloudSyncMonitor()
+
     init() {
         let container = MemoModelContainer.make()
         LegacyStoreImport.runIfNeeded(in: container.mainContext)
@@ -37,6 +40,7 @@ struct MemoApp: App {
             DecksView()
                 .environment(practiceSettings)
                 .environment(aiSettings)
+                .environment(syncMonitor)
                 .task {
                     // Logged at launch so "my decks didn't sync" is
                     // diagnosable: the store opens fine whether or not sync is

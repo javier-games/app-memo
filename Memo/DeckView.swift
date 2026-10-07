@@ -21,9 +21,11 @@ struct DeckView: View {
 
     private var cards: [Card] { deck.orderedCards }
 
-    /// This deck's options, or the defaults while it has none of its own.
+    /// This deck's options, or the standard ones while it has none of its own.
     private var settings: PracticeSettings {
-        deck.resolvedPracticeSettings(defaults: practiceSettings.settings)
+        deck.resolvedPracticeSettings(
+            bookmarkFallback: practiceSettings.settings.bookmarkFallbackMode
+        )
     }
 
     var body: some View {

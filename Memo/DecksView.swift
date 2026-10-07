@@ -270,4 +270,5 @@ struct DeckRow: View {
         .environment(AISettingsStore(
             defaults: UserDefaults(suiteName: "preview.ai.settings")!
         ))
+        .environment(CloudSyncMonitor())
 }
