@@ -12,11 +12,16 @@ import UniformTypeIdentifiers
 struct DecksView: View {
 
     @Environment(\.modelContext) private var modelContext
+    @Environment(AISettingsStore.self) private var ai
 
     @Query(sort: [SortDescriptor(\Deck.sortIndex), SortDescriptor(\Deck.createdAt)])
     private var decks: [Deck]
 
     @State private var isPresentingAddDeck = false
+    @State private var isPresentingSettings = false
+
+    /// Non-nil while the AI-assisted import sheet is up.
+    @State private var aiImportKind: AIImportKind?
 
     /// Non-nil while the document picker is up; also names the format chosen.
     @State private var pickingKind: DeckTransferKind?
@@ -64,6 +69,26 @@ struct DecksView: View {
                             }
                         }
                     }
+
+                    Section("AI Assisted") {
+                        if ai.isConnected {
+                            ForEach(AIImportKind.allCases) { kind in
+                                Button {
+                                    aiImportKind = kind
+                                } label: {
+                                    Label(kind.title, systemImage: kind.menuIcon)
+                                }
+                            }
+                        } else {
+                            // Nothing to import with yet, so the only useful
+                            // step is the one that fixes that.
+                            Button {
+                                isPresentingSettings = true
+                            } label: {
+                                Label("Connect an AI Tool…", systemImage: "sparkles")
+                            }
+                        }
+                    }
                 } label: {
                     // Stretched to the full row and given a hit shape: a Menu
                     // is only triggered by its label, so without this the row
@@ -75,6 +100,21 @@ struct DecksView: View {
                 }
             }
             .navigationTitle("Decks")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isPresentingSettings = true
+                    } label: {
+                        Label("Settings", systemImage: "gearshape")
+                    }
+                }
+            }
+            .sheet(isPresented: $isPresentingSettings) {
+                SettingsView()
+            }
+            .sheet(item: $aiImportKind) { kind in
+                AIImportView(kind: kind, existingDeckCount: decks.count)
+            }
             .sheet(isPresented: $isPresentingAddDeck) {
                 DeckEditorView(
                     title: "New Deck",
@@ -226,5 +266,8 @@ struct DeckRow: View {
         .modelContainer(PreviewData.container())
         .environment(PracticeSettingsStore(
             defaults: UserDefaults(suiteName: "preview.practice.settings")!
+        ))
+        .environment(AISettingsStore(
+            defaults: UserDefaults(suiteName: "preview.ai.settings")!
         ))
 }

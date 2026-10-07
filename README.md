@@ -22,6 +22,7 @@ Designed to enhance your learning experience by using customizable flash cards. 
 - **Practice Options**: Four orders to practise in, an inverse mode that flips which side asks the question, and a limit so you can drill part of a deck. See [Practice Options](#practice-options).
 - **Progress per Card**: Each card counts consecutive correct answers towards a target. A wrong answer sends it back to zero, so the count reflects what you currently know rather than what you once did.
 - **Import and Export Decks**: Import decks from the **Add** menu on the deck list, and share a deck from the **share** button at the top of it. Both work in JSON and CSV.
+- **AI-Assisted Import**: Turn a text file or a PDF into a deck with Claude or ChatGPT, using your own API key. See [AI-Assisted Import](#ai-assisted-import).
 - **Reorder**: Long-press and drag to rearrange decks or cards. Card order is what the *In Order* practice mode deals.
 - **Flexible Study**: Perfect for language learning, memorizing trivia, studying for exams, or any topic that benefits from flash cards.
 
@@ -141,6 +142,34 @@ Tea,a hot drink,Té,
 The header row is optional, and short rows are padded, so a plain two-column
 file imports fine.
 
+## AI-Assisted Import
+
+Memo can hand a file to an AI model and turn the answer into decks. It works
+with Claude (Anthropic) and ChatGPT (OpenAI), and uses **your own API key**:
+neither company lets another app sign in to a Claude or ChatGPT subscription,
+so a key is the only way to connect.
+
+1. Open **Settings** (the gear on the deck list), choose the assistant, paste
+   an API key and tap **Connect**. The key is checked against the service
+   before it is saved, and is kept in the device's Keychain.
+2. In the **Add** menu, the **AI Assisted** section offers **Text File** (plain
+   text, CSV, JSON, Markdown…) and **PDF**. Until a tool is connected it shows
+   **Connect an AI Tool…** instead, which opens Settings.
+3. Pick the file and, if you like, add instructions of your own — "only chapter
+   2", "answers in Spanish". They are added to Memo's instructions, never used
+   in place of them.
+4. Memo shows the decks and card counts it got back. Nothing is added to your
+   library until you confirm.
+
+The model is asked to answer in the JSON format above, and its answer goes
+through the same importer as a file you picked yourself, so the same rules
+apply: cards with no front or no back are skipped, and import only ever adds.
+
+**Using this costs money.** The file is sent to the service you connected,
+which charges your API account for every request, separately from any Claude or
+ChatGPT subscription. Settings and the import screen both say so. Text files are limited to 1 MB and PDFs to 20 MB; a larger file is
+refused, not trimmed.
+
 ## iCloud Sync (built, currently turned off)
 
 Decks are stored in SwiftData. The app is written to replicate them across your
@@ -203,9 +232,11 @@ shipping, or synced devices will find no records.
 
 ```
 Memo/
+├── AI/           the AI services, the prompt, and AI-assisted import
 ├── Models/       Deck and Card, the SwiftData models
 ├── Persistence/  the store, its CloudKit configuration, the one-time migration
 ├── Practice/     the practice rules, the session, and the screens that use them
+├── Settings/     the app-wide settings screen
 ├── Transfer/     the JSON and CSV file formats, import and export
 └── Shared/       small pieces used in more than one place
 ```

@@ -22,6 +22,10 @@ struct MemoApp: App {
     /// per-device preferences, not user content, so they are not synced.
     @State private var practiceSettings = PracticeSettingsStore()
 
+    /// Which AI tool is connected, for AI-assisted import. Per-device for the
+    /// same reason, and because the key behind it never leaves the Keychain.
+    @State private var aiSettings = AISettingsStore()
+
     init() {
         let container = MemoModelContainer.make()
         LegacyStoreImport.runIfNeeded(in: container.mainContext)
@@ -32,6 +36,7 @@ struct MemoApp: App {
         WindowGroup {
             DecksView()
                 .environment(practiceSettings)
+                .environment(aiSettings)
                 .task {
                     // Logged at launch so "my decks didn't sync" is
                     // diagnosable: the store opens fine whether or not sync is
