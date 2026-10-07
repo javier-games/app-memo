@@ -82,9 +82,11 @@ private struct AIToolsSettings: View {
                     let groups = provider.grouped(models)
 
                     Picker("Model", selection: modelBinding(for: provider)) {
-                        Section("Recommended") {
-                            ForEach(groups.known, id: \.self) { model in
-                                Text(model).tag(model)
+                        if !groups.known.isEmpty {
+                            Section("Recommended") {
+                                ForEach(groups.known, id: \.self) { model in
+                                    Text(model).tag(model)
+                                }
                             }
                         }
 
