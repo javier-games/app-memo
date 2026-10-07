@@ -1,8 +1,9 @@
 name: Revoke Signing Certificate
 
-# Cleans up after a device build from the TestFlight workflow, which leaves its
-# distribution certificate and ad hoc profile in place. Apple allows only a few
-# distribution certificates per team, so leftovers eventually block new builds.
+# Revokes a distribution certificate by its App Store Connect ID and deletes
+# the workflow's profiles. Left over from when every build made its own
+# certificate; only useful for clearing out the ones that scheme left behind.
+# The stored signing certificate must never be passed to it.
 on:
   workflow_dispatch:
     inputs:
