@@ -8,12 +8,11 @@ import Foundation
 /// Build-wide switches.
 enum AppConfiguration {
 
-    /// Whether this build is able to replicate decks through CloudKit.
+    /// Whether this build replicates decks through CloudKit.
     ///
-    /// Being able to is not the same as doing it: sync stays off until the
-    /// user turns it on, which is ``CloudSyncPreference``'s business. This
-    /// switch is for builds that cannot sync at all, and needs three things
-    /// outside this file to be `true`:
+    /// Sync has no switch of its own in the app: with this on, decks follow
+    /// the iCloud account signed in on the device, and with no account they
+    /// stay on the device. It needs three things outside this file:
     ///
     /// 1. The **Memo** target signed with `Memo/Memo.entitlements` (iCloud with
     ///    CloudKit and the container `iCloud.com.javier.memo`, plus Push
@@ -21,6 +20,8 @@ enum AppConfiguration {
     /// 2. An App ID in the developer portal with those capabilities and that
     ///    container, which takes a paid Apple Developer Program membership.
     /// 3. The CloudKit schema deployed to production; see the README.
+    ///
+    /// Set it to `false` for a build that cannot be signed that way.
     static let isCloudSyncAvailable = true
 
     /// Subsystem used for all `Logger` instances.

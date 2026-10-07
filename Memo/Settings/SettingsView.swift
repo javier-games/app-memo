@@ -32,43 +32,22 @@ struct SettingsView: View {
     }
 }
 
-/// Turns iCloud sync on and off.
+/// Says whether decks are reaching iCloud. There is nothing to switch: sync
+/// follows the iCloud account signed in on the device.
 private struct CloudSyncSettings: View {
-
-    @AppStorage(CloudSyncPreference.storageKey) private var isOn = false
 
     @State private var status: CloudSyncStatus?
 
     var body: some View {
 
         Section {
-            Toggle("Sync with iCloud", isOn: $isOn)
+            LabeledContent("Status", value: status?.userDescription ?? "…")
                 .task { status = await CloudSyncStatus.current() }
-
-            if isOn, !needsRestart, let status {
-                LabeledContent("Status", value: status.userDescription)
-            }
         } header: {
             Text("iCloud")
         } footer: {
-            Text(footer)
+            Text("Your decks are kept the same on every device signed in to your iCloud account. Nobody else can see them.")
         }
-    }
-
-    /// The store is opened one way or the other at launch and stays that way,
-    /// so the switch and the running store can disagree until then.
-    private var needsRestart: Bool {
-        isOn != MemoModelContainer.isCloudConfigured
-    }
-
-    private var footer: String {
-        if needsRestart {
-            return isOn
-                ? String(localized: "Close Memo and open it again to start syncing.")
-                : String(localized: "Close Memo and open it again to stop syncing. Your decks stay on this device.")
-        }
-
-        return String(localized: "Keeps your decks the same on every device signed in to your iCloud account.")
     }
 }
 
