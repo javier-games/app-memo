@@ -302,6 +302,18 @@ final class AIAssistedImportTests: XCTestCase {
         XCTAssertNil(store.apiKey(for: .claude))
     }
 
+    func testRefreshedModelListKeepsTheChoiceWhileItIsStillOffered() throws {
+        let store = makeStore(secrets: MemorySecretStore())
+        try store.connect(.claude, apiKey: "key", models: ["claude-opus-5-5", "claude-haiku-4-5"])
+        store.setModel("claude-haiku-4-5", for: .claude)
+
+        store.updateModels(["claude-opus-5-5", "claude-haiku-4-5", "claude-sonnet-5-5"], for: .claude)
+        XCTAssertEqual(store.model(for: .claude), "claude-haiku-4-5")
+
+        store.updateModels(["claude-opus-5-5"], for: .claude)
+        XCTAssertEqual(store.model(for: .claude), "claude-opus-5-5")
+    }
+
     func testPreferredModelFallsBackToWhatTheKeyHas() {
         XCTAssertEqual(AIProvider.chatGPT.preferredModel(among: ["gpt-5", "gpt-4o"]), "gpt-5")
         XCTAssertEqual(AIProvider.chatGPT.preferredModel(among: ["gpt-4o"]), "gpt-4o")

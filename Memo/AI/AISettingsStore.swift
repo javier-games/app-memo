@@ -94,6 +94,17 @@ final class AISettingsStore {
         settings.selectedModels[provider.rawValue] = provider.preferredModel(among: models)
     }
 
+    /// Replaces the model list with a fresh one from the service, keeping the
+    /// user's choice for as long as the service still offers it.
+    func updateModels(_ models: [String], for provider: AIProvider) {
+        guard !models.isEmpty else { return }
+
+        settings.availableModels[provider.rawValue] = models
+        if !models.contains(model(for: provider)) {
+            settings.selectedModels[provider.rawValue] = provider.preferredModel(among: models)
+        }
+    }
+
     func disconnect(_ provider: AIProvider) {
         do {
             try secrets.setSecret(nil, for: provider.rawValue)

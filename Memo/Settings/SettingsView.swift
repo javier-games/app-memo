@@ -55,10 +55,25 @@ private struct AIToolsSettings: View {
             Text("Used to create decks from text files and PDFs.")
         }
 
+        Section {
+            Label {
+                Text("\(provider.company) charges your API account for every file you send. This is separate from any \(provider.title) subscription, and the amount depends on the model and the size of the file.")
+            } icon: {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+            }
+            .font(.footnote)
+        } header: {
+            Text("Costs")
+        }
+
         if ai.isConnected(provider) {
             Section {
                 LabeledContent("Method", value: String(localized: "API Key"))
                 LabeledContent("Status", value: String(localized: "Connected"))
+                    // The services add and retire models, so the list saved
+                    // at connection time is refreshed whenever this is shown.
+                    .task(id: provider) { await refreshModels(for: provider) }
 
                 let models = ai.availableModels(for: provider)
                 if models.isEmpty {
@@ -104,7 +119,7 @@ private struct AIToolsSettings: View {
 
                 Link("Get an API Key", destination: provider.keysPage)
             } footer: {
-                Text("\(provider.title) is connected with an API key from \(provider.company), billed to your own account. Signing in with a \(provider.title) subscription is not something \(provider.company) offers to other apps.")
+                Text("\(provider.title) is connected with an API key from \(provider.company). Signing in with a \(provider.title) subscription is not something \(provider.company) offers to other apps.")
             }
             .onChange(of: provider) {
                 draftKey = ""
@@ -122,6 +137,16 @@ private struct AIToolsSettings: View {
             get: { ai.model(for: provider) },
             set: { ai.setModel($0, for: provider) }
         )
+    }
+
+    /// A failure here is not shown: the saved list still works, and the user
+    /// did not ask for anything.
+    private func refreshModels(for provider: AIProvider) async {
+        guard let key = ai.apiKey(for: provider),
+              let models = try? await provider.makeClient().models(apiKey: key)
+        else { return }
+
+        ai.updateModels(models, for: provider)
     }
 
     /// Asks the service for its models before saving anything, so a mistyped

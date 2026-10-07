@@ -165,8 +165,9 @@ The model is asked to answer in the JSON format above, and its answer goes
 through the same importer as a file you picked yourself, so the same rules
 apply: cards with no front or no back are skipped, and import only ever adds.
 
-The file is sent to the service you connected, which bills your account for the
-request. Text files are limited to 1 MB and PDFs to 20 MB; a larger file is
+**Using this costs money.** The file is sent to the service you connected,
+which charges your API account for every request, separately from any Claude or
+ChatGPT subscription. Settings and the import screen both say so. Text files are limited to 1 MB and PDFs to 20 MB; a larger file is
 refused, not trimmed.
 
 ## iCloud Sync (built, currently turned off)

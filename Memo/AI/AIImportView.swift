@@ -48,7 +48,7 @@ struct AIImportView: View {
                     }
                     .disabled(isGenerating)
                 } footer: {
-                    Text("The file is sent to \(provider.title) with your API key. \(provider.company) may charge your account for it.")
+                    Text("The file is sent to \(provider.title) with your API key, and \(provider.company) charges your account for it.")
                 }
 
                 Section {
