@@ -25,15 +25,15 @@ struct DeckDefaultsSettingsView: View {
             PracticeOptionsSections(settings: $store.settings, deckCardCount: nil)
 
             Section {
-                Picker("Without Bookmarks", selection: $store.settings.bookmarkFallbackMode) {
+                Picker("Use This Mode", selection: $store.settings.bookmarkFallbackMode) {
                     ForEach(PracticeMode.bookmarkFallbacks) { mode in
                         Text(mode.title).tag(mode)
                     }
                 }
             } header: {
-                Text("Bookmarked Mode")
+                Text("When a Deck Has No Bookmarks")
             } footer: {
-                Text("The mode used when a deck is practised in Bookmarked mode and none of its cards are bookmarked. It applies to every deck.")
+                Text("Only matters for a deck set to Bookmarked mode. If none of its cards are bookmarked, it is practised in this mode. It applies to every deck.")
             }
 
             Section {
