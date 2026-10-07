@@ -10,8 +10,9 @@ import OSLog
 /// are not here; see ``SecretStore``.
 struct AISettings: Codable, Equatable {
 
-    /// The tool AI-assisted import uses.
-    var provider = AIProvider.claude
+    /// The tool AI-assisted import uses. None until the user picks one: the
+    /// feature costs money, so it is never on by default.
+    var provider: AIProvider?
 
     /// Keyed by ``AIProvider/rawValue``.
     var selectedModels: [String: String] = [:]
@@ -62,7 +63,8 @@ final class AISettingsStore {
 
     /// Whether the selected tool can be used right now.
     var isConnected: Bool {
-        connectedProviders.contains(settings.provider)
+        guard let provider = settings.provider else { return false }
+        return connectedProviders.contains(provider)
     }
 
     func isConnected(_ provider: AIProvider) -> Bool {
