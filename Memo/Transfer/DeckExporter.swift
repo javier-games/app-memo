@@ -53,6 +53,9 @@ enum DeckExporter {
         )
     }
 
+    /// The name of a file holding every deck.
+    static let libraryFileName = "Memo Decks.json"
+
     /// A file name built from the deck's name, safe for any file system.
     static func fileName(for deck: Deck, kind: DeckTransferKind) -> String {
         let base = deck.name.trimmingCharacters(in: .whitespacesAndNewlines)
