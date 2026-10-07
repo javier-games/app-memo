@@ -6,8 +6,25 @@ name: TestFlight
 #   Secrets:   ASC_KEY_ID                App Store Connect API key ID
 #              ASC_ISSUER_ID             App Store Connect issuer ID
 #              ASC_PRIVATE_KEY           contents of the AuthKey_XXXX.p8 file
+#
+# `destination: device` makes an ad hoc build for one registered iPhone instead,
+# pointed at CloudKit's development database. Running it once with sync turned
+# on is what creates the record types there, which a Mac-less setup has no
+# other way to do. Its certificate is left in place, because revoking it would
+# stop the build from opening; remove it afterwards with the Revoke Signing
+# Certificate workflow.
 on:
   workflow_dispatch:
+    inputs:
+      destination:
+        description: Where the build goes
+        type: choice
+        options: [testflight, device]
+        default: testflight
+      device_udid:
+        description: UDID of the iPhone (device builds only)
+        type: string
+        required: false
 
 concurrency:
   group: testflight
@@ -22,6 +39,8 @@ jobs:
       APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      DESTINATION: ${{ inputs.destination }}
+      DEVICE_UDID: ${{ inputs.device_udid }}
       FASTLANE_SKIP_UPDATE_CHECK: "1"
       FASTLANE_HIDE_CHANGELOG: "1"
     steps:
@@ -37,6 +56,10 @@ jobs:
               missing=1
             fi
           done
+          if [ "$DESTINATION" = device ] && [ -z "$DEVICE_UDID" ]; then
+            echo "::error::A device build needs the device_udid input"
+            missing=1
+          fi
           [ -z "$missing" ]
 
       # The runner context is not available in job-level env.
@@ -100,16 +123,22 @@ jobs:
             -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" > /dev/null
           identity=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" | awk 'NR==1 {print $2}')
 
-          # The app's own entitlements, switched from development to
-          # production, plus the ones Xcode adds to every App Store build.
+          # The app's own entitlements plus the ones every distribution build
+          # carries. Push is always production outside Xcode; the CloudKit
+          # database depends on where the build is going.
           entitlements="$RUNNER_TEMP/Distribution.entitlements"
           cp Memo/Memo.entitlements "$entitlements"
+          if [ "$DESTINATION" = device ]; then
+            cloudkit=Development
+          else
+            cloudkit=Production
+            /usr/libexec/PlistBuddy -c "Add :beta-reports-active bool true" "$entitlements"
+          fi
           /usr/libexec/PlistBuddy \
             -c "Set :aps-environment production" \
-            -c "Add :com.apple.developer.icloud-container-environment string Production" \
+            -c "Add :com.apple.developer.icloud-container-environment string $cloudkit" \
             -c "Add :application-identifier string $APPLE_TEAM_ID.games.javier.memo" \
             -c "Add :com.apple.developer.team-identifier string $APPLE_TEAM_ID" \
-            -c "Add :beta-reports-active bool true" \
             -c "Add :get-task-allow bool false" \
             "$entitlements"
 
@@ -138,6 +167,7 @@ jobs:
           (cd "$RUNNER_TEMP/ipa" && zip -qry "$RUNNER_TEMP/Memo.ipa" Payload)
 
       - name: Upload to TestFlight
+        if: inputs.destination != 'device'
         run: |
           mkdir -p ~/.appstoreconnect/private_keys
           cp "$ASC_KEY_PATH" ~/.appstoreconnect/private_keys/"AuthKey_$ASC_KEY_ID.p8"
@@ -145,8 +175,21 @@ jobs:
             --file "$RUNNER_TEMP/Memo.ipa" \
             --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
 
+      - name: Keep the device build
+        if: inputs.destination == 'device'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Memo-device
+          path: ${{ runner.temp }}/Memo.ipa
+          retention-days: 1
+
+      - name: Note the certificate to revoke later
+        if: inputs.destination == 'device'
+        run: |
+          echo "Signing certificate left in place: $SIGNING_CERT_ID" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Remove the certificate and profile
-        if: always()
+        if: always() && inputs.destination != 'device'
         run: fastlane remove_signing
 
       - name: Remove key material
