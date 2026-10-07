@@ -23,6 +23,8 @@ struct CardDraft {
     /// hand; during a run it is maintained by ``CardPracticeProgressRecorder``.
     var practiceProgress: Int = 0
 
+    var isBookmarked = false
+
     init() {}
 
     init(card: Card) {
@@ -31,6 +33,7 @@ struct CardDraft {
         backText = card.backText
         backHintText = card.backHintText
         practiceProgress = card.practiceProgress
+        isBookmarked = card.isBookmarked
     }
 
     var isValid: Bool {
@@ -44,6 +47,7 @@ struct CardDraft {
         card.backText = backText.trimmingCharacters(in: .whitespacesAndNewlines)
         card.backHintText = backHintText.trimmingCharacters(in: .whitespacesAndNewlines)
         card.practiceProgress = max(0, practiceProgress)
+        card.isBookmarked = isBookmarked
     }
 }
 
@@ -52,10 +56,13 @@ struct CardDraft {
 struct CardEditorView: View {
 
     @Environment(\.dismiss) private var dismiss
-    @Environment(PracticeSettingsStore.self) private var practiceSettings
 
     let title: LocalizedStringKey
     let saveTitle: LocalizedStringKey
+
+    /// The practice target of the deck the card belongs to, which bounds its
+    /// progress. Passed in because it differs from deck to deck.
+    let practiceTarget: Int
 
     let onSave: (CardDraft) -> Void
 
@@ -64,11 +71,13 @@ struct CardEditorView: View {
     init(
         title: LocalizedStringKey,
         saveTitle: LocalizedStringKey,
+        practiceTarget: Int,
         draft: CardDraft,
         onSave: @escaping (CardDraft) -> Void
     ) {
         self.title = title
         self.saveTitle = saveTitle
+        self.practiceTarget = practiceTarget
         self.onSave = onSave
         _draft = State(initialValue: draft)
     }
@@ -136,6 +145,8 @@ struct CardEditorView: View {
                 }
             }
             .disabled(!isTracked)
+
+            Toggle("Bookmarked", isOn: $draft.isBookmarked)
         } header: {
             Text("Practice")
         } footer: {
@@ -143,9 +154,7 @@ struct CardEditorView: View {
         }
     }
 
-    private var target: Int {
-        practiceSettings.settings.resolvedPracticeTarget
-    }
+    private var target: Int { practiceTarget }
 
     private var isTracked: Bool { target > 0 }
 
@@ -167,8 +176,8 @@ struct CardEditorView: View {
 
     private var progressFooter: String {
         isTracked
-            ? String(localized: "Correct answers recorded so far. Set it by hand if you have already practised this card elsewhere — a correct answer adds one, a wrong one sends it back to zero.")
-            : String(localized: "Progress tracking is switched off in Practice Options.")
+            ? String(localized: "Correct answers recorded so far. Set it by hand if you have already practised this card elsewhere — a correct answer adds one, a wrong one sends it back to zero. Bookmarked cards are the ones Bookmarked mode practises.")
+            : String(localized: "Progress tracking is switched off in Practice Options. Bookmarked cards are the ones Bookmarked mode practises.")
     }
 }
 
@@ -176,9 +185,7 @@ struct CardEditorView: View {
     CardEditorView(
         title: "Edit Card",
         saveTitle: "Save",
+        practiceTarget: 10,
         draft: CardDraft(card: Card(frontText: "Tea", backText: "Té", practiceProgress: 3))
     ) { _ in }
-    .environment(PracticeSettingsStore(
-        defaults: UserDefaults(suiteName: "preview.practice.settings")!
-    ))
 }

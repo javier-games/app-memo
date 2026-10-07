@@ -19,7 +19,8 @@ Designed to enhance your learning experience by using customizable flash cards. 
 - **Practice**: Cards appear one-by-one so you can focus on individual items.
     - **Mark as Correct, Wrong, or Skip**: Correct and wrong both settle a card; skipping sends it to the back of the deck for later, and does not count as an answer.
     - **Session results**: Finishing a deck shows how many you got right, wrong and skipped, and offers another run.
-- **Practice Options**: Four orders to practise in, an inverse mode that flips which side asks the question, and a limit so you can drill part of a deck. See [Practice Options](#practice-options).
+- **Practice Options**: Five modes to practise in, an inverse mode that flips which side asks the question, and a limit so you can drill part of a deck. Set per deck, with defaults for the rest. See [Practice Options](#practice-options).
+- **Bookmarks**: Mark the cards you want to come back to and practise only those.
 - **Progress per Card**: Each card counts consecutive correct answers towards a target. A wrong answer sends it back to zero, so the count reflects what you currently know rather than what you once did.
 - **Import and Export Decks**: Import decks from the **Add** menu on the deck list, and share a deck from the **share** button at the top of it. Both work in JSON and CSV.
 - **AI-Assisted Import**: Turn a text file or a PDF into a deck with Claude or ChatGPT, using your own API key. See [AI-Assisted Import](#ai-assisted-import).
@@ -60,8 +61,10 @@ Designed to enhance your learning experience by using customizable flash cards. 
 
 ## Practice Options
 
-Reached from the **sliders** button at the top of a deck. The settings apply to
-every deck and are captured when a run starts, so changing them mid-run will not
+Each deck has its own options, reached from the **sliders** button at the top of
+it. A deck that has not been given any uses the defaults, which you set in
+**Settings → Decks**; **Use the Default Options** puts a deck back on them. The
+options are captured when a run starts, so changing them mid-run will not
 reshape a session already in progress.
 
 | Option | Default | What it does |
@@ -79,12 +82,21 @@ reshape a session already in progress.
 | **In Order** | The deck as you arranged it, start to finish. Always the whole deck, so the card limit does not apply. |
 | **Least Practiced** | Lowest progress first, ties keeping the deck's order. The same run every time. |
 | **Least Practiced, Shuffled** | Lowest progress first, but ties vary each run. |
+| **Bookmarked** | Only the cards you have bookmarked, shuffled. |
 
 The two *Least Practiced* modes put the cards you keep getting wrong — and the
 ones you have never seen — ahead of the ones you have already learned. Combined
 with **Cards**, they give you "the twenty I am worst at". With **Practice
 Target** set to 0 every card sits at zero progress, so both fall back to their
 unordered form.
+
+### Bookmarks
+
+Bookmark a card by swiping it to the right in the deck, with the **Bookmarked**
+switch in the card editor, or with the bookmark button while practising it.
+**Bookmarked** mode then deals only those cards. A deck with no bookmarks is
+practised in another mode instead, **Random** unless you pick a different one
+under **Settings → Decks → Bookmarked Mode**; that choice applies to every deck.
 
 ### Progress
 
@@ -149,7 +161,7 @@ with Claude (Anthropic) and ChatGPT (OpenAI), and uses **your own API key**:
 neither company lets another app sign in to a Claude or ChatGPT subscription,
 so a key is the only way to connect.
 
-1. Open **Settings** (the gear on the deck list), choose the assistant, paste
+1. Open **Settings → AI Connection** (the gear on the deck list), choose the assistant, paste
    an API key and tap **Connect**. The key is checked against the service
    before it is saved, and is kept in the device's Keychain.
 2. In the **Add** menu, the **AI Assisted** section offers **Text File** (plain
@@ -234,7 +246,7 @@ Memo/
 ├── Models/       Deck and Card, the SwiftData models
 ├── Persistence/  the store, its CloudKit configuration, the one-time migration
 ├── Practice/     the practice rules, the session, and the screens that use them
-├── Settings/     the app-wide settings screen
+├── Settings/     the app-wide settings: deck defaults and the AI connection
 ├── Transfer/     the JSON and CSV file formats, import and export
 └── Shared/       small pieces used in more than one place
 ```

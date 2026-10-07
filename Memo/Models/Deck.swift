@@ -35,6 +35,13 @@ final class Deck {
 
     var createdAt: Date = Date.distantPast
 
+    /// This deck's own practice options, encoded, or `nil` while it follows
+    /// the app-wide defaults. Read and written through ``practiceSettings``.
+    ///
+    /// Stored as one encoded value, like the defaults are, so adding a rule
+    /// needs no new property here and no change to the CloudKit schema.
+    var practiceSettingsData: Data?
+
     /// Optional-and-inverse is required by CloudKit. Deleting a deck cascades to
     /// its cards so no orphan records are left behind on other devices.
     @Relationship(deleteRule: .cascade, inverse: \Card.deck)
@@ -71,6 +78,30 @@ extension Deck {
     }
 
     var cardCount: Int { cards?.count ?? 0 }
+
+    var hasBookmarkedCards: Bool {
+        (cards ?? []).contains(where: \.isBookmarked)
+    }
+
+    /// The options set for this deck, or `nil` while it follows the defaults.
+    var practiceSettings: PracticeSettings? {
+        get {
+            practiceSettingsData.flatMap { try? JSONDecoder().decode(PracticeSettings.self, from: $0) }
+        }
+        set {
+            practiceSettingsData = newValue.flatMap { try? JSONEncoder().encode($0) }
+        }
+    }
+
+    /// The options a practice run of this deck uses.
+    ///
+    /// What to do when a deck has no bookmarks is an app-wide choice, so it
+    /// always comes from the defaults, whatever the deck has set for itself.
+    func resolvedPracticeSettings(defaults: PracticeSettings) -> PracticeSettings {
+        var settings = practiceSettings ?? defaults
+        settings.bookmarkFallbackMode = defaults.bookmarkFallbackMode
+        return settings
+    }
 
     var isEmpty: Bool { cardCount == 0 }
 

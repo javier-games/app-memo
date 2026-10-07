@@ -6,7 +6,7 @@
 import SwiftUI
 
 /// Settings that apply to the whole app, as opposed to one deck or one
-/// practice run.
+/// practice run. Opens on a list of areas, each with a screen of its own.
 struct SettingsView: View {
 
     @Environment(\.dismiss) private var dismiss
@@ -14,12 +14,24 @@ struct SettingsView: View {
     var body: some View {
 
         NavigationStack {
-            Form {
+            List {
+                Section {
+                    NavigationLink {
+                        DeckDefaultsSettingsView()
+                    } label: {
+                        Label("Decks", systemImage: "rectangle.stack")
+                    }
+
+                    NavigationLink {
+                        AIConnectionSettingsView()
+                    } label: {
+                        Label("AI Connection", systemImage: "sparkles")
+                    }
+                }
+
                 if AppConfiguration.isCloudSyncAvailable {
                     CloudSyncSettings()
                 }
-
-                AIToolsSettings()
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -29,6 +41,17 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+}
+
+private struct AIConnectionSettingsView: View {
+
+    var body: some View {
+        Form {
+            AIToolsSettings()
+        }
+        .navigationTitle("AI Connection")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

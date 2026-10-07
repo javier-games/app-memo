@@ -30,6 +30,13 @@ enum PracticeMode: String, Codable, CaseIterable, Identifiable {
     /// Lowest practice progress first, ties in a different order each run.
     case leastPracticedShuffled
 
+    /// Only the cards the user has bookmarked, shuffled.
+    ///
+    /// A deck with no bookmarks is practised in
+    /// ``PracticeSettings/bookmarkFallbackMode`` instead, so choosing this
+    /// mode never leaves a deck with nothing to deal.
+    case bookmarked
+
     var id: String { rawValue }
 
     var title: String {
@@ -38,6 +45,7 @@ enum PracticeMode: String, Codable, CaseIterable, Identifiable {
         case .inOrder:                String(localized: "In Order")
         case .leastPracticed:         String(localized: "Least Practiced")
         case .leastPracticedShuffled: String(localized: "Least Practiced, Shuffled")
+        case .bookmarked:             String(localized: "Bookmarked")
         }
     }
 
@@ -47,8 +55,8 @@ enum PracticeMode: String, Codable, CaseIterable, Identifiable {
     /// would be meaningless; the panel disables the control and explains why.
     var allowsCardLimit: Bool {
         switch self {
-        case .random, .leastPracticed, .leastPracticedShuffled: true
-        case .inOrder:                                          false
+        case .random, .leastPracticed, .leastPracticedShuffled, .bookmarked: true
+        case .inOrder:                                                      false
         }
     }
 
@@ -59,18 +67,24 @@ enum PracticeMode: String, Codable, CaseIterable, Identifiable {
     var ordersByProgress: Bool {
         switch self {
         case .leastPracticed, .leastPracticedShuffled: true
-        case .random, .inOrder:                        false
+        case .random, .inOrder, .bookmarked:           false
         }
     }
 
     /// Why the card limit is unavailable, for modes that fix it.
     var cardLimitExplanation: String? {
         switch self {
-        case .random, .leastPracticed, .leastPracticedShuffled:
+        case .random, .leastPracticed, .leastPracticedShuffled, .bookmarked:
             nil
         case .inOrder:
             String(localized: "In Order practises the whole deck, so every card is included.")
         }
+    }
+
+    /// The modes a deck with no bookmarks can be practised in: every mode
+    /// that does not itself need bookmarks.
+    static var bookmarkFallbacks: [PracticeMode] {
+        allCases.filter { $0 != .bookmarked }
     }
 }
 
@@ -98,6 +112,13 @@ struct PracticeSettings: Codable, Equatable {
     /// otherwise silently mean "all" in one deck and "a fifth" in another.
     var cardLimit: Int?
 
+    /// The mode a ``PracticeMode/bookmarked`` run uses for a deck that has no
+    /// bookmarks.
+    ///
+    /// An app-wide choice: a deck's own options never override it. See
+    /// ``Deck/resolvedPracticeSettings(defaults:)``.
+    var bookmarkFallbackMode: PracticeMode = .random
+
     static let `default` = PracticeSettings()
 
     /// The range the practice target may be set to.
@@ -112,6 +133,12 @@ struct PracticeSettings: Codable, Equatable {
         guard mode.allowsCardLimit, let cardLimit else { return deckSize }
 
         return min(max(1, cardLimit), deckSize)
+    }
+
+    /// The fallback in force. Never ``PracticeMode/bookmarked`` itself, which
+    /// would fall back to itself for ever.
+    var resolvedBookmarkFallbackMode: PracticeMode {
+        bookmarkFallbackMode == .bookmarked ? .random : bookmarkFallbackMode
     }
 
     /// Whether the run covers the whole deck.
@@ -145,7 +172,7 @@ struct PracticeSettings: Codable, Equatable {
 extension PracticeSettings {
 
     private enum CodingKeys: String, CodingKey {
-        case isInverted, mode, cardLimit, practiceTarget
+        case isInverted, mode, cardLimit, practiceTarget, bookmarkFallbackMode
     }
 
     /// Decodes leniently: any rule absent from a stored payload takes its
@@ -168,7 +195,9 @@ extension PracticeSettings {
                 ?? fallback.mode,
             practiceTarget: try container.decodeIfPresent(Int.self, forKey: .practiceTarget)
                 ?? fallback.practiceTarget,
-            cardLimit: try container.decodeIfPresent(Int.self, forKey: .cardLimit)
+            cardLimit: try container.decodeIfPresent(Int.self, forKey: .cardLimit),
+            bookmarkFallbackMode: (try? container.decode(PracticeMode.self, forKey: .bookmarkFallbackMode))
+                ?? fallback.bookmarkFallbackMode
         )
     }
 }

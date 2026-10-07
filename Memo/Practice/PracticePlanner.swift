@@ -20,24 +20,39 @@ enum PracticePlanner {
     static func plan(from available: [Card], settings: PracticeSettings) -> [Card] {
         guard !available.isEmpty else { return [] }
 
-        let ordered: [Card] = switch settings.mode {
+        // The card limit counts against the cards a mode draws from, which for
+        // bookmarks is fewer than the deck.
+        let ordered: [Card]
+
+        switch settings.mode {
         case .random:
-            available.shuffled()
+            ordered = available.shuffled()
 
         case .inOrder:
-            available
+            ordered = available
 
         case .leastPracticed:
-            byProgress(available)
+            ordered = byProgress(available)
 
         case .leastPracticedShuffled:
             // Shuffled first, then ordered by progress: the shuffle decides
             // what happens within a group of equally practiced cards, which is
             // the only place it can without breaking the ordering.
-            byProgress(available.shuffled())
+            ordered = byProgress(available.shuffled())
+
+        case .bookmarked:
+            let bookmarked = available.filter(\.isBookmarked)
+
+            guard !bookmarked.isEmpty else {
+                var fallback = settings
+                fallback.mode = settings.resolvedBookmarkFallbackMode
+                return plan(from: available, settings: fallback)
+            }
+
+            ordered = bookmarked.shuffled()
         }
 
-        return Array(ordered.prefix(settings.cardCount(forDeckSize: available.count)))
+        return Array(ordered.prefix(settings.cardCount(forDeckSize: ordered.count)))
     }
 
     /// Least practiced first, preserving the incoming order within each level.

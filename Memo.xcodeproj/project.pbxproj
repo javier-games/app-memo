@@ -54,6 +54,8 @@
 		EDC333D9165F6B000105C95E /* AIImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F90851979099B89B02CD7A /* AIImportView.swift */; };
 		4283822301ED3D573CFBA3D0 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E4498A909F21F5E7EA5650 /* SettingsView.swift */; };
 		987545F8EE578C610EBBAC59 /* AIAssistedImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64570FBC942001B2BB90965B /* AIAssistedImportTests.swift */; };
+		CD195FB93298AE91BF698E3E /* DeckDefaultsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DB301C2A0449B7F7D3CD9CB /* DeckDefaultsSettingsView.swift */; };
+		2654AAFA099D68701ACB9726 /* BookmarkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67288C8A85AAFF01B0C04664 /* BookmarkTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -125,6 +127,8 @@
 		87F90851979099B89B02CD7A /* AIImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AIImportView.swift"; sourceTree = "<group>"; };
 		D0E4498A909F21F5E7EA5650 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView.swift"; sourceTree = "<group>"; };
 		64570FBC942001B2BB90965B /* AIAssistedImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AIAssistedImportTests.swift"; sourceTree = "<group>"; };
+		9DB301C2A0449B7F7D3CD9CB /* DeckDefaultsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeckDefaultsSettingsView.swift"; sourceTree = "<group>"; };
+		67288C8A85AAFF01B0C04664 /* BookmarkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BookmarkTests.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -175,6 +179,7 @@
 			isa = PBXGroup;
 			children = (
 				D05C2182AE53FB30E3B4D500 /* DeckTransferTests.swift */,
+				67288C8A85AAFF01B0C04664 /* BookmarkTests.swift */,
 				64570FBC942001B2BB90965B /* AIAssistedImportTests.swift */,
 				073A51012FC7992EEB1510CE /* CardPracticeProgressTests.swift */,
 				BCE7896AF372DD4AC9382622 /* PracticeSessionTests.swift */,
@@ -293,6 +298,7 @@
 			isa = PBXGroup;
 			children = (
 				D0E4498A909F21F5E7EA5650 /* SettingsView.swift */,
+				9DB301C2A0449B7F7D3CD9CB /* DeckDefaultsSettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -439,6 +445,7 @@
 				2CB22D86C20864DABF618784 /* AIDeckGenerator.swift in Sources */,
 				EDC333D9165F6B000105C95E /* AIImportView.swift in Sources */,
 				4283822301ED3D573CFBA3D0 /* SettingsView.swift in Sources */,
+				CD195FB93298AE91BF698E3E /* DeckDefaultsSettingsView.swift in Sources */,
 				AA3988DBD65BA5F25CF86764 /* DeckCSVFormat.swift in Sources */,
 				A04EC4DD20883DBC7E08D931 /* DeckTransferFormat.swift in Sources */,
 				A0479D4C85727FF7D4DF646C /* CardEditorView.swift in Sources */,
@@ -472,6 +479,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				75FED3B78920FDF5C57F2854 /* DeckTransferTests.swift in Sources */,
+				2654AAFA099D68701ACB9726 /* BookmarkTests.swift in Sources */,
 				987545F8EE578C610EBBAC59 /* AIAssistedImportTests.swift in Sources */,
 				411F05A4A5D6C72780B15CC0 /* CardPracticeProgressTests.swift in Sources */,
 				15A6689AB39D5CA3C1827F47 /* LegacyStoreImportTests.swift in Sources */,

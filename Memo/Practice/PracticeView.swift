@@ -134,12 +134,25 @@ struct PracticeView: View {
             CardEditorView(
                 title: "Edit Card",
                 saveTitle: "Save",
+                practiceTarget: settings.resolvedPracticeTarget,
                 draft: CardDraft(card: card)
             ) { draft in
                 draft.apply(to: card)
             }
         }
         .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    session.currentCard?.isBookmarked.toggle()
+                } label: {
+                    Label(
+                        isCurrentCardBookmarked ? "Remove Bookmark" : "Bookmark",
+                        systemImage: isCurrentCardBookmarked ? "bookmark.fill" : "bookmark"
+                    )
+                }
+                .disabled(session.currentCard == nil)
+            }
+
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     editingCard = session.currentCard
@@ -207,6 +220,12 @@ struct PracticeView: View {
         .frame(width: Self.cardSize.width, height: Self.cardSize.height)
         .background(deck.color)
         .foregroundStyle(deck.contrastingTextColor)
+    }
+
+    /// Bookmarking here changes later runs, not this one: the cards of a run
+    /// are settled when it starts.
+    private var isCurrentCardBookmarked: Bool {
+        session.currentCard?.isBookmarked ?? false
     }
 
     // MARK: - Card metrics
