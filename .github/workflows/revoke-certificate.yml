@@ -1,0 +1,41 @@
+name: Revoke Signing Certificate
+
+# Cleans up after a device build from the TestFlight workflow, which leaves its
+# distribution certificate and ad hoc profile in place. Apple allows only a few
+# distribution certificates per team, so leftovers eventually block new builds.
+on:
+  workflow_dispatch:
+    inputs:
+      certificate_id:
+        description: Certificate ID from the device build's run summary
+        type: string
+        required: true
+
+jobs:
+  revoke:
+    name: Revoke
+    runs-on: macos-26
+    timeout-minutes: 10
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      SIGNING_CERT_ID: ${{ inputs.certificate_id }}
+      FASTLANE_SKIP_UPDATE_CHECK: "1"
+      FASTLANE_HIDE_CHANGELOG: "1"
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Write the App Store Connect API key
+        env:
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+        run: |
+          echo "ASC_KEY_PATH=$RUNNER_TEMP/AuthKey.p8" >> "$GITHUB_ENV"
+          printf '%s\n' "$ASC_PRIVATE_KEY" > "$RUNNER_TEMP/AuthKey.p8"
+          chmod 600 "$RUNNER_TEMP/AuthKey.p8"
+
+      - name: Revoke the certificate and delete the profiles
+        run: fastlane remove_signing
+
+      - name: Remove the API key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/AuthKey.p8"

@@ -65,7 +65,7 @@ enum CloudSyncStatus: Equatable {
     static func current() async -> CloudSyncStatus {
         // The build switch is checked first, so a build without the
         // entitlements never reaches a CloudKit symbol at all.
-        guard AppConfiguration.isCloudSyncEnabled else {
+        guard AppConfiguration.isCloudSyncAvailable else {
             logger.info("iCloud sync is disabled in this build.")
             return .notConfigured("Sync is turned off in this build")
         }

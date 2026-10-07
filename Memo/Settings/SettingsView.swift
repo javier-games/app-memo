@@ -15,6 +15,10 @@ struct SettingsView: View {
 
         NavigationStack {
             Form {
+                if AppConfiguration.isCloudSyncAvailable {
+                    CloudSyncSettings()
+                }
+
                 AIToolsSettings()
             }
             .navigationTitle("Settings")
@@ -24,6 +28,25 @@ struct SettingsView: View {
                     Button("Done") { dismiss() }
                 }
             }
+        }
+    }
+}
+
+/// Says whether decks are reaching iCloud. There is nothing to switch: sync
+/// follows the iCloud account signed in on the device.
+private struct CloudSyncSettings: View {
+
+    @State private var status: CloudSyncStatus?
+
+    var body: some View {
+
+        Section {
+            LabeledContent("Status", value: status?.userDescription ?? "…")
+                .task { status = await CloudSyncStatus.current() }
+        } header: {
+            Text("iCloud")
+        } footer: {
+            Text("Your decks are kept the same on every device signed in to your iCloud account. Nobody else can see them.")
         }
     }
 }

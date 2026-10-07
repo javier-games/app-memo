@@ -48,7 +48,7 @@ enum MemoModelContainer {
 
     /// Creates the container used by the app.
     static func make() -> ModelContainer {
-        if AppConfiguration.isCloudSyncEnabled, let container = makeCloudKitContainer() {
+        if AppConfiguration.isCloudSyncAvailable, let container = makeCloudKitContainer() {
             mode = .cloudKitConfigured
             logger.info("Opened store with CloudKit configuration.")
             return container
@@ -56,7 +56,7 @@ enum MemoModelContainer {
 
         if let container = makeLocalContainer() {
             mode = .localOnly
-            if AppConfiguration.isCloudSyncEnabled {
+            if AppConfiguration.isCloudSyncAvailable {
                 logger.warning("CloudKit unavailable; opened local-only store.")
             } else {
                 logger.info("Sync disabled in this build; opened local-only store.")

@@ -7,6 +7,13 @@ default_platform(:ios)
 
 BUNDLE_ID = "games.javier.memo"
 PROFILE_NAME = "Memo CI"
+DEVICE_PROFILE_NAME = "Memo Device"
+
+# A build for one registered device, pointed at CloudKit's development
+# database. See the `destination` input of the TestFlight workflow.
+def device_build?
+  ENV["DESTINATION"] == "device"
+end
 
 def connect_api_key
   app_store_connect_api_key(
@@ -18,6 +25,10 @@ end
 
 lane :create_signing do
   connect_api_key
+
+  if device_build?
+    register_device(name: "Memo test device", udid: ENV.fetch("DEVICE_UDID"))
+  end
 
   cert(
     development: false,
@@ -34,7 +45,8 @@ lane :create_signing do
 
   sigh(
     app_identifier: BUNDLE_ID,
-    provisioning_name: PROFILE_NAME,
+    provisioning_name: device_build? ? DEVICE_PROFILE_NAME : PROFILE_NAME,
+    adhoc: device_build?,
     cert_id: cert_id,
     force: true,
     skip_install: true,
@@ -50,9 +62,11 @@ lane :remove_signing do
     filepath: ENV.fetch("ASC_KEY_PATH")
   )
 
-  Spaceship::ConnectAPI::Profile.all(filter: { name: PROFILE_NAME }).each do |profile|
-    profile.delete!
-    UI.message("Deleted profile #{profile.name}")
+  [PROFILE_NAME, DEVICE_PROFILE_NAME].each do |name|
+    Spaceship::ConnectAPI::Profile.all(filter: { name: name }).each do |profile|
+      profile.delete!
+      UI.message("Deleted profile #{profile.name}")
+    end
   end
 
   cert_id = ENV["SIGNING_CERT_ID"].to_s
