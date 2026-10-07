@@ -13,10 +13,9 @@ import OSLog
 /// choice made for every deck at once: the mode a deck with no bookmarks falls
 /// back to.
 ///
-/// `UserDefaults` is the right home for these: they are small, per-device
-/// preferences rather than user content. They are stored as one encoded value
-/// so adding a rule needs no new key and no migration — an older payload simply
-/// decodes with the new property at its default.
+/// Kept as one encoded value so adding a rule needs no new key and no
+/// migration — an older payload simply decodes with the new property at its
+/// default — and shared between the user's devices; see ``SettingsStorage``.
 @Observable
 final class PracticeSettingsStore {
 
@@ -27,7 +26,7 @@ final class PracticeSettingsStore {
         }
     }
 
-    @ObservationIgnored private let defaults: UserDefaults
+    @ObservationIgnored private let storage: SettingsStorage
 
     @ObservationIgnored
     private static let storageKey = "PracticeSettings"
@@ -38,9 +37,15 @@ final class PracticeSettingsStore {
         category: "PracticeSettings"
     )
 
-    init(defaults: UserDefaults = .standard) {
-        self.defaults = defaults
-        self.settings = Self.load(from: defaults)
+    init(defaults: UserDefaults = .standard, cloud: SettingsCloud? = nil) {
+        let storage = SettingsStorage(key: Self.storageKey, defaults: defaults, cloud: cloud)
+
+        self.storage = storage
+        self.settings = Self.decode(storage.load())
+
+        storage.onRemoteChange { [weak self] data in
+            self?.settings = Self.decode(data)
+        }
     }
 
     /// Restores every rule to its default.
@@ -48,8 +53,8 @@ final class PracticeSettingsStore {
         settings = .default
     }
 
-    private static func load(from defaults: UserDefaults) -> PracticeSettings {
-        guard let data = defaults.data(forKey: storageKey) else { return .default }
+    private static func decode(_ data: Data?) -> PracticeSettings {
+        guard let data else { return .default }
 
         do {
             return try JSONDecoder().decode(PracticeSettings.self, from: data)
@@ -63,7 +68,10 @@ final class PracticeSettingsStore {
 
     private func save() {
         do {
-            defaults.set(try JSONEncoder().encode(settings), forKey: Self.storageKey)
+            let encoder = JSONEncoder()
+            // Stable bytes, so the same settings are recognised as the same.
+            encoder.outputFormatting = .sortedKeys
+            storage.save(try encoder.encode(settings))
         } catch {
             Self.logger.error("Could not save practice settings: \(error.localizedDescription)")
         }

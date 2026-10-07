@@ -18,18 +18,25 @@ struct MemoApp: App {
     /// through the UI layer.
     private let modelContainer: ModelContainer
 
-    /// Practice rules live alongside the store rather than inside it: they are
-    /// per-device preferences, not user content, so they are not synced.
-    @State private var practiceSettings = PracticeSettingsStore()
+    /// The settings that are not a deck's own. Preferences rather than user
+    /// content, so they live beside the store, not in it, and reach the
+    /// user's other devices through iCloud's key-value store.
+    @State private var practiceSettings: PracticeSettingsStore
 
-    /// Which AI tool is connected, for AI-assisted import. Per-device for the
-    /// same reason, and because the key behind it never leaves the Keychain.
-    @State private var aiSettings = AISettingsStore()
+    /// Which AI tool is chosen, for AI-assisted import. Shared the same way;
+    /// the key behind it never leaves this device's Keychain.
+    @State private var aiSettings: AISettingsStore
 
     /// Created before the store, so no sync event is missed.
     @State private var syncMonitor = CloudSyncMonitor()
 
     init() {
+        let cloud: SettingsCloud? = AppConfiguration.isCloudSyncAvailable
+            ? UbiquitousSettingsCloud()
+            : nil
+        _practiceSettings = State(initialValue: PracticeSettingsStore(cloud: cloud))
+        _aiSettings = State(initialValue: AISettingsStore(cloud: cloud))
+
         let container = MemoModelContainer.make()
         LegacyStoreImport.runIfNeeded(in: container.mainContext)
         self.modelContainer = container

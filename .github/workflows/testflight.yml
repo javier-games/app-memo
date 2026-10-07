@@ -148,7 +148,7 @@ jobs:
           identity=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" | awk 'NR==1 {print $2}')
 
           # The app's own entitlements plus the ones every distribution build
-          # carries. Push is always production outside Xcode; the CloudKit
+          # carries, with the build variables Xcode would have filled in. Push is always production outside Xcode; the CloudKit
           # database depends on where the build is going.
           entitlements="$RUNNER_TEMP/Distribution.entitlements"
           cp Memo/Memo.entitlements "$entitlements"
@@ -160,6 +160,7 @@ jobs:
           fi
           /usr/libexec/PlistBuddy \
             -c "Set :aps-environment production" \
+            -c "Set :com.apple.developer.ubiquity-kvstore-identifier $APPLE_TEAM_ID.games.javier.memo" \
             -c "Add :com.apple.developer.icloud-container-environment string $cloudkit" \
             -c "Add :application-identifier string $APPLE_TEAM_ID.games.javier.memo" \
             -c "Add :com.apple.developer.team-identifier string $APPLE_TEAM_ID" \
