@@ -43,6 +43,17 @@
 		F491837A2B622B930051531F /* PracticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49183792B622B930051531F /* PracticeView.swift */; };
 		F4C1592D2B9DB3250035895F /* DeckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C1592C2B9DB3250035895F /* DeckView.swift */; };
 		F4C9E2722BBC08FC00CCB32E /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C9E2712BBC08FC00CCB32E /* CardView.swift */; };
+		BEFDDF9FF0714E9BFB4C84C3 /* AIProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61ABEF40E5B1B5248E56C294 /* AIProvider.swift */; };
+		67B29DE222F8E2222EC711F2 /* AIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A44B2D2CFA1FC73E47B438B2 /* AIClient.swift */; };
+		DE069960FD8F18B4E6388809 /* AIDeckPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A98B90C7C9BCF3BD24E5EFD /* AIDeckPrompt.swift */; };
+		EABA81C61565428680D49696 /* ClaudeClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75F3B9D4704D1268D90B724 /* ClaudeClient.swift */; };
+		8C5A34ED85C63B1A689845E3 /* OpenAIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C292EB71EB08CF6750E796DD /* OpenAIClient.swift */; };
+		311A49A3D89EB92C46C733BA /* SecretStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19FDD7547A655B44C799F4F1 /* SecretStore.swift */; };
+		04356E8B3B6EDEE4286FC7C5 /* AISettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE37D29DFE3E87D548A29EAC /* AISettingsStore.swift */; };
+		2CB22D86C20864DABF618784 /* AIDeckGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E401C754B233516330161F93 /* AIDeckGenerator.swift */; };
+		EDC333D9165F6B000105C95E /* AIImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F90851979099B89B02CD7A /* AIImportView.swift */; };
+		4283822301ED3D573CFBA3D0 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E4498A909F21F5E7EA5650 /* SettingsView.swift */; };
+		987545F8EE578C610EBBAC59 /* AIAssistedImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64570FBC942001B2BB90965B /* AIAssistedImportTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -103,6 +114,17 @@
 		F491838E2B622B950051531F /* MemoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MemoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4C1592C2B9DB3250035895F /* DeckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckView.swift; sourceTree = "<group>"; };
 		F4C9E2712BBC08FC00CCB32E /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
+		61ABEF40E5B1B5248E56C294 /* AIProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AIProvider.swift"; sourceTree = "<group>"; };
+		A44B2D2CFA1FC73E47B438B2 /* AIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AIClient.swift"; sourceTree = "<group>"; };
+		5A98B90C7C9BCF3BD24E5EFD /* AIDeckPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AIDeckPrompt.swift"; sourceTree = "<group>"; };
+		D75F3B9D4704D1268D90B724 /* ClaudeClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClaudeClient.swift"; sourceTree = "<group>"; };
+		C292EB71EB08CF6750E796DD /* OpenAIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "OpenAIClient.swift"; sourceTree = "<group>"; };
+		19FDD7547A655B44C799F4F1 /* SecretStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SecretStore.swift"; sourceTree = "<group>"; };
+		EE37D29DFE3E87D548A29EAC /* AISettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AISettingsStore.swift"; sourceTree = "<group>"; };
+		E401C754B233516330161F93 /* AIDeckGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AIDeckGenerator.swift"; sourceTree = "<group>"; };
+		87F90851979099B89B02CD7A /* AIImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AIImportView.swift"; sourceTree = "<group>"; };
+		D0E4498A909F21F5E7EA5650 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView.swift"; sourceTree = "<group>"; };
+		64570FBC942001B2BB90965B /* AIAssistedImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AIAssistedImportTests.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -153,6 +175,7 @@
 			isa = PBXGroup;
 			children = (
 				D05C2182AE53FB30E3B4D500 /* DeckTransferTests.swift */,
+				64570FBC942001B2BB90965B /* AIAssistedImportTests.swift */,
 				073A51012FC7992EEB1510CE /* CardPracticeProgressTests.swift */,
 				BCE7896AF372DD4AC9382622 /* PracticeSessionTests.swift */,
 				CACDFFC3B2C44B4B53080E43 /* PracticeSettingsTests.swift */,
@@ -232,6 +255,8 @@
 			children = (
 				38D198E6451FDCC727584A9A /* DeckEditorView.swift */,
 				9D13033938681367210A0106 /* Transfer */,
+				98B30011FD76E354F808B610 /* AI */,
+				DA611807EB61CA9BE0B68095 /* Settings */,
 				8FC2067B090D8C9278D50758 /* CardEditorView.swift */,
 				87857433467730D1440934B3 /* Assets.xcassets */,
 				735894202308D0E4D8B161AF /* Practice */,
@@ -246,6 +271,30 @@
 				F4C9E2712BBC08FC00CCB32E /* CardView.swift */,
 			);
 			path = Memo;
+			sourceTree = "<group>";
+		};
+		98B30011FD76E354F808B610 /* AI */ = {
+			isa = PBXGroup;
+			children = (
+				61ABEF40E5B1B5248E56C294 /* AIProvider.swift */,
+				A44B2D2CFA1FC73E47B438B2 /* AIClient.swift */,
+				5A98B90C7C9BCF3BD24E5EFD /* AIDeckPrompt.swift */,
+				D75F3B9D4704D1268D90B724 /* ClaudeClient.swift */,
+				C292EB71EB08CF6750E796DD /* OpenAIClient.swift */,
+				19FDD7547A655B44C799F4F1 /* SecretStore.swift */,
+				EE37D29DFE3E87D548A29EAC /* AISettingsStore.swift */,
+				E401C754B233516330161F93 /* AIDeckGenerator.swift */,
+				87F90851979099B89B02CD7A /* AIImportView.swift */,
+			);
+			path = AI;
+			sourceTree = "<group>";
+		};
+		DA611807EB61CA9BE0B68095 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				D0E4498A909F21F5E7EA5650 /* SettingsView.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -380,6 +429,16 @@
 				E6E73DEC4915BB2596461DB7 /* DeckEditorView.swift in Sources */,
 				6EB9C5C8D6E2CB8D41295675 /* DeckExporter.swift in Sources */,
 				AC18781D6AE2C10323E98859 /* DeckImporter.swift in Sources */,
+				BEFDDF9FF0714E9BFB4C84C3 /* AIProvider.swift in Sources */,
+				67B29DE222F8E2222EC711F2 /* AIClient.swift in Sources */,
+				DE069960FD8F18B4E6388809 /* AIDeckPrompt.swift in Sources */,
+				EABA81C61565428680D49696 /* ClaudeClient.swift in Sources */,
+				8C5A34ED85C63B1A689845E3 /* OpenAIClient.swift in Sources */,
+				311A49A3D89EB92C46C733BA /* SecretStore.swift in Sources */,
+				04356E8B3B6EDEE4286FC7C5 /* AISettingsStore.swift in Sources */,
+				2CB22D86C20864DABF618784 /* AIDeckGenerator.swift in Sources */,
+				EDC333D9165F6B000105C95E /* AIImportView.swift in Sources */,
+				4283822301ED3D573CFBA3D0 /* SettingsView.swift in Sources */,
 				AA3988DBD65BA5F25CF86764 /* DeckCSVFormat.swift in Sources */,
 				A04EC4DD20883DBC7E08D931 /* DeckTransferFormat.swift in Sources */,
 				A0479D4C85727FF7D4DF646C /* CardEditorView.swift in Sources */,
@@ -413,6 +472,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				75FED3B78920FDF5C57F2854 /* DeckTransferTests.swift in Sources */,
+				987545F8EE578C610EBBAC59 /* AIAssistedImportTests.swift in Sources */,
 				411F05A4A5D6C72780B15CC0 /* CardPracticeProgressTests.swift in Sources */,
 				15A6689AB39D5CA3C1827F47 /* LegacyStoreImportTests.swift in Sources */,
 				6D2FE8E061B9F24F5E7BEEBB /* SortIndexedTests.swift in Sources */,
