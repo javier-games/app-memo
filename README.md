@@ -172,10 +172,14 @@ refused, not trimmed.
 
 ## iCloud Sync
 
-Decks are stored in SwiftData and replicated across your devices through
-CloudKit, in the private database of the iCloud account signed in on the
-device. With no account signed in the app works entirely on-device and starts
-syncing once one is.
+Decks are stored in SwiftData, on the device. Sync is **off by default**: turn
+on **Sync with iCloud** in Settings to replicate your decks across your devices
+through CloudKit, in the private database of the iCloud account signed in on
+the device. The switch takes effect the next time the app is opened, because a
+store cannot change how it is backed while it is in use.
+
+Turning sync on uploads the decks already on the device. Turning it off stops
+replicating and leaves the decks where they are, on the device and in iCloud.
 
 The data model has the shape CloudKit requires: a default on every property,
 optional relationships with inverses, no unique constraints, explicit sort
@@ -183,7 +187,8 @@ indices.
 
 ### What sync depends on
 
-1. `isCloudSyncEnabled` is `true` in `Memo/Shared/AppConfiguration.swift`.
+1. `isCloudSyncAvailable` is `true` in `Memo/Shared/AppConfiguration.swift`.
+   This says the build *can* sync; whether it does is the user's switch.
 2. The **Memo** target is signed with `Memo/Memo.entitlements` (iCloud with
    CloudKit and the container `iCloud.com.javier.memo`, plus Push
    Notifications) and declares the remote-notification background mode. The
@@ -196,14 +201,14 @@ indices.
    will not sign.
 4. The CloudKit schema is deployed to production; see below.
 
-Only `MemoModelContainer` and `CloudSyncStatus` branch on the flag.
+With the flag `false` the Settings switch is hidden and the app stays on-device.
 
 ### Checking whether sync is working
 
 Sync needs two devices signed in to the *same* iCloud account, and is not
 instant. Filter Console on the subsystem matching the target's bundle
 identifier (the app derives it from there); the app reports its store mode and
-account status at launch. With an account signed in:
+account status at launch. With sync on and an account signed in:
 
 ```
 [<bundle-id>:Persistence] Opened store with CloudKit configuration.
@@ -222,8 +227,8 @@ App Store builds only ever use production. The record types are created in the
 development schema the first time a development build saves a deck and a card
 while signed in to iCloud. They then have to be copied across with **Deploy
 Schema Changes** in the [CloudKit Console](https://icloud.developer.apple.com).
-Until that is done, a TestFlight build keeps working on-device but syncs
-nothing.
+Until that is done, a TestFlight build with sync turned on keeps working
+on-device but replicates nothing.
 
 ## Project Structure
 

@@ -28,6 +28,10 @@ enum CloudSyncStatus: Equatable {
     /// Status could not be determined — usually offline.
     case unknown
 
+    /// The store was opened without sync: the user has it turned off, or
+    /// turned it on since the app started.
+    case off
+
     /// The app is not provisioned for CloudKit, so sync can never run.
     case notConfigured(String)
 
@@ -40,6 +44,7 @@ enum CloudSyncStatus: Equatable {
         case .noAccount:            "Sign in to iCloud to sync your decks"
         case .restricted:           "iCloud is restricted on this device"
         case .unknown:              "Can't reach iCloud right now"
+        case .off:                  "iCloud sync is off"
         case .notConfigured:        "iCloud sync isn't set up for this build"
         }
     }
@@ -65,9 +70,16 @@ enum CloudSyncStatus: Equatable {
     static func current() async -> CloudSyncStatus {
         // The build switch is checked first, so a build without the
         // entitlements never reaches a CloudKit symbol at all.
-        guard AppConfiguration.isCloudSyncEnabled else {
+        guard AppConfiguration.isCloudSyncAvailable else {
             logger.info("iCloud sync is disabled in this build.")
             return .notConfigured("Sync is turned off in this build")
+        }
+
+        // Asked of the store that is open, not of the preference: the two
+        // differ between flipping the switch and the next launch.
+        guard MemoModelContainer.isCloudConfigured else {
+            logger.info("iCloud sync is off.")
+            return .off
         }
 
         // Deliberately answered without touching CloudKit when no account is
