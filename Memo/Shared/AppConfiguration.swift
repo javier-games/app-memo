@@ -10,30 +10,20 @@ enum AppConfiguration {
 
     /// Whether the app replicates decks through CloudKit.
     ///
-    /// Currently `false`, because CloudKit requires a paid Apple Developer
-    /// Program membership. A free personal team cannot provision the iCloud or
-    /// Push Notifications capabilities, so a build carrying those entitlements
-    /// fails to sign at all.
+    /// Needs three things outside this file, or the app quietly stays
+    /// on-device:
     ///
-    /// Everything sync needs is still in place — the models keep the shape
-    /// CloudKit requires (defaults on every property, optional relationships
-    /// with inverses, no unique constraints, explicit sort indices), so turning
-    /// this on later needs no migration and no model changes.
+    /// 1. The **Memo** target signed with `Memo/Memo.entitlements` (iCloud with
+    ///    CloudKit and the container `iCloud.com.javier.memo`, plus Push
+    ///    Notifications) and the remote-notification background mode.
+    /// 2. An App ID in the developer portal with those capabilities and that
+    ///    container, which takes a paid Apple Developer Program membership.
+    /// 3. The CloudKit schema deployed to production; see the README.
     ///
-    /// To enable, once a paid membership is available:
-    ///
-    /// 1. Set this to `true`.
-    /// 2. In the **Memo** target → **Signing & Capabilities**, add **iCloud**
-    ///    with **CloudKit** ticked and the container
-    ///    `iCloud.com.javier.memo`, plus **Background Modes → Remote
-    ///    notifications** and **Push Notifications**. That restores
-    ///    `CODE_SIGN_ENTITLEMENTS = Memo/Memo.entitlements`, which is still in
-    ///    the repository and still correct.
-    ///
-    /// Until both are done the app runs entirely on-device. Nothing else in the
-    /// codebase branches on this beyond ``MemoModelContainer`` and
-    /// ``CloudSyncStatus``.
-    static let isCloudSyncEnabled = false
+    /// Turning this off needs no migration: the store is the same file either
+    /// way. Nothing else in the codebase branches on this beyond
+    /// ``MemoModelContainer`` and ``CloudSyncStatus``.
+    static let isCloudSyncEnabled = true
 
     /// Subsystem used for all `Logger` instances.
     ///

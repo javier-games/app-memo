@@ -100,22 +100,26 @@ jobs:
             -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" > /dev/null
           identity=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" | awk 'NR==1 {print $2}')
 
-          cat > "$RUNNER_TEMP/Distribution.entitlements" <<EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>application-identifier</key>
-            <string>$APPLE_TEAM_ID.games.javier.memo</string>
-            <key>com.apple.developer.team-identifier</key>
-            <string>$APPLE_TEAM_ID</string>
-            <key>beta-reports-active</key>
-            <true/>
-            <key>get-task-allow</key>
-            <false/>
-          </dict>
-          </plist>
-          EOF
+          # The app's own entitlements, switched from development to
+          # production, plus the ones Xcode adds to every App Store build.
+          entitlements="$RUNNER_TEMP/Distribution.entitlements"
+          cp Memo/Memo.entitlements "$entitlements"
+          /usr/libexec/PlistBuddy \
+            -c "Set :aps-environment production" \
+            -c "Add :com.apple.developer.icloud-container-environment string Production" \
+            -c "Add :application-identifier string $APPLE_TEAM_ID.games.javier.memo" \
+            -c "Add :com.apple.developer.team-identifier string $APPLE_TEAM_ID" \
+            -c "Add :beta-reports-active bool true" \
+            -c "Add :get-task-allow bool false" \
+            "$entitlements"
+
+          # A profile only carries what the App ID has switched on. Signing
+          # with more than that produces a build App Store Connect rejects.
+          if ! security cms -D -i "$SIGNING_DIR/Memo.mobileprovision" \
+              | grep -q "com.apple.developer.icloud-services"; then
+            echo "::error::The App ID games.javier.memo does not have iCloud enabled in the developer portal."
+            exit 1
+          fi
 
           cp "$SIGNING_DIR/Memo.mobileprovision" "$app/embedded.mobileprovision"
           if [ -d "$app/Frameworks" ]; then
@@ -123,7 +127,7 @@ jobs:
               -exec codesign --force --sign "$identity" --keychain "$KEYCHAIN_PATH" {} \;
           fi
           codesign --force --sign "$identity" --keychain "$KEYCHAIN_PATH" \
-            --entitlements "$RUNNER_TEMP/Distribution.entitlements" \
+            --entitlements "$entitlements" \
             --generate-entitlement-der \
             -r="designated => anchor apple generic and identifier \"games.javier.memo\" and certificate leaf[subject.OU] = \"$APPLE_TEAM_ID\" and certificate 1[field.1.2.840.113635.100.6.2.1] exists" \
             "$app"

@@ -170,31 +170,31 @@ which charges your API account for every request, separately from any Claude or
 ChatGPT subscription. Settings and the import screen both say so. Text files are limited to 1 MB and PDFs to 20 MB; a larger file is
 refused, not trimmed.
 
-## iCloud Sync (built, currently turned off)
+## iCloud Sync
 
-Decks are stored in SwiftData. The app is written to replicate them across your
-devices through CloudKit, but **sync is disabled in this build** because
-CloudKit needs a paid Apple Developer Program membership — a free personal team
-cannot provision the iCloud or Push Notifications capabilities, and a build
-carrying those entitlements will not sign at all.
+Decks are stored in SwiftData and replicated across your devices through
+CloudKit, in the private database of the iCloud account signed in on the
+device. With no account signed in the app works entirely on-device and starts
+syncing once one is.
 
-With sync off the app runs entirely on-device. Nothing is missing or stubbed:
-the data model already has the shape CloudKit requires (a default on every
-property, optional relationships with inverses, no unique constraints, explicit
-sort indices), so turning sync on later needs no migration and no model changes.
+The data model has the shape CloudKit requires: a default on every property,
+optional relationships with inverses, no unique constraints, explicit sort
+indices.
 
-### Turning it on
+### What sync depends on
 
-1. Set `isCloudSyncEnabled` to `true` in `Memo/Shared/AppConfiguration.swift`.
-2. In the **Memo** target → **Signing & Capabilities**, add:
-   - **iCloud**, with **CloudKit** ticked and the container
-     `iCloud.com.javier.memo` (press **+** to create it if absent). It must
-     match `Memo/Memo.entitlements`, which is still in the repository and still
-     correct. The container identifier is independent of the bundle
-     identifier and should not be changed to follow it — adding the capability restores the
-     `CODE_SIGN_ENTITLEMENTS` build setting that points at it.
-   - **Background Modes** → **Remote notifications**.
-   - **Push Notifications**.
+1. `isCloudSyncEnabled` is `true` in `Memo/Shared/AppConfiguration.swift`.
+2. The **Memo** target is signed with `Memo/Memo.entitlements` (iCloud with
+   CloudKit and the container `iCloud.com.javier.memo`, plus Push
+   Notifications) and declares the remote-notification background mode. The
+   container identifier is independent of the bundle identifier and should not
+   be changed to follow it.
+3. In the Apple developer portal, the App ID has **iCloud** (with that
+   container assigned) and **Push Notifications** enabled. This needs a paid
+   Apple Developer Program membership; with a free personal team, set the flag
+   to `false` and remove `CODE_SIGN_ENTITLEMENTS` from the target, or the build
+   will not sign.
+4. The CloudKit schema is deployed to production; see below.
 
 Only `MemoModelContainer` and `CloudSyncStatus` branch on the flag.
 
@@ -203,14 +203,7 @@ Only `MemoModelContainer` and `CloudSyncStatus` branch on the flag.
 Sync needs two devices signed in to the *same* iCloud account, and is not
 instant. Filter Console on the subsystem matching the target's bundle
 identifier (the app derives it from there); the app reports its store mode and
-account status at launch:
-
-```
-[<bundle-id>:Persistence] Sync disabled in this build; opened local-only store.
-[<bundle-id>:Sync] iCloud sync is disabled in this build.
-```
-
-With sync enabled and an account signed in those become:
+account status at launch. With an account signed in:
 
 ```
 [<bundle-id>:Persistence] Opened store with CloudKit configuration.
@@ -222,11 +215,15 @@ CloudKit-backed store even with no entitlement and no account and simply never
 replicates — the `Sync` line is the one that tells you whether replication can
 actually happen.
 
-### Before releasing with sync on
+### The CloudKit schema
 
-CloudKit keeps separate development and production schemas. Deploy the schema to
-production in the [CloudKit Console](https://icloud.developer.apple.com) before
-shipping, or synced devices will find no records.
+CloudKit keeps separate development and production schemas, and TestFlight and
+App Store builds only ever use production. The record types are created in the
+development schema the first time a development build saves a deck and a card
+while signed in to iCloud. They then have to be copied across with **Deploy
+Schema Changes** in the [CloudKit Console](https://icloud.developer.apple.com).
+Until that is done, a TestFlight build keeps working on-device but syncs
+nothing.
 
 ## Project Structure
 
