@@ -83,15 +83,31 @@ struct PracticeView: View {
             )
             .onAppear(perform: showCard)
 
-            if hasHintForVisibleFace {
+            // Under the card rather than in the navigation bar: it acts on the
+            // card in front of you, and up there it sat next to Edit, away
+            // from everything else you do with a card.
+            HStack(spacing: 12) {
                 Button {
-                    showHint.toggle()
+                    session.currentCard?.isBookmarked.toggle()
                 } label: {
-                    Label("Show hint", systemImage: "questionmark.circle")
+                    Label(
+                        isCurrentCardBookmarked ? "Bookmarked" : "Bookmark",
+                        systemImage: isCurrentCardBookmarked ? "bookmark.fill" : "bookmark"
+                    )
                 }
-                .buttonStyle(.bordered)
-                .padding(.top, 32)
+                .tint(isCurrentCardBookmarked ? .orange : nil)
+                .disabled(session.currentCard == nil)
+
+                if hasHintForVisibleFace {
+                    Button {
+                        showHint.toggle()
+                    } label: {
+                        Label("Show hint", systemImage: "questionmark.circle")
+                    }
+                }
             }
+            .buttonStyle(.bordered)
+            .padding(.top, 32)
 
             Spacer()
 
@@ -141,18 +157,6 @@ struct PracticeView: View {
             }
         }
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    session.currentCard?.isBookmarked.toggle()
-                } label: {
-                    Label(
-                        isCurrentCardBookmarked ? "Remove Bookmark" : "Bookmark",
-                        systemImage: isCurrentCardBookmarked ? "bookmark.fill" : "bookmark"
-                    )
-                }
-                .disabled(session.currentCard == nil)
-            }
-
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     editingCard = session.currentCard

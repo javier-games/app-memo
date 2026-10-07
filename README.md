@@ -92,7 +92,7 @@ unordered form.
 ### Bookmarks
 
 Bookmark a card by swiping it to the right in the deck, with the **Bookmarked**
-switch in the card editor, or with the bookmark button while practising it.
+switch in the card editor, or with the **Bookmark** button under the card while practising it.
 **Bookmarked** mode then deals only those cards. A deck with no bookmarks is
 practised in another mode instead, **Random** unless you pick a different one
 under **Settings → Decks → When a Deck Has No Bookmarks**; that choice applies to every deck.
