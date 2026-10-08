@@ -351,6 +351,14 @@ final class DeckDraftTests: XCTestCase {
         XCTAssertTrue(draft.isValid)
     }
 
+    func testTheIconFieldKeepsOnlyTheLastCharacterTyped() {
+        XCTAssertEqual(EmojiTextField.icon(afterTyping: "🥩"), "🥩")
+        XCTAssertEqual(EmojiTextField.icon(afterTyping: "🥩😀"), "😀")
+        // One emoji, however many code points it is built from.
+        XCTAssertEqual(EmojiTextField.icon(afterTyping: "👩🏽‍🍳"), "👩🏽‍🍳")
+        XCTAssertEqual(EmojiTextField.icon(afterTyping: ""), "", "deleting clears it")
+    }
+
     func testANewDraftSuggestsAnIcon() {
         XCTAssertFalse(DeckDraft().icon.isEmpty, "a new deck should never be iconless")
     }
