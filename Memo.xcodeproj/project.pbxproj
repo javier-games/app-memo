@@ -67,7 +67,7 @@
 		60752B7396FB36EC326B7C3B /* RepositorySettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61127F7ED641AA7CAA38206D /* RepositorySettingsStore.swift */; };
 		C6460198886E19E1EEBDC633 /* RepositorySync.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EC1BCC0DCC7AF43D2BA4A6 /* RepositorySync.swift */; };
 		CCA727CD906FEF45F22D1D3E /* RepositorySyncView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80B085E329B1114FCA3698FC /* RepositorySyncView.swift */; };
-		4B895D2EE0904CD60F6BBF98 /* RepositorySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A7B43A7CBB143C75EA82DEC /* RepositorySettingsView.swift */; };
+		4B895D2EE0904CD60F6BBF98 /* SyncSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A7B43A7CBB143C75EA82DEC /* SyncSettingsView.swift */; };
 		0CFC3F08AABAB9A50E5A8182 /* RepositorySyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E22AEBEFD80E57E1794B80A7 /* RepositorySyncTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -153,7 +153,7 @@
 		61127F7ED641AA7CAA38206D /* RepositorySettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RepositorySettingsStore.swift"; sourceTree = "<group>"; };
 		E1EC1BCC0DCC7AF43D2BA4A6 /* RepositorySync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RepositorySync.swift"; sourceTree = "<group>"; };
 		80B085E329B1114FCA3698FC /* RepositorySyncView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RepositorySyncView.swift"; sourceTree = "<group>"; };
-		6A7B43A7CBB143C75EA82DEC /* RepositorySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RepositorySettingsView.swift"; sourceTree = "<group>"; };
+		6A7B43A7CBB143C75EA82DEC /* SyncSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SyncSettingsView.swift"; sourceTree = "<group>"; };
 		E22AEBEFD80E57E1794B80A7 /* RepositorySyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RepositorySyncTests.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -333,7 +333,7 @@
 			isa = PBXGroup;
 			children = (
 				D0E4498A909F21F5E7EA5650 /* SettingsView.swift */,
-				6A7B43A7CBB143C75EA82DEC /* RepositorySettingsView.swift */,
+				6A7B43A7CBB143C75EA82DEC /* SyncSettingsView.swift */,
 				9DB301C2A0449B7F7D3CD9CB /* DecksSettingsView.swift */,
 			);
 			path = Settings;
@@ -482,7 +482,7 @@
 				E6E73DEC4915BB2596461DB7 /* DeckEditorView.swift in Sources */,
 				6EB9C5C8D6E2CB8D41295675 /* DeckExporter.swift in Sources */,
 				AC18781D6AE2C10323E98859 /* DeckImporter.swift in Sources */,
-				4B895D2EE0904CD60F6BBF98 /* RepositorySettingsView.swift in Sources */,
+				4B895D2EE0904CD60F6BBF98 /* SyncSettingsView.swift in Sources */,
 				CCA727CD906FEF45F22D1D3E /* RepositorySyncView.swift in Sources */,
 				C6460198886E19E1EEBDC633 /* RepositorySync.swift in Sources */,
 				60752B7396FB36EC326B7C3B /* RepositorySettingsStore.swift in Sources */,
