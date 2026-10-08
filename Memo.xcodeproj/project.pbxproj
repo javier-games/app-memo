@@ -63,6 +63,12 @@
 		5217242A5FAAFCA1BF72CE68 /* DeckImportPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7E3C6CDBCF596C67FD4B498 /* DeckImportPlan.swift */; };
 		1A07347B9365EF31CAACD60C /* ImportReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E99A15A61F481A85DEFFFA70 /* ImportReviewView.swift */; };
 		8C2E6EE8DAF39F068FE34EDB /* DeckImportPlanTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA16643F361C5B8EA09D8B3 /* DeckImportPlanTests.swift */; };
+		0DFDB7BBCDBD6B26E4E75519 /* GitHubClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB73BA60F68F1CCDA971202 /* GitHubClient.swift */; };
+		60752B7396FB36EC326B7C3B /* RepositorySettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61127F7ED641AA7CAA38206D /* RepositorySettingsStore.swift */; };
+		C6460198886E19E1EEBDC633 /* RepositorySync.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EC1BCC0DCC7AF43D2BA4A6 /* RepositorySync.swift */; };
+		CCA727CD906FEF45F22D1D3E /* RepositorySyncView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80B085E329B1114FCA3698FC /* RepositorySyncView.swift */; };
+		4B895D2EE0904CD60F6BBF98 /* RepositorySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A7B43A7CBB143C75EA82DEC /* RepositorySettingsView.swift */; };
+		0CFC3F08AABAB9A50E5A8182 /* RepositorySyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E22AEBEFD80E57E1794B80A7 /* RepositorySyncTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -143,6 +149,12 @@
 		F7E3C6CDBCF596C67FD4B498 /* DeckImportPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeckImportPlan.swift"; sourceTree = "<group>"; };
 		E99A15A61F481A85DEFFFA70 /* ImportReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ImportReviewView.swift"; sourceTree = "<group>"; };
 		4CA16643F361C5B8EA09D8B3 /* DeckImportPlanTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeckImportPlanTests.swift"; sourceTree = "<group>"; };
+		0EB73BA60F68F1CCDA971202 /* GitHubClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GitHubClient.swift"; sourceTree = "<group>"; };
+		61127F7ED641AA7CAA38206D /* RepositorySettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RepositorySettingsStore.swift"; sourceTree = "<group>"; };
+		E1EC1BCC0DCC7AF43D2BA4A6 /* RepositorySync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RepositorySync.swift"; sourceTree = "<group>"; };
+		80B085E329B1114FCA3698FC /* RepositorySyncView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RepositorySyncView.swift"; sourceTree = "<group>"; };
+		6A7B43A7CBB143C75EA82DEC /* RepositorySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RepositorySettingsView.swift"; sourceTree = "<group>"; };
+		E22AEBEFD80E57E1794B80A7 /* RepositorySyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RepositorySyncTests.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -195,6 +207,7 @@
 			isa = PBXGroup;
 			children = (
 				D05C2182AE53FB30E3B4D500 /* DeckTransferTests.swift */,
+				E22AEBEFD80E57E1794B80A7 /* RepositorySyncTests.swift */,
 				E2E45FF985F8468B80EEF8AF /* SettingsStorageTests.swift */,
 				4CA16643F361C5B8EA09D8B3 /* DeckImportPlanTests.swift */,
 				A294EF4B43CC79C0D72D273B /* CloudSyncActivityTests.swift */,
@@ -281,6 +294,7 @@
 			children = (
 				38D198E6451FDCC727584A9A /* DeckEditorView.swift */,
 				9D13033938681367210A0106 /* Transfer */,
+				595CC55D75B9FD5C06B84FCC /* Repository */,
 				98B30011FD76E354F808B610 /* AI */,
 				DA611807EB61CA9BE0B68095 /* Settings */,
 				8FC2067B090D8C9278D50758 /* CardEditorView.swift */,
@@ -319,9 +333,21 @@
 			isa = PBXGroup;
 			children = (
 				D0E4498A909F21F5E7EA5650 /* SettingsView.swift */,
+				6A7B43A7CBB143C75EA82DEC /* RepositorySettingsView.swift */,
 				9DB301C2A0449B7F7D3CD9CB /* DecksSettingsView.swift */,
 			);
 			path = Settings;
+			sourceTree = "<group>";
+		};
+		595CC55D75B9FD5C06B84FCC /* Repository */ = {
+			isa = PBXGroup;
+			children = (
+				0EB73BA60F68F1CCDA971202 /* GitHubClient.swift */,
+				61127F7ED641AA7CAA38206D /* RepositorySettingsStore.swift */,
+				E1EC1BCC0DCC7AF43D2BA4A6 /* RepositorySync.swift */,
+				80B085E329B1114FCA3698FC /* RepositorySyncView.swift */,
+			);
+			path = Repository;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -456,6 +482,11 @@
 				E6E73DEC4915BB2596461DB7 /* DeckEditorView.swift in Sources */,
 				6EB9C5C8D6E2CB8D41295675 /* DeckExporter.swift in Sources */,
 				AC18781D6AE2C10323E98859 /* DeckImporter.swift in Sources */,
+				4B895D2EE0904CD60F6BBF98 /* RepositorySettingsView.swift in Sources */,
+				CCA727CD906FEF45F22D1D3E /* RepositorySyncView.swift in Sources */,
+				C6460198886E19E1EEBDC633 /* RepositorySync.swift in Sources */,
+				60752B7396FB36EC326B7C3B /* RepositorySettingsStore.swift in Sources */,
+				0DFDB7BBCDBD6B26E4E75519 /* GitHubClient.swift in Sources */,
 				1A07347B9365EF31CAACD60C /* ImportReviewView.swift in Sources */,
 				5217242A5FAAFCA1BF72CE68 /* DeckImportPlan.swift in Sources */,
 				BEFDDF9FF0714E9BFB4C84C3 /* AIProvider.swift in Sources */,
@@ -504,6 +535,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				75FED3B78920FDF5C57F2854 /* DeckTransferTests.swift in Sources */,
+				0CFC3F08AABAB9A50E5A8182 /* RepositorySyncTests.swift in Sources */,
 				8DA371F06B7CF0668C45FE6B /* SettingsStorageTests.swift in Sources */,
 				8C2E6EE8DAF39F068FE34EDB /* DeckImportPlanTests.swift in Sources */,
 				4F0EF0097C3BC6877931D7F3 /* CloudSyncActivityTests.swift in Sources */,

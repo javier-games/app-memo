@@ -23,6 +23,7 @@ Designed to enhance your learning experience by using customizable flash cards. 
 - **Bookmarks**: Mark the cards you want to come back to and practise only those.
 - **Progress per Card**: Each card counts consecutive correct answers towards a target. A wrong answer sends it back to zero, so the count reflects what you currently know rather than what you once did.
 - **Import and Export Decks**: Import decks from the **Add** menu on the deck list, and share a deck from the **share** button at the top of it. Both work in JSON and CSV. **Settings → Decks → Export All Decks** puts every deck in one JSON file. A JSON file exported from Memo can be imported again to update the decks it came from.
+- **Repository Sync**: Keep decks in a GitHub repository and push or pull the ones you pick. See [Repository Sync](#repository-sync).
 - **AI-Assisted Import**: Turn a text file or a PDF into a deck with Claude or ChatGPT, using your own API key. See [AI-Assisted Import](#ai-assisted-import).
 - **Reorder**: Long-press and drag to rearrange decks or cards. Card order is what the *In Order* practice mode deals.
 - **Flexible Study**: Perfect for language learning, memorizing trivia, studying for exams, or any topic that benefits from flash cards.
@@ -211,6 +212,38 @@ which charges your API account for every request, separately from any Claude or
 ChatGPT subscription. Settings and the import screen both say so. Text files are limited to 1 MB and PDFs to 20 MB; a larger file is
 refused, not trimmed.
 
+## Repository Sync
+
+Decks can be kept in a GitHub repository and pushed or pulled when you choose.
+This is separate from iCloud: iCloud keeps your own devices the same without
+being asked, while a repository is a copy you update on purpose, can edit by
+hand, and can share.
+
+1. In **Settings → Repository**, tap **Sign In with GitHub**. Memo shows a
+   code; you enter it on github.com and approve. Memo never sees your password,
+   and the access it is given stays in this device's Keychain.
+2. Choose the repository. An empty one is set up the first time it is opened.
+3. Choose the layout with **One File for All Decks**: on, every deck lives in
+   `Memo Decks.json`; off, each deck has a file of its own, named after it.
+4. The **Repository** button on the deck list then compares the two sides.
+   Each deck is one of: not in the repository yet, not on this device, up to
+   date, or different. Tick the ones you want and tap **Pull** or **Push**.
+
+Pulling goes through the same review as importing a file, so an edit of yours
+is never replaced without being shown first. Pushing writes your version; if
+the repository changed since it was read, the push is refused and you are asked
+to refresh.
+
+Decks are matched by the `id` inside the files, not by file name, so files can
+be renamed in the repository. A deck found in more than one file is reported
+and left alone until one copy is removed, since there is no telling which is
+the right one. Practice progress, bookmarks and practice options are never
+pushed.
+
+The feature appears only in a build with `gitHubClientID` set in
+`Memo/Shared/AppConfiguration.swift`: the client ID of a GitHub OAuth app with
+the device flow enabled.
+
 ## iCloud Sync
 
 Decks are stored in SwiftData and replicated across your devices through
@@ -283,6 +316,7 @@ Memo/
 ├── Models/       Deck and Card, the SwiftData models
 ├── Persistence/  the store, its CloudKit configuration, the one-time migration
 ├── Practice/     the practice rules, the session, and the screens that use them
+├── Repository/   GitHub sign-in, and the rules for pushing and pulling decks
 ├── Settings/     the app-wide settings: decks, the AI connection, iCloud status
 ├── Transfer/     the JSON and CSV file formats, import and export
 └── Shared/       small pieces used in more than one place

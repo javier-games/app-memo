@@ -27,6 +27,14 @@ struct SettingsView: View {
                     } label: {
                         Label("AI Connection", systemImage: "sparkles")
                     }
+
+                    if AppConfiguration.isRepositorySyncAvailable {
+                        NavigationLink {
+                            RepositorySettingsView()
+                        } label: {
+                            Label("Repository", systemImage: "arrow.triangle.branch")
+                        }
+                    }
                 }
 
                 if AppConfiguration.isCloudSyncAvailable {
