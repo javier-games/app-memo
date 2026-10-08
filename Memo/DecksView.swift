@@ -13,12 +13,14 @@ struct DecksView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Environment(AISettingsStore.self) private var ai
+    @Environment(RepositorySettingsStore.self) private var repository
 
     @Query(sort: [SortDescriptor(\Deck.sortIndex), SortDescriptor(\Deck.createdAt)])
     private var decks: [Deck]
 
     @State private var isPresentingAddDeck = false
     @State private var isPresentingSettings = false
+    @State private var isPresentingRepository = false
 
     /// Non-nil while the AI-assisted import sheet is up.
     @State private var aiImportKind: AIImportKind?
@@ -102,6 +104,18 @@ struct DecksView: View {
             }
             .navigationTitle("Decks")
             .toolbar {
+                // Only once there is somewhere to sync to; setting that up is
+                // in Settings.
+                if repository.isReady {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            isPresentingRepository = true
+                        } label: {
+                            Label("Repository", systemImage: "arrow.triangle.2.circlepath")
+                        }
+                    }
+                }
+
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         isPresentingSettings = true
@@ -109,6 +123,9 @@ struct DecksView: View {
                         Label("Settings", systemImage: "gearshape")
                     }
                 }
+            }
+            .sheet(isPresented: $isPresentingRepository) {
+                RepositorySyncView()
             }
             .sheet(isPresented: $isPresentingSettings) {
                 SettingsView()
@@ -245,4 +262,7 @@ struct DeckRow: View {
             defaults: UserDefaults(suiteName: "preview.ai.settings")!
         ))
         .environment(CloudSyncMonitor())
+        .environment(RepositorySettingsStore(
+            defaults: UserDefaults(suiteName: "preview.repository.settings")!
+        ))
 }

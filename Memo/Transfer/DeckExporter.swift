@@ -29,11 +29,15 @@ enum DeckExporter {
     }
 
     static func jsonData(for decks: [Deck]) throws -> Data {
+        try jsonData(for: transferFile(for: decks))
+    }
+
+    static func jsonData(for file: DeckTransferFile) throws -> Data {
         let encoder = JSONEncoder()
         // Readable, stable, and without the escaped slashes and \uXXXX that
         // would mangle the emoji and accents these decks are full of.
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
-        return try encoder.encode(transferFile(for: decks))
+        return try encoder.encode(file)
     }
 
     static func jsonData(for deck: Deck) throws -> Data {

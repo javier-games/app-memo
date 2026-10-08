@@ -24,6 +24,16 @@ enum AppConfiguration {
     /// Set it to `false` for a build that cannot be signed that way.
     static let isCloudSyncAvailable = true
 
+    /// The client ID of the GitHub OAuth app that signs users in for
+    /// repository sync, with its device flow enabled.
+    ///
+    /// Not a secret: the device flow uses no client secret, and the ID alone
+    /// grants nothing. Empty hides the feature, which is right for a build
+    /// with no app registered.
+    static let gitHubClientID = ""
+
+    static var isRepositorySyncAvailable: Bool { !gitHubClientID.isEmpty }
+
     /// Subsystem used for all `Logger` instances.
     ///
     /// Derived from the bundle identifier rather than hardcoded, so it follows

@@ -27,6 +27,10 @@ struct MemoApp: App {
     /// the key behind it never leaves this device's Keychain.
     @State private var aiSettings: AISettingsStore
 
+    /// Where decks are pushed to and pulled from, if anywhere. Shared like
+    /// the other settings; the GitHub token stays in this device's Keychain.
+    @State private var repositorySettings: RepositorySettingsStore
+
     /// Created before the store, so no sync event is missed.
     @State private var syncMonitor = CloudSyncMonitor()
 
@@ -36,6 +40,7 @@ struct MemoApp: App {
             : nil
         _practiceSettings = State(initialValue: PracticeSettingsStore(cloud: cloud))
         _aiSettings = State(initialValue: AISettingsStore(cloud: cloud))
+        _repositorySettings = State(initialValue: RepositorySettingsStore(cloud: cloud))
 
         let container = MemoModelContainer.make()
         LegacyStoreImport.runIfNeeded(in: container.mainContext)
@@ -47,6 +52,7 @@ struct MemoApp: App {
             DecksView()
                 .environment(practiceSettings)
                 .environment(aiSettings)
+                .environment(repositorySettings)
                 .environment(syncMonitor)
                 .task {
                     // Logged at launch so "my decks didn't sync" is
