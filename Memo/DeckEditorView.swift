@@ -27,9 +27,18 @@ struct DeckDraft {
     }
 
     func apply(to deck: Deck) {
+        let before = DeckTransferDeck(details: deck)
+
         deck.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
         deck.icon = icon
         deck.setColor(color)
+
+        // Compared in the form a file stores, so reopening the editor and
+        // saving without touching anything does not count as an edit.
+        let after = DeckTransferDeck(details: deck)
+        if (before.name, before.icon, before.color) != (after.name, after.icon, after.color) {
+            deck.modifiedAt = Date()
+        }
     }
 
     /// A starting suggestion, so a new deck is never iconless.

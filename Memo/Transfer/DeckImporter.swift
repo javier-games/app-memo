@@ -52,6 +52,8 @@ enum DeckImporter {
         case unreadable(String)
         case malformed(String)
         case nothingToImport
+        /// A failure in one of several files, so the message can say which.
+        case inFile(name: String, reason: String)
 
         var errorDescription: String? {
             switch self {
@@ -61,6 +63,8 @@ enum DeckImporter {
                 String(localized: "The file is not in a format Memo understands. \(reason)")
             case .nothingToImport:
                 String(localized: "That file contains no cards to import.")
+            case .inFile(let name, let reason):
+                "\(name): \(reason)"
             }
         }
     }
@@ -98,6 +102,47 @@ enum DeckImporter {
     }
 
     // MARK: - Previewing
+
+    /// A file's name and contents, read but not yet parsed.
+    struct SourceFile {
+        var name: String
+        var data: Data
+    }
+
+    static func readFiles(at urls: [URL]) throws -> [SourceFile] {
+        try urls.map { url in
+            do {
+                return SourceFile(name: url.lastPathComponent, data: try read(contentsOf: url))
+            } catch {
+                throw Failure.inFile(name: url.lastPathComponent, reason: error.localizedDescription)
+            }
+        }
+    }
+
+    /// Parses several files into one preview.
+    ///
+    /// All or nothing: one unusable file stops the import and is named, since
+    /// carrying on would leave the user unsure which of their files went in.
+    static func preview(files: [SourceFile], kind: DeckTransferKind) throws -> Preview {
+        var combined = Preview(decks: [], skippedCardCount: 0)
+
+        for file in files {
+            do {
+                let preview = try preview(
+                    data: file.data,
+                    kind: kind,
+                    // CSV has nowhere to put a deck name, so the file supplies it.
+                    fallbackDeckName: (file.name as NSString).deletingPathExtension
+                )
+                combined.decks += preview.decks
+                combined.skippedCardCount += preview.skippedCardCount
+            } catch let error where files.count > 1 {
+                throw Failure.inFile(name: file.name, reason: error.localizedDescription)
+            }
+        }
+
+        return combined
+    }
 
     static func preview(
         data: Data,
@@ -151,50 +196,99 @@ enum DeckImporter {
 
     // MARK: - Inserting
 
-    /// Appends the previewed decks to the library.
+    /// Adds the previewed decks to the library as new decks, whatever
+    /// identifiers the file carries.
     ///
-    /// Import only ever adds. The documented file format carries no identifier,
-    /// so there is no sound way to tell "the same deck again" from "a different
-    /// deck with the same name" — and guessing wrong would overwrite something
-    /// the user still wanted. New decks are appended after the existing ones.
+    /// The plain "add" used for files with nothing to match against, and for
+    /// decks an AI wrote. A file that may update decks already in the library
+    /// goes through ``plan(_:against:)`` instead.
     @discardableResult
     static func insert(
         _ preview: Preview,
         into context: ModelContext,
         after existingDeckCount: Int
     ) -> [Deck] {
-        preview.decks.enumerated().map { offset, transferDeck in
-            let deck = Deck(
-                name: transferDeck.name.isEmpty
-                    ? String(localized: "Imported Deck")
-                    : transferDeck.name,
-                icon: transferDeck.icon.isEmpty ? defaultIcon : transferDeck.icon,
-                sortIndex: existingDeckCount + offset
+        var takenIDs = existingIDs(in: context)
+
+        return preview.decks.enumerated().map { offset, transferDeck in
+            insert(
+                transferDeck,
+                sortIndex: existingDeckCount + offset,
+                takenIDs: &takenIDs,
+                into: context
             )
-
-            let color = DeckTransferColor.components(from: transferDeck.color)
-            deck.colorRed = color.red
-            deck.colorGreen = color.green
-            deck.colorBlue = color.blue
-            deck.colorAlpha = color.alpha
-
-            context.insert(deck)
-
-            for (cardIndex, transferCard) in transferDeck.cardList.enumerated() {
-                let card = Card(
-                    frontText: transferCard.frontText,
-                    backText: transferCard.backText,
-                    frontHintText: transferCard.frontHintText,
-                    backHintText: transferCard.backHintText,
-                    sortIndex: cardIndex,
-                    practiceProgress: max(0, transferCard.practiceProgress ?? 0)
-                )
-                context.insert(card)
-                card.deck = deck
-            }
-
-            return deck
         }
+    }
+
+    /// Inserts one deck with its cards.
+    ///
+    /// The file's identifiers are kept, so the same file imported later is
+    /// recognised — unless something in the library already has one of them,
+    /// in which case that deck or card gets a fresh one. Two things sharing an
+    /// identifier would make every later match ambiguous.
+    static func insert(
+        _ transferDeck: DeckTransferDeck,
+        sortIndex: Int,
+        takenIDs: inout Set<UUID>,
+        into context: ModelContext
+    ) -> Deck {
+        let deck = Deck(
+            uuid: claim(transferDeck.uuid, in: &takenIDs),
+            name: transferDeck.name.isEmpty
+                ? String(localized: "Imported Deck")
+                : transferDeck.name,
+            icon: transferDeck.icon.isEmpty ? defaultIcon : transferDeck.icon,
+            sortIndex: sortIndex,
+            modifiedAt: transferDeck.modifiedDate ?? Date()
+        )
+
+        let color = DeckTransferColor.components(from: transferDeck.color)
+        deck.colorRed = color.red
+        deck.colorGreen = color.green
+        deck.colorBlue = color.blue
+        deck.colorAlpha = color.alpha
+
+        context.insert(deck)
+
+        for (cardIndex, transferCard) in transferDeck.cardList.enumerated() {
+            let card = makeCard(from: transferCard, sortIndex: cardIndex, takenIDs: &takenIDs)
+            context.insert(card)
+            card.deck = deck
+        }
+
+        return deck
+    }
+
+    static func makeCard(
+        from transferCard: DeckTransferCard,
+        sortIndex: Int,
+        takenIDs: inout Set<UUID>
+    ) -> Card {
+        Card(
+            uuid: claim(transferCard.uuid, in: &takenIDs),
+            frontText: transferCard.frontText,
+            backText: transferCard.backText,
+            frontHintText: transferCard.frontHintText,
+            backHintText: transferCard.backHintText,
+            sortIndex: sortIndex,
+            modifiedAt: transferCard.modifiedDate ?? Date(),
+            practiceProgress: max(0, transferCard.practiceProgress ?? 0)
+        )
+    }
+
+    /// Every deck and card identifier already in the store.
+    static func existingIDs(in context: ModelContext) -> Set<UUID> {
+        let decks = (try? context.fetch(FetchDescriptor<Deck>())) ?? []
+        let cards = (try? context.fetch(FetchDescriptor<Card>())) ?? []
+        return Set(decks.map(\.uuid)).union(cards.map(\.uuid))
+    }
+
+    /// `wanted` if it is free, otherwise a new identifier; either way marked
+    /// as taken.
+    private static func claim(_ wanted: UUID?, in takenIDs: inout Set<UUID>) -> UUID {
+        let id = wanted.flatMap { takenIDs.contains($0) ? nil : $0 } ?? UUID()
+        takenIDs.insert(id)
+        return id
     }
 
     /// Used when a file gives no icon of its own.

@@ -60,6 +60,9 @@
 		4F0EF0097C3BC6877931D7F3 /* CloudSyncActivityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A294EF4B43CC79C0D72D273B /* CloudSyncActivityTests.swift */; };
 		02FE10FD53E2E6CAD6720621 /* SettingsStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE20F880FC064FA26874E4BF /* SettingsStorage.swift */; };
 		8DA371F06B7CF0668C45FE6B /* SettingsStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2E45FF985F8468B80EEF8AF /* SettingsStorageTests.swift */; };
+		5217242A5FAAFCA1BF72CE68 /* DeckImportPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7E3C6CDBCF596C67FD4B498 /* DeckImportPlan.swift */; };
+		1A07347B9365EF31CAACD60C /* ImportReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E99A15A61F481A85DEFFFA70 /* ImportReviewView.swift */; };
+		8C2E6EE8DAF39F068FE34EDB /* DeckImportPlanTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA16643F361C5B8EA09D8B3 /* DeckImportPlanTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -137,6 +140,9 @@
 		A294EF4B43CC79C0D72D273B /* CloudSyncActivityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CloudSyncActivityTests.swift"; sourceTree = "<group>"; };
 		DE20F880FC064FA26874E4BF /* SettingsStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsStorage.swift"; sourceTree = "<group>"; };
 		E2E45FF985F8468B80EEF8AF /* SettingsStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsStorageTests.swift"; sourceTree = "<group>"; };
+		F7E3C6CDBCF596C67FD4B498 /* DeckImportPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeckImportPlan.swift"; sourceTree = "<group>"; };
+		E99A15A61F481A85DEFFFA70 /* ImportReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ImportReviewView.swift"; sourceTree = "<group>"; };
+		4CA16643F361C5B8EA09D8B3 /* DeckImportPlanTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeckImportPlanTests.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,6 +176,8 @@
 				89903CBD36787EB75C82B396 /* DeckTransferFormat.swift */,
 				3323348FE7108D16A54E1D56 /* DeckCSVFormat.swift */,
 				495041363AA400C41DF8D836 /* DeckImporter.swift */,
+				E99A15A61F481A85DEFFFA70 /* ImportReviewView.swift */,
+				F7E3C6CDBCF596C67FD4B498 /* DeckImportPlan.swift */,
 				06E5E5C55257B9702C3D24CD /* DeckExporter.swift */,
 			);
 			path = Transfer;
@@ -188,6 +196,7 @@
 			children = (
 				D05C2182AE53FB30E3B4D500 /* DeckTransferTests.swift */,
 				E2E45FF985F8468B80EEF8AF /* SettingsStorageTests.swift */,
+				4CA16643F361C5B8EA09D8B3 /* DeckImportPlanTests.swift */,
 				A294EF4B43CC79C0D72D273B /* CloudSyncActivityTests.swift */,
 				67288C8A85AAFF01B0C04664 /* BookmarkTests.swift */,
 				64570FBC942001B2BB90965B /* AIAssistedImportTests.swift */,
@@ -447,6 +456,8 @@
 				E6E73DEC4915BB2596461DB7 /* DeckEditorView.swift in Sources */,
 				6EB9C5C8D6E2CB8D41295675 /* DeckExporter.swift in Sources */,
 				AC18781D6AE2C10323E98859 /* DeckImporter.swift in Sources */,
+				1A07347B9365EF31CAACD60C /* ImportReviewView.swift in Sources */,
+				5217242A5FAAFCA1BF72CE68 /* DeckImportPlan.swift in Sources */,
 				BEFDDF9FF0714E9BFB4C84C3 /* AIProvider.swift in Sources */,
 				67B29DE222F8E2222EC711F2 /* AIClient.swift in Sources */,
 				DE069960FD8F18B4E6388809 /* AIDeckPrompt.swift in Sources */,
@@ -494,6 +505,7 @@
 			files = (
 				75FED3B78920FDF5C57F2854 /* DeckTransferTests.swift in Sources */,
 				8DA371F06B7CF0668C45FE6B /* SettingsStorageTests.swift in Sources */,
+				8C2E6EE8DAF39F068FE34EDB /* DeckImportPlanTests.swift in Sources */,
 				4F0EF0097C3BC6877931D7F3 /* CloudSyncActivityTests.swift in Sources */,
 				2654AAFA099D68701ACB9726 /* BookmarkTests.swift in Sources */,
 				987545F8EE578C610EBBAC59 /* AIAssistedImportTests.swift in Sources */,

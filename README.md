@@ -22,7 +22,7 @@ Designed to enhance your learning experience by using customizable flash cards. 
 - **Practice Options**: Five modes to practise in, an inverse mode that flips which side asks the question, and a limit so you can drill part of a deck. Each deck has its own. See [Practice Options](#practice-options).
 - **Bookmarks**: Mark the cards you want to come back to and practise only those.
 - **Progress per Card**: Each card counts consecutive correct answers towards a target. A wrong answer sends it back to zero, so the count reflects what you currently know rather than what you once did.
-- **Import and Export Decks**: Import decks from the **Add** menu on the deck list, and share a deck from the **share** button at the top of it. Both work in JSON and CSV.
+- **Import and Export Decks**: Import decks from the **Add** menu on the deck list, and share a deck from the **share** button at the top of it. Both work in JSON and CSV. **Settings → Decks → Export All Decks** puts every deck in one JSON file. A JSON file exported from Memo can be imported again to update the decks it came from.
 - **AI-Assisted Import**: Turn a text file or a PDF into a deck with Claude or ChatGPT, using your own API key. See [AI-Assisted Import](#ai-assisted-import).
 - **Reorder**: Long-press and drag to rearrange decks or cards. Card order is what the *In Order* practice mode deals.
 - **Flexible Study**: Perfect for language learning, memorizing trivia, studying for exams, or any topic that benefits from flash cards.
@@ -56,7 +56,7 @@ Designed to enhance your learning experience by using customizable flash cards. 
 6. **Edit a Deck**: Tap the **pencil** button at the top of a deck to change its name, icon or colour.
 7. **Edit a Card**: Tap it in the deck, or tap the **pencil** button while practising to fix the card in front of you.
 8. **Reorder**: Long-press a deck or a card and drag.
-9. **Import Decks**: On the deck list, tap **Add** and choose **JSON** or **CSV**. Memo shows what the file contains before anything is added, and importing only ever adds — nothing already in your library is changed.
+9. **Import Decks**: On the deck list, tap **Add** and choose **JSON** or **CSV**. Pick one file or several. Memo shows what they would add and change before anything is written, and asks about anything that conflicts with an edit of yours — see [Importing a file again](#importing-a-file-again).
 10. **Export a Deck**: Open a deck and tap the **share** button at the top, then choose **JSON** or **CSV**.
 
 ## Practice Options
@@ -72,6 +72,7 @@ in progress.
 | **Mode** | Random | The order cards are dealt in — see below. |
 | **Cards** | All | Practise a slice of the deck rather than all of it. Stored as "no limit" rather than a number, so it keeps meaning across decks of different sizes. |
 | **Practice Target** | 10 | Correct answers a card needs before it counts as learned. **0** turns progress tracking off entirely, without discarding progress already recorded. |
+| **After a Wrong Answer** | Keep Progress | What a wrong answer does to a card's progress — see [Progress](#progress). |
 
 ### Modes
 
@@ -99,8 +100,11 @@ under **Settings → Decks → When a Deck Has No Bookmarks**; that choice appli
 
 ### Progress
 
-A card's progress goes up by one for each correct answer and back to zero after
-a wrong one, up to the Practice Target. The deck list shows each card's standing
+A card's progress goes up by one for each correct answer, up to the Practice
+Target. What a wrong answer does is the deck's **After a Wrong Answer** option:
+**Keep Progress** (the default) changes nothing, **Lose One** takes one correct
+answer back, and **Back to Zero** starts the card again. The deck list shows
+each card's standing
 — grey while short of the target, green once reached. If you have already
 practised a card elsewhere, you can set its count by hand in the card editor.
 
@@ -112,11 +116,15 @@ Decks are exported to JSON in the following structure:
 {
   "deckList": [
     {
+      "id": "6F1C2B3A-9D4E-4F5A-8B6C-7D8E9F0A1B2C",
+      "modifiedAt": "2026-10-08T09:30:00.000Z",
       "name": "Food",
       "icon": "🥩",
       "color": "253,251,102,255",
       "cardList": [
         {
+          "id": "0A1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D",
+          "modifiedAt": "2026-10-08T09:30:00.000Z",
           "frontText": "Tea",
           "frontHintText": "",
           "backText": "お茶",
@@ -136,7 +144,28 @@ Decks are exported to JSON in the following structure:
 
 Everything except `cardList` is optional, so a hand-written file needs only what
 you care about. Cards with no front or no back are skipped, and the import
-summary says how many were left out.
+summary says how many were left out. A file may hold any number of decks, and
+several files can be picked at once.
+
+### Importing a file again
+
+`id` and `modifiedAt` are what make a file an update rather than a copy. Memo
+writes both on export; a file without them always imports as new decks.
+
+A deck whose `id` matches one in your library updates that deck:
+
+- Cards in the file that the deck does not have are added.
+- A card that differs, where the file's `modifiedAt` is newer, is updated.
+- A card that differs, where the file is **not** newer, is a conflict: you
+  changed it here after the file was made, or the file was edited without its
+  date being moved. Memo shows your version and the file's side by side and
+  asks. **Overwrite** takes the file's, **Don't Apply** keeps yours; the rest
+  of the import goes ahead either way.
+- The deck's own name, icon and colour are compared the same way.
+- Nothing is ever deleted: a card missing from the file stays.
+
+Practice progress and bookmarks are not in the file and are never changed by an
+import.
 
 ### CSV
 
@@ -174,7 +203,8 @@ so a key is the only way to connect.
 
 The model is asked to answer in the JSON format above, and its answer goes
 through the same importer as a file you picked yourself, so the same rules
-apply: cards with no front or no back are skipped, and import only ever adds.
+apply: cards with no front or no back are skipped, and the decks always arrive
+as new ones.
 
 **Using this costs money.** The file is sent to the service you connected,
 which charges your API account for every request, separately from any Claude or
