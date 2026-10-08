@@ -111,7 +111,9 @@ answer back, and **Back to Zero** starts the card again.
 During a run you can overrule this for a single card by **holding** a button:
 holding **correct** offers **Mark as Learned**, which takes the card straight
 to the target, and holding **incorrect** offers the two wrong-answer behaviours
-the deck is not set to. The deck list shows each card's standing
+the deck is not set to. Where an option would change nothing — the card is
+already at zero, already at the target, or the deck's target is 0 — the menu
+says so instead. The deck list shows each card's standing
 — grey while short of the target, green once reached. If you have already
 practised a card elsewhere, you can set its count by hand in the card editor.
 

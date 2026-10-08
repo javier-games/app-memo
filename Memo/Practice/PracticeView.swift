@@ -129,6 +129,7 @@ struct PracticeView: View {
                     buttonColor: .red,
                     isEnabled: hasBeenFlipped,
                     held: incorrectAlternatives,
+                    heldNote: incorrectNote,
                     action: { finishCard(.incorrect) }
                 )
 
@@ -138,6 +139,7 @@ struct PracticeView: View {
                     buttonColor: .green,
                     isEnabled: hasBeenFlipped,
                     held: correctAlternatives,
+                    heldNote: correctNote,
                     action: { finishCard(.correct) }
                 )
 
@@ -256,8 +258,26 @@ struct PracticeView: View {
     /// With tracking off there is no progress for any of these to change.
     private var tracksProgress: Bool { settings.resolvedPracticeTarget > 0 }
 
+    private var currentProgress: Int {
+        max(0, session.currentCard?.practiceProgress ?? 0)
+    }
+
+    /// Said in place of options that would change nothing, so holding a
+    /// button always answers with something and never looks broken.
+    private var trackingOffNote: String {
+        String(localized: "Progress is off for this deck: its practice target is 0.")
+    }
+
+    private var correctNote: String? {
+        guard tracksProgress else { return trackingOffNote }
+
+        return currentProgress >= settings.resolvedPracticeTarget
+            ? String(localized: "This card has already reached the target.")
+            : nil
+    }
+
     private var correctAlternatives: [CircleButtonView.HeldAction] {
-        guard tracksProgress else { return [] }
+        guard correctNote == nil else { return [] }
 
         return [
             CircleButtonView.HeldAction(
@@ -269,8 +289,17 @@ struct PracticeView: View {
         ]
     }
 
+    /// At zero every wrong-answer behaviour comes to the same thing.
+    private var incorrectNote: String? {
+        guard tracksProgress else { return trackingOffNote }
+
+        return currentProgress == 0
+            ? String(localized: "This card's progress is already zero.")
+            : nil
+    }
+
     private var incorrectAlternatives: [CircleButtonView.HeldAction] {
-        guard tracksProgress else { return [] }
+        guard incorrectNote == nil else { return [] }
 
         return settings.errorPenalty.alternatives.map { penalty in
             CircleButtonView.HeldAction(title: penalty.title, systemImage: penalty.systemImage) {
@@ -425,14 +454,23 @@ struct CircleButtonView: View {
     /// still does the button's own action.
     var held: [HeldAction] = []
 
+    /// Shown in that menu when there is nothing to offer, to say why.
+    var heldNote: String?
+
     let action: () -> Void
 
     var body: some View {
         Group {
-            if held.isEmpty {
+            if held.isEmpty, heldNote == nil {
                 Button(action: action) { face }
             } else {
                 Menu {
+                    if let heldNote {
+                        // Plain text in a menu is shown as a line that cannot
+                        // be chosen.
+                        Text(heldNote)
+                    }
+
                     ForEach(held) { item in
                         Button(action: item.action) {
                             Label(item.title, systemImage: item.systemImage)
