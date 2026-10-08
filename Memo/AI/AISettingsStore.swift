@@ -6,8 +6,9 @@
 import Foundation
 import OSLog
 
-/// The AI preferences that are safe to keep in `UserDefaults`. The API keys
-/// are not here; see ``SecretStore``.
+/// The AI preferences that are safe to keep in `UserDefaults` and to share
+/// between the user's devices. The API keys are not here, and are never
+/// shared: see ``SecretStore``.
 struct AISettings: Codable, Equatable {
 
     /// The tool AI-assisted import uses. None until the user picks one: the
@@ -37,7 +38,7 @@ final class AISettingsStore {
     /// Mirrors which keys are in the Keychain, which cannot be observed.
     private(set) var connectedProviders: Set<AIProvider>
 
-    @ObservationIgnored private let defaults: UserDefaults
+    @ObservationIgnored private let storage: SettingsStorage
     @ObservationIgnored private let secrets: SecretStore
 
     @ObservationIgnored
@@ -51,14 +52,23 @@ final class AISettingsStore {
 
     init(
         defaults: UserDefaults = .standard,
-        secrets: SecretStore = KeychainSecretStore()
+        secrets: SecretStore = KeychainSecretStore(),
+        cloud: SettingsCloud? = nil
     ) {
-        self.defaults = defaults
+        let storage = SettingsStorage(key: Self.storageKey, defaults: defaults, cloud: cloud)
+
+        self.storage = storage
         self.secrets = secrets
-        self.settings = Self.load(from: defaults)
+        self.settings = Self.decode(storage.load())
         self.connectedProviders = Set(
             AIProvider.allCases.filter { secrets.secret(for: $0.rawValue) != nil }
         )
+
+        // Another device choosing an assistant chooses it here too. Whether it
+        // is connected here is still this device's own key.
+        storage.onRemoteChange { [weak self] data in
+            self?.settings = Self.decode(data)
+        }
     }
 
     /// Whether the selected tool can be used right now.
@@ -119,8 +129,8 @@ final class AISettingsStore {
         settings.selectedModels[provider.rawValue] = nil
     }
 
-    private static func load(from defaults: UserDefaults) -> AISettings {
-        guard let data = defaults.data(forKey: storageKey) else { return .default }
+    private static func decode(_ data: Data?) -> AISettings {
+        guard let data else { return .default }
 
         do {
             return try JSONDecoder().decode(AISettings.self, from: data)
@@ -132,7 +142,10 @@ final class AISettingsStore {
 
     private func save() {
         do {
-            defaults.set(try JSONEncoder().encode(settings), forKey: Self.storageKey)
+            let encoder = JSONEncoder()
+            // Stable bytes, so the same settings are recognised as the same.
+            encoder.outputFormatting = .sortedKeys
+            storage.save(try encoder.encode(settings))
         } catch {
             Self.logger.error("Could not save AI settings: \(error.localizedDescription)")
         }

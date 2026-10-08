@@ -220,6 +220,13 @@ sync, and with none they stay on the device until one is. Settings shows the
 account, whether a sync is running, when the last one finished, and the error
 if it failed.
 
+Settings follow you as well. A deck's practice options, bookmarks and card
+progress are part of the decks and sync with them. The app-wide settings — the
+mode used for a deck with no bookmarks, and which AI assistant and model are
+chosen — travel through iCloud's key-value store. The one thing that never
+leaves a device is the AI API key, which stays in that device's Keychain, so
+each device connects with its own.
+
 The data model has the shape CloudKit requires: a default on every property,
 optional relationships with inverses, no unique constraints, explicit sort
 indices.
@@ -228,8 +235,8 @@ indices.
 
 1. `isCloudSyncAvailable` is `true` in `Memo/Shared/AppConfiguration.swift`.
 2. The **Memo** target is signed with `Memo/Memo.entitlements` (iCloud with
-   CloudKit and the container `iCloud.com.javier.memo`, plus Push
-   Notifications) and declares the remote-notification background mode. The
+   CloudKit, key-value storage and the container `iCloud.com.javier.memo`,
+   plus Push Notifications) and declares the remote-notification background mode. The
    container identifier is independent of the bundle identifier and should not
    be changed to follow it.
 3. In the Apple developer portal, the App ID has **iCloud** (with that
