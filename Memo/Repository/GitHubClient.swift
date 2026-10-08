@@ -134,7 +134,18 @@ struct GitHubClient: GitHubFiles {
                 "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
             ])
 
-            switch Self.pollResult(from: try await Self.send(request)) {
+            let answer: Data
+            do {
+                answer = try await Self.send(request)
+            } catch GitHubFailure.network {
+                // Approving means leaving for the browser, and iOS suspends
+                // the app while it is away: a poll caught mid-flight comes
+                // back as a lost connection. That says nothing about the
+                // sign-in, so the next poll simply asks again.
+                continue
+            }
+
+            switch Self.pollResult(from: answer) {
             case .token(let token): return token
             case .pending:          continue
             case .slowDown:         interval += 5
