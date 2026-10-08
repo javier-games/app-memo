@@ -30,7 +30,7 @@ enum AppConfiguration {
     /// Not a secret: the device flow uses no client secret, and the ID alone
     /// grants nothing. Empty hides the feature, which is right for a build
     /// with no app registered.
-    static let gitHubClientID = ""
+    static let gitHubClientID = "Ov23liAgja0kCB6FH7x0"
 
     static var isRepositorySyncAvailable: Bool { !gitHubClientID.isEmpty }
 
