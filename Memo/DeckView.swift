@@ -213,7 +213,7 @@ struct DeckView: View {
     // MARK: - Searching
 
     /// The matches only. Choosing one goes back to the whole deck with that
-    /// card in view, where it can be opened, moved or swiped like any other.
+    /// card in view, then opens it.
     @ViewBuilder
     private func searchResults(proxy: ScrollViewProxy) -> some View {
         let matches = CardSearch.cards(in: cards, matching: query)
@@ -231,8 +231,8 @@ struct DeckView: View {
         }
     }
 
-    /// Ends the search, scrolls the deck to `card` and lights its row for a
-    /// moment.
+    /// Ends the search, scrolls the deck to `card`, lights its row for a
+    /// moment, and then opens it for editing.
     private func reveal(_ card: Card, with proxy: ScrollViewProxy) {
         searchText = ""
         isSearching = false
@@ -249,7 +249,11 @@ struct DeckView: View {
                 highlightedCardID = card.uuid
             }
 
-            try? await Task.sleep(for: .seconds(1.5))
+            // Long enough to see where the card sits in the deck before the
+            // editor covers it.
+            try? await Task.sleep(for: .seconds(0.9))
+
+            presentedSheet = .edit(card)
 
             withAnimation(.easeOut(duration: 0.6)) {
                 highlightedCardID = nil
