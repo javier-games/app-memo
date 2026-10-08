@@ -19,10 +19,15 @@ struct PracticeOptionsSections: View {
     /// no limit to offer.
     let deckCardCount: Int?
 
+    /// A heading for the group, where these sit among other settings.
+    var title: LocalizedStringKey?
+
     var body: some View {
 
         Section {
             Toggle("Inverse", isOn: $settings.isInverted)
+        } header: {
+            if let title { Text(title) }
         } footer: {
             Text("Show the other side of the card first, and answer with the side you normally see.")
         }
@@ -128,71 +133,4 @@ struct PracticeOptionsSections: View {
             ? String(localized: "Progress is not recorded for any card.")
             : String(localized: "Correct answers a card needs before it counts as learned. \(settings.errorPenalty.explanation)")
     }
-}
-
-/// One deck's practice options.
-///
-/// A deck starts on the standard options and keeps whatever is changed here
-/// for itself. Nothing here affects any other deck.
-struct PracticeSettingsView: View {
-
-    @Environment(PracticeSettingsStore.self) private var store
-    @Environment(\.dismiss) private var dismiss
-
-    let deck: Deck
-
-    var body: some View {
-
-        NavigationStack {
-            Form {
-
-                PracticeOptionsSections(
-                    settings: settingsBinding,
-                    deckCardCount: deck.practisableCards.count
-                )
-
-                Section {
-                    Button("Reset to Defaults", role: .destructive) {
-                        deck.practiceSettings = nil
-                    }
-                    .disabled(deck.practiceSettings == nil)
-                } footer: {
-                    Text("These options belong to this deck only.")
-                }
-            }
-            .navigationTitle("Practice Options")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
-                }
-            }
-        }
-    }
-
-    private var bookmarkFallback: PracticeMode {
-        store.settings.bookmarkFallbackMode
-    }
-
-    /// Options that end up equal to the standard ones are not stored, so a
-    /// deck nobody has customised carries nothing.
-    private var settingsBinding: Binding<PracticeSettings> {
-        Binding(
-            get: { deck.resolvedPracticeSettings(bookmarkFallback: bookmarkFallback) },
-            set: { newValue in
-                var standard = PracticeSettings.default
-                standard.bookmarkFallbackMode = newValue.bookmarkFallbackMode
-                deck.practiceSettings = newValue == standard ? nil : newValue
-            }
-        )
-    }
-}
-
-#Preview {
-    let container = PreviewData.container()
-    return PracticeSettingsView(deck: PreviewData.sampleDeck(in: container))
-        .modelContainer(container)
-        .environment(PracticeSettingsStore(
-            defaults: UserDefaults(suiteName: "preview.practice.settings")!
-        ))
 }

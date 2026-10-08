@@ -85,6 +85,8 @@ extension Deck {
 
     var cardCount: Int { cards?.count ?? 0 }
 
+    var isEmpty: Bool { cardCount == 0 }
+
     var hasBookmarkedCards: Bool {
         (cards ?? []).contains(where: \.isBookmarked)
     }

@@ -9,6 +9,13 @@ import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
 
+/// Where the deck list can navigate to: a deck, optionally with one of its
+/// cards to point out on arrival.
+struct DeckRoute: Hashable {
+    var deckID: UUID
+    var cardID: UUID?
+}
+
 struct DecksView: View {
 
     @Environment(\.modelContext) private var modelContext
@@ -35,74 +42,40 @@ struct DecksView: View {
     @State private var pendingImport: DeckImportPlan?
     @State private var importError: String?
 
+    /// Held here so a search result can open a deck, which a link in a row
+    /// cannot do for something that is not a row.
+    @State private var path: [DeckRoute] = []
+
+    @State private var searchText = ""
+    @State private var isSearching = false
+
+    private var query: String { CardSearch.normalized(searchText) }
+
     var body: some View {
 
-        NavigationStack {
+        NavigationStack(path: $path) {
 
             List {
-
-                Section {
-                    ForEach(decks) { deck in
-                        DeckRow(deck: deck)
-                    }
-                    .onDelete(perform: deleteDecks)
-                    .onMove(perform: moveDecks)
-                } header: {
-                    if decks.isEmpty {
-                        Text("Memo looks quite empty uh? Try adding some decks.")
-                    } else {
-                        Spacer()
-                    }
-                }
-
-                Menu {
-                    Button {
-                        isPresentingAddDeck = true
-                    } label: {
-                        Label("New Deck", systemImage: "square.and.pencil")
-                    }
-
-                    Section("Import") {
-                        ForEach(DeckTransferKind.allCases) { kind in
-                            Button {
-                                requestedKind = kind
-                                pickingKind = kind
-                            } label: {
-                                Label(kind.title, systemImage: kind.menuIcon)
-                            }
-                        }
-                    }
-
-                    Section("AI Assisted") {
-                        if ai.isConnected {
-                            ForEach(AIImportKind.allCases) { kind in
-                                Button {
-                                    aiImportKind = kind
-                                } label: {
-                                    Label(kind.title, systemImage: kind.menuIcon)
-                                }
-                            }
-                        } else {
-                            // Nothing to import with yet, so the only useful
-                            // step is the one that fixes that.
-                            Button {
-                                isPresentingSettings = true
-                            } label: {
-                                Label("Connect an AI Tool…", systemImage: "sparkles")
-                            }
-                        }
-                    }
-                } label: {
-                    // Stretched to the full row and given a hit shape: a Menu
-                    // is only triggered by its label, so without this the row
-                    // looks tappable across its width but responds on about a
-                    // fifth of it.
-                    Label("Add", systemImage: "plus")
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(.rect)
+                if query.isEmpty {
+                    library
+                } else {
+                    searchResults
                 }
             }
             .navigationTitle("Decks")
+            .navigationDestination(for: DeckRoute.self) { route in
+                if let deck = decks.first(where: { $0.uuid == route.deckID }) {
+                    DeckView(deck: deck, focusedCardID: route.cardID)
+                } else {
+                    ContentUnavailableView("Deck Not Found", systemImage: "rectangle.stack")
+                }
+            }
+            .searchable(
+                text: $searchText,
+                isPresented: $isSearching,
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: "Search Decks and Cards"
+            )
             .toolbar {
                 // Only once there is somewhere to sync to; setting that up is
                 // in Settings.
@@ -164,6 +137,127 @@ struct DecksView: View {
                 Text(message)
             }
         }
+    }
+
+    // MARK: - The library
+
+    @ViewBuilder
+    private var library: some View {
+        Section {
+            ForEach(decks) { deck in
+                DeckRow(deck: deck)
+            }
+            .onDelete(perform: deleteDecks)
+            .onMove(perform: moveDecks)
+        } header: {
+            if decks.isEmpty {
+                Text("Memo looks quite empty uh? Try adding some decks.")
+            } else {
+                Spacer()
+            }
+        }
+
+        Menu {
+            Button {
+                isPresentingAddDeck = true
+            } label: {
+                Label("New Deck", systemImage: "square.and.pencil")
+            }
+
+            Section("Import") {
+                ForEach(DeckTransferKind.allCases) { kind in
+                    Button {
+                        requestedKind = kind
+                        pickingKind = kind
+                    } label: {
+                        Label(kind.title, systemImage: kind.menuIcon)
+                    }
+                }
+            }
+
+            Section("AI Assisted") {
+                if ai.isConnected {
+                    ForEach(AIImportKind.allCases) { kind in
+                        Button {
+                            aiImportKind = kind
+                        } label: {
+                            Label(kind.title, systemImage: kind.menuIcon)
+                        }
+                    }
+                } else {
+                    // Nothing to import with yet, so the only useful
+                    // step is the one that fixes that.
+                    Button {
+                        isPresentingSettings = true
+                    } label: {
+                        Label("Connect an AI Tool…", systemImage: "sparkles")
+                    }
+                }
+            }
+        } label: {
+            // Stretched to the full row and given a hit shape: a Menu
+            // is only triggered by its label, so without this the row
+            // looks tappable across its width but responds on about a
+            // fifth of it.
+            Label("Add", systemImage: "plus")
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(.rect)
+        }
+    }
+
+    // MARK: - Searching
+
+    /// Decks by name, then cards by what they say. A card opens its deck with
+    /// that card in view.
+    @ViewBuilder
+    private var searchResults: some View {
+        let matchingDecks = CardSearch.decks(in: decks, matching: query)
+        let hits = CardSearch.hits(in: decks, matching: query)
+
+        if matchingDecks.isEmpty, hits.isEmpty {
+            Section {
+                Text("No decks or cards match.")
+                    .foregroundStyle(.secondary)
+            }
+        }
+
+        if !matchingDecks.isEmpty {
+            Section("Decks") {
+                ForEach(matchingDecks) { deck in
+                    DeckRow(deck: deck)
+                }
+            }
+        }
+
+        if !hits.isEmpty {
+            Section("Cards") {
+                ForEach(hits) { hit in
+                    Button {
+                        open(hit)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack {
+                                Text(hit.card.backText)
+                                Spacer()
+                                Text(hit.card.frontText)
+                                    .fontWeight(.light)
+                            }
+                            .foregroundStyle(.primary)
+
+                            Text("\(hit.deck.icon) \(hit.deck.name)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func open(_ hit: CardSearch.Hit) {
+        searchText = ""
+        isSearching = false
+        path.append(DeckRoute(deckID: hit.deck.uuid, cardID: hit.card.uuid))
     }
 
     // MARK: - Importing
@@ -242,7 +336,7 @@ struct DeckRow: View {
     let deck: Deck
 
     var body: some View {
-        NavigationLink(destination: DeckView(deck: deck)) {
+        NavigationLink(value: DeckRoute(deckID: deck.uuid)) {
             HStack {
                 Text(deck.icon)
                     .frame(width: 30)
