@@ -69,6 +69,9 @@
 		CCA727CD906FEF45F22D1D3E /* RepositorySyncView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80B085E329B1114FCA3698FC /* RepositorySyncView.swift */; };
 		4B895D2EE0904CD60F6BBF98 /* SyncSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A7B43A7CBB143C75EA82DEC /* SyncSettingsView.swift */; };
 		0CFC3F08AABAB9A50E5A8182 /* RepositorySyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E22AEBEFD80E57E1794B80A7 /* RepositorySyncTests.swift */; };
+		E7E9C2BFA1398C1DE81ADF38 /* CardSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66385E637A4556765701612F /* CardSearch.swift */; };
+		BBA5870F944F3767E0122916 /* DeckSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4CB5403CE9F8816943F8E52 /* DeckSettingsView.swift */; };
+		9CBBF9A78CA9DAA6DFA6C3EC /* CardSearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90C3A1F6B51A26AE7467D5A8 /* CardSearchTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -155,6 +158,9 @@
 		80B085E329B1114FCA3698FC /* RepositorySyncView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RepositorySyncView.swift"; sourceTree = "<group>"; };
 		6A7B43A7CBB143C75EA82DEC /* SyncSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SyncSettingsView.swift"; sourceTree = "<group>"; };
 		E22AEBEFD80E57E1794B80A7 /* RepositorySyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RepositorySyncTests.swift"; sourceTree = "<group>"; };
+		66385E637A4556765701612F /* CardSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CardSearch.swift"; sourceTree = "<group>"; };
+		B4CB5403CE9F8816943F8E52 /* DeckSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeckSettingsView.swift"; sourceTree = "<group>"; };
+		90C3A1F6B51A26AE7467D5A8 /* CardSearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CardSearchTests.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -207,6 +213,7 @@
 			isa = PBXGroup;
 			children = (
 				D05C2182AE53FB30E3B4D500 /* DeckTransferTests.swift */,
+				90C3A1F6B51A26AE7467D5A8 /* CardSearchTests.swift */,
 				E22AEBEFD80E57E1794B80A7 /* RepositorySyncTests.swift */,
 				E2E45FF985F8468B80EEF8AF /* SettingsStorageTests.swift */,
 				4CA16643F361C5B8EA09D8B3 /* DeckImportPlanTests.swift */,
@@ -250,6 +257,7 @@
 			isa = PBXGroup;
 			children = (
 				309D36D89EA52084536A4031 /* SortIndexed.swift */,
+				66385E637A4556765701612F /* CardSearch.swift */,
 				161907CCB573DC509546756A /* AppConfiguration.swift */,
 				35A2084F9E30BA0899477F91 /* Color+Memo.swift */,
 				5078CFCAA79A93C3B7CC2619 /* PreviewData.swift */,
@@ -293,6 +301,7 @@
 			isa = PBXGroup;
 			children = (
 				38D198E6451FDCC727584A9A /* DeckEditorView.swift */,
+				B4CB5403CE9F8816943F8E52 /* DeckSettingsView.swift */,
 				9D13033938681367210A0106 /* Transfer */,
 				595CC55D75B9FD5C06B84FCC /* Repository */,
 				98B30011FD76E354F808B610 /* AI */,
@@ -482,6 +491,8 @@
 				E6E73DEC4915BB2596461DB7 /* DeckEditorView.swift in Sources */,
 				6EB9C5C8D6E2CB8D41295675 /* DeckExporter.swift in Sources */,
 				AC18781D6AE2C10323E98859 /* DeckImporter.swift in Sources */,
+				BBA5870F944F3767E0122916 /* DeckSettingsView.swift in Sources */,
+				E7E9C2BFA1398C1DE81ADF38 /* CardSearch.swift in Sources */,
 				4B895D2EE0904CD60F6BBF98 /* SyncSettingsView.swift in Sources */,
 				CCA727CD906FEF45F22D1D3E /* RepositorySyncView.swift in Sources */,
 				C6460198886E19E1EEBDC633 /* RepositorySync.swift in Sources */,
@@ -535,6 +546,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				75FED3B78920FDF5C57F2854 /* DeckTransferTests.swift in Sources */,
+				9CBBF9A78CA9DAA6DFA6C3EC /* CardSearchTests.swift in Sources */,
 				0CFC3F08AABAB9A50E5A8182 /* RepositorySyncTests.swift in Sources */,
 				8DA371F06B7CF0668C45FE6B /* SettingsStorageTests.swift in Sources */,
 				8C2E6EE8DAF39F068FE34EDB /* DeckImportPlanTests.swift in Sources */,

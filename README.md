@@ -22,9 +22,10 @@ Designed to enhance your learning experience by using customizable flash cards. 
 - **Practice Options**: Five modes to practise in, an inverse mode that flips which side asks the question, and a limit so you can drill part of a deck. Each deck has its own. See [Practice Options](#practice-options).
 - **Bookmarks**: Mark the cards you want to come back to and practise only those.
 - **Progress per Card**: Each card counts consecutive correct answers towards a target. A wrong answer sends it back to zero, so the count reflects what you currently know rather than what you once did.
-- **Import and Export Decks**: Import decks from the **Add** menu on the deck list, and share a deck from the **share** button at the top of it. Both work in JSON and CSV. **Settings → Decks → Export All Decks** puts every deck in one JSON file. A JSON file exported from Memo can be imported again to update the decks it came from.
+- **Import and Export Decks**: Import decks from the **Add** menu on the deck list, and share a deck from its **Deck Settings**. Both work in JSON and CSV. **Settings → Decks → Export All Decks** puts every deck in one JSON file. A JSON file exported from Memo can be imported again to update the decks it came from.
 - **Repository Sync**: Keep decks in a GitHub repository and push or pull the ones you pick. See [Repository Sync](#repository-sync).
 - **AI-Assisted Import**: Turn a text file or a PDF into a deck with Claude or ChatGPT, using your own API key. See [AI-Assisted Import](#ai-assisted-import).
+- **Search**: Find a deck or a card from the deck list, or a card from inside its deck. Choosing a card takes you to it and lights it up.
 - **Reorder**: Long-press and drag to rearrange decks or cards. Card order is what the *In Order* practice mode deals.
 - **Flexible Study**: Perfect for language learning, memorizing trivia, studying for exams, or any topic that benefits from flash cards.
 
@@ -53,17 +54,18 @@ Designed to enhance your learning experience by using customizable flash cards. 
 2. **Add Cards to Deck**: Open a deck and tap **Add**. Enter text for both sides, and optionally a hint for each. Both text fields grow to fit, so a term above its reading stays readable while you type it.
 3. **Practice a Deck**: Open a deck and tap **Practice**. Tap or drag the card to flip it; swipe it right for correct, left for wrong.
 4. **Mark as Correct, Wrong, or Skip**: Correct and wrong both move the deck on. Skipping sends the card to the back and does not move the progress bar — the card is deferred, not answered, so a run cannot end on a skip.
-5. **Adjust How You Practise**: Tap the **sliders** button at the top of a deck. See [Practice Options](#practice-options).
+5. **Adjust How You Practise**: Tap the **sliders** button at the top of a deck to open its **Deck Settings**, which hold its name, icon and colour, its practice options, and sharing. See [Practice Options](#practice-options).
 6. **Edit a Deck**: Tap the **pencil** button at the top of a deck to change its name, icon or colour.
 7. **Edit a Card**: Tap it in the deck, or tap the **pencil** button while practising to fix the card in front of you.
 8. **Reorder**: Long-press a deck or a card and drag.
 9. **Import Decks**: On the deck list, tap **Add** and choose **JSON** or **CSV**. Pick one file or several. Memo shows what they would add and change before anything is written, and asks about anything that conflicts with an edit of yours — see [Importing a file again](#importing-a-file-again).
-10. **Export a Deck**: Open a deck and tap the **share** button at the top, then choose **JSON** or **CSV**.
+10. **Export a Deck**: Open a deck's **Deck Settings** and choose **JSON** or **CSV** under Share.
 
 ## Practice Options
 
-Each deck has its own options, reached from the **sliders** button at the top of
-it, and **Reset to Defaults** puts them back as they started. They are captured
+Each deck has its own options, in its **Deck Settings** (the **sliders** button
+at the top of it), and **Reset Practice Options** puts them back as they
+started. They are captured
 when a run starts, so changing them mid-run will not reshape a session already
 in progress.
 

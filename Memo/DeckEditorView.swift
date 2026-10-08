@@ -6,7 +6,7 @@
 import SwiftUI
 
 /// The in-flight contents of the deck editor.
-struct DeckDraft {
+struct DeckDraft: Equatable {
 
     var name = ""
     var icon = ""
@@ -51,8 +51,8 @@ struct DeckDraft {
     }
 }
 
-/// One editor for creating a deck and for changing an existing one, since the
-/// two differ only in their seed values and their button.
+/// The editor for a new deck. An existing deck's details are changed in
+/// ``DeckSettingsView``, alongside the rest of its settings.
 struct DeckEditorView: View {
 
     @Environment(\.dismiss) private var dismiss
