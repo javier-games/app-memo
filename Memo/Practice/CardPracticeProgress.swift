@@ -68,4 +68,12 @@ enum CardPracticeProgressRecorder {
             break
         }
     }
+
+    /// Takes `card` straight to the target: the user is saying they know it,
+    /// without answering it that many times. A target of zero is left alone,
+    /// as it is for any other outcome.
+    static func complete(_ card: Card, target: Int) {
+        guard target > 0 else { return }
+        card.practiceProgress = target
+    }
 }
