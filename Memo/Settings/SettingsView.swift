@@ -28,17 +28,13 @@ struct SettingsView: View {
                         Label("AI Connection", systemImage: "sparkles")
                     }
 
-                    if AppConfiguration.isRepositorySyncAvailable {
+                    if AppConfiguration.isCloudSyncAvailable || AppConfiguration.isRepositorySyncAvailable {
                         NavigationLink {
-                            RepositorySettingsView()
+                            SyncSettingsView()
                         } label: {
-                            Label("Repository", systemImage: "arrow.triangle.branch")
+                            Label("Sync", systemImage: "arrow.triangle.2.circlepath")
                         }
                     }
-                }
-
-                if AppConfiguration.isCloudSyncAvailable {
-                    CloudSyncSettings()
                 }
             }
             .navigationTitle("Settings")
@@ -60,46 +56,6 @@ private struct AIConnectionSettingsView: View {
         }
         .navigationTitle("AI Connection")
         .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-/// Says whether decks are reaching iCloud. There is nothing to switch: sync
-/// follows the iCloud account signed in on the device.
-private struct CloudSyncSettings: View {
-
-    @Environment(CloudSyncMonitor.self) private var monitor
-
-    @State private var account: CloudSyncStatus?
-
-    var body: some View {
-
-        let activity = monitor.activity
-
-        Section {
-            LabeledContent("Account", value: account?.userDescription ?? "…")
-                .task { account = await CloudSyncStatus.current() }
-
-            if account == .available {
-                LabeledContent("Sync", value: activity.summary)
-
-                if let lastSuccess = activity.lastSuccess {
-                    LabeledContent(
-                        "Last Synced",
-                        value: lastSuccess.formatted(date: .abbreviated, time: .shortened)
-                    )
-                }
-
-                if let error = activity.lastError {
-                    Text(error)
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                }
-            }
-        } header: {
-            Text("iCloud")
-        } footer: {
-            Text("Your decks are kept the same on every device signed in to your iCloud account. Nobody else can see them.")
-        }
     }
 }
 

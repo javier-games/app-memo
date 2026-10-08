@@ -1,12 +1,72 @@
 //
-//  RepositorySettingsView.swift
+//  SyncSettingsView.swift
 //  Memo
 //
 
 import SwiftUI
 
+/// The two ways decks leave this device: iCloud, which keeps the user's own
+/// devices the same without being asked, and a GitHub repository, which is
+/// pushed to and pulled from on purpose.
+struct SyncSettingsView: View {
+
+    var body: some View {
+        Form {
+            if AppConfiguration.isCloudSyncAvailable {
+                CloudSyncSettings()
+            }
+
+            if AppConfiguration.isRepositorySyncAvailable {
+                RepositorySettingsSections()
+            }
+        }
+        .navigationTitle("Sync")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+/// Says whether decks are reaching iCloud. There is nothing to switch: sync
+/// follows the iCloud account signed in on the device.
+struct CloudSyncSettings: View {
+
+    @Environment(CloudSyncMonitor.self) private var monitor
+
+    @State private var account: CloudSyncStatus?
+
+    var body: some View {
+
+        let activity = monitor.activity
+
+        Section {
+            LabeledContent("Account", value: account?.userDescription ?? "…")
+                .task { account = await CloudSyncStatus.current() }
+
+            if account == .available {
+                LabeledContent("Sync", value: activity.summary)
+
+                if let lastSuccess = activity.lastSuccess {
+                    LabeledContent(
+                        "Last Synced",
+                        value: lastSuccess.formatted(date: .abbreviated, time: .shortened)
+                    )
+                }
+
+                if let error = activity.lastError {
+                    Text(error)
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                }
+            }
+        } header: {
+            Text("iCloud")
+        } footer: {
+            Text("iCloud only keeps your decks and settings the same across your own devices, the ones signed in to your iCloud account. They are stored in your private iCloud, which only you can open. Nothing is shared with us or with anyone else.")
+        }
+    }
+}
+
 /// Signs in to GitHub and chooses where decks are pushed and pulled.
-struct RepositorySettingsView: View {
+private struct RepositorySettingsSections: View {
 
     @Environment(RepositorySettingsStore.self) private var repository
     @Environment(\.openURL) private var openURL
@@ -22,7 +82,7 @@ struct RepositorySettingsView: View {
 
         @Bindable var repository = repository
 
-        Form {
+        Group {
             if repository.isSignedIn {
                 Section {
                     LabeledContent("Account", value: repository.settings.accountLogin ?? "GitHub")
@@ -38,7 +98,7 @@ struct RepositorySettingsView: View {
 
                     Toggle("One File for All Decks", isOn: $repository.settings.usesSingleFile)
                 } header: {
-                    Text("GitHub")
+                    Text("GitHub Repository")
                 } footer: {
                     Text(
                         repository.settings.usesSingleFile
@@ -82,7 +142,7 @@ struct RepositorySettingsView: View {
                 Section {
                     Button("Sign In with GitHub") { startSignIn() }
                 } header: {
-                    Text("GitHub")
+                    Text("GitHub Repository")
                 } footer: {
                     Text("Keep your decks in a GitHub repository, and push or pull them when you choose. You sign in on github.com; Memo never sees your password.")
                 }
@@ -95,9 +155,9 @@ struct RepositorySettingsView: View {
                 }
             }
         }
-        .navigationTitle("Repository")
-        .navigationBarTitleDisplayMode(.inline)
-        .onDisappear { signIn?.cancel() }
+        // Deliberately not cancelled when these rows go away. Showing the code
+        // replaces the sign-in button's row, which would count; and a sign-in
+        // approved after leaving the screen should still take.
     }
 
     /// The chosen repository stays in the list even if the account can no

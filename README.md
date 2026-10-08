@@ -219,7 +219,7 @@ This is separate from iCloud: iCloud keeps your own devices the same without
 being asked, while a repository is a copy you update on purpose, can edit by
 hand, and can share.
 
-1. In **Settings → Repository**, tap **Sign In with GitHub**. Memo shows a
+1. In **Settings → Sync**, under GitHub Repository, tap **Sign In with GitHub**. Memo shows a
    code; you enter it on github.com and approve. Memo never sees your password,
    and the access it is given stays in this device's Keychain.
 2. Choose the repository. An empty one is set up the first time it is opened.
@@ -249,9 +249,12 @@ the device flow enabled.
 Decks are stored in SwiftData and replicated across your devices through
 CloudKit, in the private database of the iCloud account signed in on the
 device. There is nothing to switch on: with an account signed in the decks
-sync, and with none they stay on the device until one is. Settings shows the
-account, whether a sync is running, when the last one finished, and the error
+sync, and with none they stay on the device until one is. **Settings → Sync**
+shows the account, whether a sync is running, when the last one finished, and the error
 if it failed.
+
+What is synced stays in your own private iCloud, which only you can open: it is
+not shared with the developer or with anyone else.
 
 Settings follow you as well. A deck's practice options, bookmarks and card
 progress are part of the decks and sync with them. The app-wide settings — the
