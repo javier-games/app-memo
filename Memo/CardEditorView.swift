@@ -42,10 +42,19 @@ struct CardDraft {
     }
 
     func apply(to card: Card) {
-        card.frontText = frontText.trimmingCharacters(in: .whitespacesAndNewlines)
-        card.frontHintText = frontHintText.trimmingCharacters(in: .whitespacesAndNewlines)
-        card.backText = backText.trimmingCharacters(in: .whitespacesAndNewlines)
-        card.backHintText = backHintText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let texts = [frontText, frontHintText, backText, backHintText]
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+
+        // Only what the card says counts as an edit. Progress and bookmarks
+        // change all the time and are not what an import compares.
+        if texts != [card.frontText, card.frontHintText, card.backText, card.backHintText] {
+            card.modifiedAt = Date()
+        }
+
+        card.frontText = texts[0]
+        card.frontHintText = texts[1]
+        card.backText = texts[2]
+        card.backHintText = texts[3]
         card.practiceProgress = max(0, practiceProgress)
         card.isBookmarked = isBookmarked
     }
@@ -176,7 +185,7 @@ struct CardEditorView: View {
 
     private var progressFooter: String {
         isTracked
-            ? String(localized: "Correct answers recorded so far. Set it by hand if you have already practised this card elsewhere — a correct answer adds one, a wrong one sends it back to zero. Bookmarked cards are the ones Bookmarked mode practises.")
+            ? String(localized: "Correct answers recorded so far. Set it by hand if you have already practised this card elsewhere — a correct answer adds one, and Practice Options decides what a wrong one does. Bookmarked cards are the ones Bookmarked mode practises.")
             : String(localized: "Progress tracking is switched off in Practice Options. Bookmarked cards are the ones Bookmarked mode practises.")
     }
 }

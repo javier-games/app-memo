@@ -65,6 +65,13 @@ enum DeckCSVFormat {
                 index < row.count ? row[index].trimmingCharacters(in: .whitespaces) : ""
             }
 
+            // Two columns can only be a front and a back. Read positionally
+            // the second would be a hint, leaving a card with no back, which
+            // is the one thing a two-column file is certainly not.
+            if row.count == 2 {
+                return DeckTransferCard(frontText: field(0), backText: field(1))
+            }
+
             return DeckTransferCard(
                 frontText: field(0),
                 frontHintText: field(1),

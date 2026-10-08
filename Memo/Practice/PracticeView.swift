@@ -257,7 +257,8 @@ struct PracticeView: View {
             CardPracticeProgressRecorder.record(
                 outcome,
                 on: card,
-                target: settings.resolvedPracticeTarget
+                target: settings.resolvedPracticeTarget,
+                penalty: settings.errorPenalty
             )
         }
 

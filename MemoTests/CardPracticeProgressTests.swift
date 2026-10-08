@@ -48,7 +48,7 @@ final class CardPracticeProgressTests: XCTestCase {
     func testCorrectAdvancesByOne() {
         let card = makeCard(progress: 3)
 
-        CardPracticeProgressRecorder.record(.correct, on: card, target: 10)
+        CardPracticeProgressRecorder.record(.correct, on: card, target: 10, penalty: .none)
 
         XCTAssertEqual(card.practiceProgress, 4)
     }
@@ -56,23 +56,53 @@ final class CardPracticeProgressTests: XCTestCase {
     func testProgressStopsAtTheTarget() {
         let card = makeCard(progress: 10)
 
-        CardPracticeProgressRecorder.record(.correct, on: card, target: 10)
+        CardPracticeProgressRecorder.record(.correct, on: card, target: 10, penalty: .none)
 
         XCTAssertEqual(card.practiceProgress, 10)
     }
 
-    func testWrongResetsToZero() {
+    func testWrongLeavesProgressAloneByDefault() {
         let card = makeCard(progress: 9)
 
-        CardPracticeProgressRecorder.record(.incorrect, on: card, target: 10)
+        CardPracticeProgressRecorder.record(
+            .incorrect, on: card, target: 10, penalty: PracticeSettings.default.errorPenalty
+        )
 
-        XCTAssertEqual(card.practiceProgress, 0, "one wrong answer undoes the streak")
+        XCTAssertEqual(PracticeSettings.default.errorPenalty, .none)
+        XCTAssertEqual(card.practiceProgress, 9)
+    }
+
+    func testWrongCanTakeOneBack() {
+        let card = makeCard(progress: 9)
+        CardPracticeProgressRecorder.record(.incorrect, on: card, target: 10, penalty: .decrease)
+        XCTAssertEqual(card.practiceProgress, 8)
+
+        let untouched = makeCard(progress: 0)
+        CardPracticeProgressRecorder.record(.incorrect, on: untouched, target: 10, penalty: .decrease)
+        XCTAssertEqual(untouched.practiceProgress, 0, "progress never goes below zero")
+    }
+
+    func testWrongCanResetToZero() {
+        let card = makeCard(progress: 9)
+
+        CardPracticeProgressRecorder.record(.incorrect, on: card, target: 10, penalty: .reset)
+
+        XCTAssertEqual(card.practiceProgress, 0)
+    }
+
+    func testAnOlderPayloadKeepsProgressOnAWrongAnswer() throws {
+        let decoded = try JSONDecoder().decode(
+            PracticeSettings.self,
+            from: Data(#"{"mode":"inOrder"}"#.utf8)
+        )
+
+        XCTAssertEqual(decoded.errorPenalty, .none)
     }
 
     func testSkippingLeavesProgressAlone() {
         let card = makeCard(progress: 4)
 
-        CardPracticeProgressRecorder.record(.skipped, on: card, target: 10)
+        CardPracticeProgressRecorder.record(.skipped, on: card, target: 10, penalty: .reset)
 
         XCTAssertEqual(card.practiceProgress, 4, "a deferred card has not been answered")
     }
@@ -80,8 +110,8 @@ final class CardPracticeProgressTests: XCTestCase {
     func testATargetOfZeroRecordsNothing() {
         let card = makeCard(progress: 5)
 
-        CardPracticeProgressRecorder.record(.correct, on: card, target: 0)
-        CardPracticeProgressRecorder.record(.incorrect, on: card, target: 0)
+        CardPracticeProgressRecorder.record(.correct, on: card, target: 0, penalty: .reset)
+        CardPracticeProgressRecorder.record(.incorrect, on: card, target: 0, penalty: .reset)
 
         XCTAssertEqual(
             card.practiceProgress, 5,

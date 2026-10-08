@@ -29,7 +29,8 @@ struct DecksView: View {
     /// cleared by the time the result arrives.
     @State private var requestedKind: DeckTransferKind = .json
 
-    @State private var pendingImport: DeckImporter.Preview?
+    /// What the picked files would do, awaiting the user's go-ahead.
+    @State private var pendingImport: DeckImportPlan?
     @State private var importError: String?
 
     var body: some View {
@@ -126,19 +127,15 @@ struct DecksView: View {
             }
             .fileImporter(
                 isPresented: isPickingFile,
-                allowedContentTypes: pickingKind?.contentTypes ?? [.json]
+                allowedContentTypes: pickingKind?.contentTypes ?? [.json],
+                allowsMultipleSelection: true
             ) { result in
-                handlePickedFile(result)
+                handlePickedFiles(result)
             }
-            .alert(
-                "Import Decks",
-                isPresented: isConfirmingImport,
-                presenting: pendingImport
-            ) { preview in
-                Button("Import") { commitImport(preview) }
-                Button("Cancel", role: .cancel) { pendingImport = nil }
-            } message: { preview in
-                Text(importSummary(for: preview))
+            .sheet(item: $pendingImport) { plan in
+                ImportReviewView(plan: plan) { overwritingConflicts in
+                    commitImport(plan, overwritingConflicts: overwritingConflicts)
+                }
             }
             .alert(
                 "Could Not Import",
@@ -161,13 +158,6 @@ struct DecksView: View {
         )
     }
 
-    private var isConfirmingImport: Binding<Bool> {
-        Binding(
-            get: { pendingImport != nil },
-            set: { if !$0 { pendingImport = nil } }
-        )
-    }
-
     private var isShowingImportError: Binding<Bool> {
         Binding(
             get: { importError != nil },
@@ -175,47 +165,31 @@ struct DecksView: View {
         )
     }
 
-    /// Reads and parses the picked file, but writes nothing yet: the user
-    /// confirms against what was actually found.
-    private func handlePickedFile(_ result: Result<URL, Error>) {
+    /// Reads and parses the picked files, but writes nothing yet: the user
+    /// confirms against what was actually found, and against what it would
+    /// change in decks they already have.
+    private func handlePickedFiles(_ result: Result<[URL], Error>) {
         pickingKind = nil
 
         do {
-            let url = try result.get()
-            let data = try DeckImporter.read(contentsOf: url)
+            let files = try DeckImporter.readFiles(at: try result.get())
+            let preview = try DeckImporter.preview(files: files, kind: requestedKind)
 
-            pendingImport = try DeckImporter.preview(
-                data: data,
-                kind: requestedKind,
-                // CSV has nowhere to put a deck name, so the file supplies it.
-                fallbackDeckName: url.deletingPathExtension().lastPathComponent
-            )
+            pendingImport = DeckImporter.plan(preview, against: decks)
         } catch {
             importError = error.localizedDescription
         }
     }
 
-    private func commitImport(_ preview: DeckImporter.Preview) {
+    private func commitImport(_ plan: DeckImportPlan, overwritingConflicts: Bool) {
         withAnimation {
-            _ = DeckImporter.insert(preview, into: modelContext, after: decks.count)
-        }
-        pendingImport = nil
-    }
-
-    private func importSummary(for preview: DeckImporter.Preview) -> String {
-        var lines = [
-            String(localized: "\(preview.deckCount) deck(s) and \(preview.cardCount) card(s) will be added.")
-        ]
-
-        if preview.skippedCardCount > 0 {
-            lines.append(
-                String(localized: "\(preview.skippedCardCount) row(s) were left out for having no front or no back.")
+            DeckImporter.apply(
+                plan,
+                overwritingConflicts: overwritingConflicts,
+                into: modelContext,
+                after: decks.count
             )
         }
-
-        lines.append(String(localized: "Nothing already in your library is changed."))
-
-        return lines.joined(separator: "\n\n")
     }
 
     /// Reorders the deck list.

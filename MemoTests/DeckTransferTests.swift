@@ -148,11 +148,19 @@ final class DeckTransferTests: XCTestCase {
     }
 
     func testCSVShortRowsArePadded() {
-        // A hand-written two-column file should still import.
         let parsed = DeckCSVFormat.parse("Tea,,Té\nBread,,Pan\n")
 
         XCTAssertEqual(parsed.count, 2)
         XCTAssertEqual(parsed.first?.backHintText, "")
+    }
+
+    func testATwoColumnCSVIsFrontAndBack() {
+        // A hand-written two-column file should still import.
+        let parsed = DeckCSVFormat.parse("Tea,Té\nBread,Pan\n")
+
+        XCTAssertEqual(parsed.map(\.frontText), ["Tea", "Bread"])
+        XCTAssertEqual(parsed.map(\.backText), ["Té", "Pan"])
+        XCTAssertTrue(parsed.allSatisfy(\.isComplete))
     }
 
     func testCSVToleratesAByteOrderMark() throws {

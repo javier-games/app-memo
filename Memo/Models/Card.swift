@@ -41,6 +41,10 @@ final class Card {
     /// lightweight SwiftData migration for anyone upgrading.
     var practiceProgress: Int = 0
 
+    /// When the card's text was last changed, here or by an import. What an
+    /// import compares to tell a newer version of the card from an older one.
+    var modifiedAt: Date = Date.distantPast
+
     /// Marked by the user for the Bookmarked practice mode.
     var isBookmarked: Bool = false
 
@@ -54,6 +58,7 @@ final class Card {
         backHintText: String = "",
         sortIndex: Int = 0,
         createdAt: Date = Date(),
+        modifiedAt: Date = Date(),
         practiceProgress: Int = 0
     ) {
         self.uuid = uuid
@@ -63,6 +68,7 @@ final class Card {
         self.backHintText = backHintText
         self.sortIndex = sortIndex
         self.createdAt = createdAt
+        self.modifiedAt = modifiedAt
         self.practiceProgress = practiceProgress
     }
 }

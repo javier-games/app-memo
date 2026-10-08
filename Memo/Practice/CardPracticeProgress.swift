@@ -43,14 +43,15 @@ enum CardPracticeProgressRecorder {
 
     /// Records an outcome against `card`.
     ///
-    /// Correct advances by one, wrong resets to zero, and skipping changes
-    /// nothing — a deferred card has not been answered. A target of zero is
-    /// left entirely alone, so turning tracking off does not quietly wipe
-    /// progress the user may want back.
+    /// Correct advances by one, wrong does what `penalty` says, and skipping
+    /// changes nothing — a deferred card has not been answered. A target of
+    /// zero is left entirely alone, so turning tracking off does not quietly
+    /// wipe progress the user may want back.
     static func record(
         _ outcome: PracticeSession.Outcome,
         on card: Card,
-        target: Int
+        target: Int,
+        penalty: PracticeErrorPenalty
     ) {
         guard target > 0 else { return }
 
@@ -58,7 +59,11 @@ enum CardPracticeProgressRecorder {
         case .correct:
             card.practiceProgress = min(card.practiceProgress + 1, target)
         case .incorrect:
-            card.practiceProgress = 0
+            switch penalty {
+            case .none:     break
+            case .decrease: card.practiceProgress = max(0, card.practiceProgress - 1)
+            case .reset:    card.practiceProgress = 0
+            }
         case .skipped:
             break
         }
