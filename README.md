@@ -18,7 +18,7 @@ Designed to enhance your learning experience by using customizable flash cards. 
 - **Add Optional Hints**: Cards can include an optional hint field to provide additional help or a small clue.
 - **Practice**: Cards appear one-by-one so you can focus on individual items.
     - **Mark as Correct, Wrong, or Skip**: Correct and wrong both settle a card; skipping sends it to the back of the deck for later, and does not count as an answer.
-    - **Session results**: Finishing a deck counts up how many you got right, wrong and skipped, and offers another run. Tap any of the three to see its cards, and tap a card there to look at it again without leaving the results.
+    - **Session results**: Finishing a deck counts up how many you got right, wrong and skipped, and offers another run. Tap any of the three to see its cards, and tap a card there to edit it without leaving the results.
 - **Practice Options**: Five modes to practise in, an inverse mode that flips which side asks the question, and a limit so you can drill part of a deck. Each deck has its own. See [Practice Options](#practice-options).
 - **Bookmarks**: Mark the cards you want to come back to and practise only those.
 - **Progress per Card**: Each card counts consecutive correct answers towards a target. A wrong answer sends it back to zero, so the count reflects what you currently know rather than what you once did.
