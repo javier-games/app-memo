@@ -110,6 +110,20 @@ enum PracticeErrorPenalty: String, Codable, CaseIterable, Identifiable {
         }
     }
 
+    var systemImage: String {
+        switch self {
+        case .none:     "equal"
+        case .decrease: "minus"
+        case .reset:    "arrow.counterclockwise"
+        }
+    }
+
+    /// The other things a wrong answer could do, for the times one card
+    /// deserves different treatment from the deck's usual.
+    var alternatives: [PracticeErrorPenalty] {
+        Self.allCases.filter { $0 != self }
+    }
+
     var explanation: String {
         switch self {
         case .none:     String(localized: "A wrong answer leaves the card's progress as it is.")

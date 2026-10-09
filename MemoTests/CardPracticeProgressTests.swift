@@ -99,6 +99,22 @@ final class CardPracticeProgressTests: XCTestCase {
         XCTAssertEqual(decoded.errorPenalty, .none)
     }
 
+    func testACardCanBeMarkedAsLearnedOutright() {
+        let card = makeCard(progress: 2)
+        CardPracticeProgressRecorder.complete(card, target: 10)
+        XCTAssertEqual(card.practiceProgress, 10)
+
+        let untracked = makeCard(progress: 2)
+        CardPracticeProgressRecorder.complete(untracked, target: 0)
+        XCTAssertEqual(untracked.practiceProgress, 2, "with tracking off there is no target to reach")
+    }
+
+    func testTheHeldOptionsAreTheOnesTheDeckDoesNotUse() {
+        XCTAssertEqual(PracticeErrorPenalty.none.alternatives, [.decrease, .reset])
+        XCTAssertEqual(PracticeErrorPenalty.decrease.alternatives, [.none, .reset])
+        XCTAssertEqual(PracticeErrorPenalty.reset.alternatives, [.none, .decrease])
+    }
+
     func testSkippingLeavesProgressAlone() {
         let card = makeCard(progress: 4)
 

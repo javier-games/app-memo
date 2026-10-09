@@ -106,8 +106,14 @@ under **Settings → Decks → When a Deck Has No Bookmarks**; that choice appli
 A card's progress goes up by one for each correct answer, up to the Practice
 Target. What a wrong answer does is the deck's **After a Wrong Answer** option:
 **Keep Progress** (the default) changes nothing, **Lose One** takes one correct
-answer back, and **Back to Zero** starts the card again. The deck list shows
-each card's standing
+answer back, and **Back to Zero** starts the card again.
+
+During a run you can overrule this for a single card by **holding** a button:
+holding **correct** offers **Mark as Learned**, which takes the card straight
+to the target, and holding **incorrect** offers the two wrong-answer behaviours
+the deck is not set to. Where an option would change nothing — the card is
+already at zero, already at the target, or the deck's target is 0 — the menu
+says so instead. The deck list shows each card's standing
 — grey while short of the target, green once reached. If you have already
 practised a card elsewhere, you can set its count by hand in the card editor.
 

@@ -120,11 +120,16 @@ struct PracticeView: View {
                     action: { skipCard() }
                 )
 
+                // Holding either button offers the answers the deck's options
+                // do not give by default, so one card can be treated
+                // differently without leaving the run to change a setting.
                 CircleButtonView(
                     iconName: "xmark",
                     label: "Mark incorrect",
                     buttonColor: .red,
                     isEnabled: hasBeenFlipped,
+                    held: incorrectAlternatives,
+                    heldNote: incorrectNote,
                     action: { finishCard(.incorrect) }
                 )
 
@@ -133,6 +138,8 @@ struct PracticeView: View {
                     label: "Mark correct",
                     buttonColor: .green,
                     isEnabled: hasBeenFlipped,
+                    held: correctAlternatives,
+                    heldNote: correctNote,
                     action: { finishCard(.correct) }
                 )
 
@@ -246,20 +253,91 @@ struct PracticeView: View {
         return isRevealed ? faces.hasAnswerHint : faces.hasPromptHint
     }
 
+    // MARK: - Held answers
+
+    /// With tracking off there is no progress for any of these to change.
+    private var tracksProgress: Bool { settings.resolvedPracticeTarget > 0 }
+
+    private var currentProgress: Int {
+        max(0, session.currentCard?.practiceProgress ?? 0)
+    }
+
+    /// Said in place of options that would change nothing, so holding a
+    /// button always answers with something and never looks broken.
+    private var trackingOffNote: String {
+        String(localized: "Progress is off for this deck: its practice target is 0.")
+    }
+
+    private var correctNote: String? {
+        guard tracksProgress else { return trackingOffNote }
+
+        return currentProgress >= settings.resolvedPracticeTarget
+            ? String(localized: "This card has already reached the target.")
+            : nil
+    }
+
+    private var correctAlternatives: [CircleButtonView.HeldAction] {
+        guard correctNote == nil else { return [] }
+
+        return [
+            CircleButtonView.HeldAction(
+                title: String(localized: "Mark as Learned"),
+                systemImage: "checkmark.seal"
+            ) {
+                finishCard(.correct, completing: true)
+            }
+        ]
+    }
+
+    /// At zero every wrong-answer behaviour comes to the same thing.
+    private var incorrectNote: String? {
+        guard tracksProgress else { return trackingOffNote }
+
+        return currentProgress == 0
+            ? String(localized: "This card's progress is already zero.")
+            : nil
+    }
+
+    private var incorrectAlternatives: [CircleButtonView.HeldAction] {
+        guard incorrectNote == nil else { return [] }
+
+        return settings.errorPenalty.alternatives.map { penalty in
+            CircleButtonView.HeldAction(title: penalty.title, systemImage: penalty.systemImage) {
+                finishCard(.incorrect, penalty: penalty)
+            }
+        }
+    }
+
     // MARK: - Flow
 
     /// Records an outcome for the current card, then either deals the next one
     /// or lets the session fall through to the results screen.
-    private func finishCard(_ outcome: PracticeSession.Outcome) {
+    ///
+    /// - Parameters:
+    ///   - penalty: What a wrong answer does this once, in place of the
+    ///     deck's own option.
+    ///   - completing: Takes a correct answer straight to the target.
+    private func finishCard(
+        _ outcome: PracticeSession.Outcome,
+        penalty: PracticeErrorPenalty? = nil,
+        completing: Bool = false
+    ) {
         // Recorded before the session advances, while the answered card is
         // still the current one.
         if let card = session.currentCard {
-            CardPracticeProgressRecorder.record(
-                outcome,
-                on: card,
-                target: settings.resolvedPracticeTarget,
-                penalty: settings.errorPenalty
-            )
+            if completing {
+                CardPracticeProgressRecorder.complete(
+                    card,
+                    target: settings.resolvedPracticeTarget
+                )
+            } else {
+                CardPracticeProgressRecorder.record(
+                    outcome,
+                    on: card,
+                    target: settings.resolvedPracticeTarget,
+                    penalty: penalty ?? settings.errorPenalty
+                )
+            }
         }
 
         hideCard {
@@ -353,25 +431,71 @@ struct PracticeView: View {
 /// semantics and avoids custom shapes sitting on top of the bar's material.
 struct CircleButtonView: View {
 
+    /// Something else the button can do, offered when it is held.
+    struct HeldAction: Identifiable {
+        let id = UUID()
+        let title: String
+        let systemImage: String
+        let action: () -> Void
+
+        init(title: String, systemImage: String, action: @escaping () -> Void) {
+            self.title = title
+            self.systemImage = systemImage
+            self.action = action
+        }
+    }
+
     let iconName: String
     let label: LocalizedStringKey
     let buttonColor: Color
     let isEnabled: Bool
+
+    /// Shown in a menu that grows out of the button when it is held. A tap
+    /// still does the button's own action.
+    var held: [HeldAction] = []
+
+    /// Shown in that menu when there is nothing to offer, to say why.
+    var heldNote: String?
+
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            Image(systemName: iconName)
-                .font(.title3)
-                .foregroundStyle(.white)
-                .frame(width: 60, height: 60)
-                .background(isEnabled ? buttonColor : Color.gray.opacity(0.5))
-                .clipShape(Circle())
+        Group {
+            if held.isEmpty, heldNote == nil {
+                Button(action: action) { face }
+            } else {
+                Menu {
+                    if let heldNote {
+                        // Plain text in a menu is shown as a line that cannot
+                        // be chosen.
+                        Text(heldNote)
+                    }
+
+                    ForEach(held) { item in
+                        Button(action: item.action) {
+                            Label(item.title, systemImage: item.systemImage)
+                        }
+                    }
+                } label: {
+                    face
+                } primaryAction: {
+                    action()
+                }
+            }
         }
         .buttonStyle(.plain)
         .disabled(!isEnabled)
         // These controls are icon-only, so they carry no implicit label.
         .accessibilityLabel(label)
+    }
+
+    private var face: some View {
+        Image(systemName: iconName)
+            .font(.title3)
+            .foregroundStyle(.white)
+            .frame(width: 60, height: 60)
+            .background(isEnabled ? buttonColor : Color.gray.opacity(0.5))
+            .clipShape(Circle())
     }
 }
 
