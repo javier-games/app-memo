@@ -18,8 +18,11 @@ struct PracticeResultsView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     let session: PracticeSession
-    let deck: Deck
-    let isInverted: Bool
+
+    /// The deck's practice target, which the card editor needs to bound a
+    /// card's progress.
+    let practiceTarget: Int
+
     let onPracticeAgain: () -> Void
     let onDone: () -> Void
 
@@ -30,14 +33,12 @@ struct PracticeResultsView: View {
 
     init(
         session: PracticeSession,
-        deck: Deck,
-        isInverted: Bool,
+        practiceTarget: Int,
         onPracticeAgain: @escaping () -> Void,
         onDone: @escaping () -> Void
     ) {
         self.session = session
-        self.deck = deck
-        self.isInverted = isInverted
+        self.practiceTarget = practiceTarget
         self.onPracticeAgain = onPracticeAgain
         self.onDone = onDone
         _reveal = State(initialValue: PracticeResultsReveal(log: session.outcomes))
@@ -113,8 +114,7 @@ struct PracticeResultsView: View {
             PracticeReviewView(
                 outcome: outcome,
                 cards: session.reviewedCards(outcome),
-                deck: deck,
-                isInverted: isInverted
+                practiceTarget: practiceTarget
             )
         }
         .onAppear {
@@ -189,9 +189,6 @@ private struct ResultRow: View {
 }
 
 #Preview {
-    let container = PreviewData.container()
-    let deck = PreviewData.sampleDeck(in: container)
-
     var session = PracticeSession(cards: (0..<6).map { index in
         Card(frontText: "Front \(index)", backText: "Back \(index)")
     })
@@ -202,10 +199,8 @@ private struct ResultRow: View {
 
     return PracticeResultsView(
         session: session,
-        deck: deck,
-        isInverted: false,
+        practiceTarget: 10,
         onPracticeAgain: {},
         onDone: {}
     )
-    .modelContainer(container)
 }

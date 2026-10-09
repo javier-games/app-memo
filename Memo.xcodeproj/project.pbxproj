@@ -72,7 +72,6 @@
 		E7E9C2BFA1398C1DE81ADF38 /* CardSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66385E637A4556765701612F /* CardSearch.swift */; };
 		BBA5870F944F3767E0122916 /* DeckSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4CB5403CE9F8816943F8E52 /* DeckSettingsView.swift */; };
 		9CBBF9A78CA9DAA6DFA6C3EC /* CardSearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90C3A1F6B51A26AE7467D5A8 /* CardSearchTests.swift */; };
-		02A00C1E1753B3FDD4711A67 /* PracticeCardFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09B5F03AA7204E65D1095614 /* PracticeCardFace.swift */; };
 		A6843ADDCA130BB990EB6BA2 /* PracticeResultsReveal.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDEF0381D5A853BBE5FE5954 /* PracticeResultsReveal.swift */; };
 		F4BFFC7D395650B3F68BDB74 /* PracticeReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5C7F0FE60E72EDB2F23F66E /* PracticeReviewView.swift */; };
 		66691679C5E4350E6254FA2C /* PracticeResultsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C91BDBFB605F67F2A7F896 /* PracticeResultsTests.swift */; };
@@ -165,7 +164,6 @@
 		66385E637A4556765701612F /* CardSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CardSearch.swift"; sourceTree = "<group>"; };
 		B4CB5403CE9F8816943F8E52 /* DeckSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeckSettingsView.swift"; sourceTree = "<group>"; };
 		90C3A1F6B51A26AE7467D5A8 /* CardSearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CardSearchTests.swift"; sourceTree = "<group>"; };
-		09B5F03AA7204E65D1095614 /* PracticeCardFace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PracticeCardFace.swift"; sourceTree = "<group>"; };
 		BDEF0381D5A853BBE5FE5954 /* PracticeResultsReveal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PracticeResultsReveal.swift"; sourceTree = "<group>"; };
 		D5C7F0FE60E72EDB2F23F66E /* PracticeReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PracticeReviewView.swift"; sourceTree = "<group>"; };
 		96C91BDBFB605F67F2A7F896 /* PracticeResultsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PracticeResultsTests.swift"; sourceTree = "<group>"; };
@@ -251,7 +249,6 @@
 				816FD4CB07057DBA31D88990 /* PracticeResultsView.swift */,
 				D5C7F0FE60E72EDB2F23F66E /* PracticeReviewView.swift */,
 				BDEF0381D5A853BBE5FE5954 /* PracticeResultsReveal.swift */,
-				09B5F03AA7204E65D1095614 /* PracticeCardFace.swift */,
 			);
 			path = Practice;
 			sourceTree = "<group>";
@@ -535,7 +532,6 @@
 				49AA5BABC6CE0AD4D5E552D8 /* PracticeResultsView.swift in Sources */,
 				F4BFFC7D395650B3F68BDB74 /* PracticeReviewView.swift in Sources */,
 				A6843ADDCA130BB990EB6BA2 /* PracticeResultsReveal.swift in Sources */,
-				02A00C1E1753B3FDD4711A67 /* PracticeCardFace.swift in Sources */,
 				AFFA949187517945C2269959 /* PracticeSession.swift in Sources */,
 				9EAF5A97CA9FBDA3670773B8 /* AppConfiguration.swift in Sources */,
 				E4AF48D743690FE0DE22054C /* CloudSyncStatus.swift in Sources */,
@@ -731,7 +727,7 @@
 				DEVELOPMENT_TEAM = 9UL825LAMK;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Memo Decks";
+				INFOPLIST_KEY_CFBundleDisplayName = Memo;
 				INFOPLIST_KEY_UIBackgroundModes = "remote-notification";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -767,7 +763,7 @@
 				DEVELOPMENT_TEAM = 9UL825LAMK;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Memo Decks";
+				INFOPLIST_KEY_CFBundleDisplayName = Memo;
 				INFOPLIST_KEY_UIBackgroundModes = "remote-notification";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
