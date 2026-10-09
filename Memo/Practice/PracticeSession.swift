@@ -14,8 +14,26 @@ import Foundation
 /// end left the screen blank.
 struct PracticeSession {
 
-    enum Outcome {
+    enum Outcome: Identifiable {
         case correct, incorrect, skipped
+
+        var id: Self { self }
+    }
+
+    /// One thing that happened in the run: a card, and what was done with it.
+    struct Entry {
+        let card: Card
+        let outcome: Outcome
+    }
+
+    /// A card as the results list it: once, however often it came up.
+    struct ReviewedCard: Identifiable {
+        let card: Card
+
+        /// How many times this happened to it. Only a skip can repeat.
+        let times: Int
+
+        var id: UUID { card.uuid }
     }
 
     /// The working queue. Skipping reorders this; it never removes anything, so
@@ -36,8 +54,31 @@ struct PracticeSession {
     /// ``totalCount`` at the end; this is separate from that.
     private(set) var skippedCount: Int = 0
 
+    /// Everything that happened, in the order it happened. The tallies above
+    /// say how the run went; this says which card each one was, and lets the
+    /// results be played back.
+    private(set) var log: [Entry] = []
+
     init(cards: [Card]) {
         self.cards = cards
+    }
+
+    var outcomes: [Outcome] { log.map(\.outcome) }
+
+    /// The cards that met `outcome`, in the order they first did.
+    func reviewedCards(_ outcome: Outcome) -> [ReviewedCard] {
+        var order: [UUID] = []
+        var found: [UUID: (card: Card, times: Int)] = [:]
+
+        for entry in log where entry.outcome == outcome {
+            let id = entry.card.uuid
+            if found[id] == nil { order.append(id) }
+            found[id] = (entry.card, (found[id]?.times ?? 0) + 1)
+        }
+
+        return order.compactMap { id in
+            found[id].map { ReviewedCard(card: $0.card, times: $0.times) }
+        }
     }
 
     var totalCount: Int { cards.count }
@@ -72,6 +113,9 @@ struct PracticeSession {
     mutating func record(_ outcome: Outcome) {
         guard !isFinished else { return }
 
+        // Noted before anything moves, while this is still the card on screen.
+        let entry = currentCard.map { Entry(card: $0, outcome: outcome) }
+
         switch outcome {
         case .correct:
             correctCount += 1
@@ -86,6 +130,8 @@ struct PracticeSession {
             skippedCount += 1
             moveCurrentCardToBack()
         }
+
+        if let entry { log.append(entry) }
     }
 
     /// Sends the current card to the end of the queue, leaving `currentIndex`
@@ -106,5 +152,6 @@ struct PracticeSession {
         correctCount = 0
         incorrectCount = 0
         skippedCount = 0
+        log = []
     }
 }
