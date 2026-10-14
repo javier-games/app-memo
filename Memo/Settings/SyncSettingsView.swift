@@ -112,7 +112,7 @@ private struct RepositorySettingsSections: View {
                         repository.signOut()
                     }
                 } footer: {
-                    Text("Decks go to the repository as JSON, with their cards. Practice progress and bookmarks are never sent. An empty repository is set up the first time it is opened.")
+                    Text("Signing out signs out all your devices. Decks go to the repository as JSON, with their cards. Practice progress and bookmarks are never sent. An empty repository is set up the first time it is opened.")
                 }
             } else if let deviceCode {
                 Section {
@@ -141,10 +141,11 @@ private struct RepositorySettingsSections: View {
             } else {
                 Section {
                     Button("Sign In with GitHub") { startSignIn() }
+                        .task { repository.refreshSignIn() }
                 } header: {
                     Text("GitHub Repository")
                 } footer: {
-                    Text("Keep your decks in a GitHub repository, and push or pull them when you choose. You sign in on github.com; Memo never sees your password.")
+                    Text("Keep your decks in a GitHub repository, and push or pull them when you choose. You sign in on github.com; Memo never sees your password. Signing in once covers all your devices, through iCloud Keychain.")
                 }
             }
 

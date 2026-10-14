@@ -228,8 +228,9 @@ being asked, while a repository is a copy you update on purpose, can edit by
 hand, and can share.
 
 1. In **Settings → Sync**, under GitHub Repository, tap **Sign In with GitHub**. Memo shows a
-   code; you enter it on github.com and approve. Memo never sees your password,
-   and the access it is given stays in this device's Keychain.
+   code; you enter it on github.com and approve. Memo never sees your password.
+   The access it is given is kept in iCloud Keychain, so signing in once covers
+   all your devices, and signing out signs them all out.
 2. Choose the repository. An empty one is set up the first time it is opened.
 3. Choose the layout with **One File for All Decks**: on, every deck lives in
    `Memo Decks.json`; off, each deck has a file of its own, named after it.
@@ -267,9 +268,10 @@ not shared with the developer or with anyone else.
 Settings follow you as well. A deck's practice options, bookmarks and card
 progress are part of the decks and sync with them. The app-wide settings — the
 mode used for a deck with no bookmarks, and which AI assistant and model are
-chosen — travel through iCloud's key-value store. The one thing that never
-leaves a device is the AI API key, which stays in that device's Keychain, so
-each device connects with its own.
+chosen — travel through iCloud's key-value store, and the GitHub sign-in
+through iCloud Keychain. The one thing that never leaves a device is the AI API
+key, which stays in that device's Keychain, so each device connects with its
+own.
 
 The data model has the shape CloudKit requires: a default on every property,
 optional relationships with inverses, no unique constraints, explicit sort

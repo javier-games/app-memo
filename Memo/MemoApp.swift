@@ -34,6 +34,8 @@ struct MemoApp: App {
     /// Created before the store, so no sync event is missed.
     @State private var syncMonitor = CloudSyncMonitor()
 
+    @Environment(\.scenePhase) private var scenePhase
+
     init() {
         let cloud: SettingsCloud? = AppConfiguration.isCloudSyncAvailable
             ? UbiquitousSettingsCloud()
@@ -53,6 +55,11 @@ struct MemoApp: App {
                 .environment(practiceSettings)
                 .environment(aiSettings)
                 .environment(repositorySettings)
+                .onChange(of: scenePhase) {
+                    // A sign-in or sign-out on another device shows up here
+                    // the next time the app is looked at.
+                    if scenePhase == .active { repositorySettings.refreshSignIn() }
+                }
                 .environment(syncMonitor)
                 .task {
                     // Logged at launch so "my decks didn't sync" is
