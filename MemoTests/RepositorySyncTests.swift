@@ -338,6 +338,28 @@ final class RepositorySyncTests: XCTestCase {
         XCTAssertEqual(store.settings.repository, "javier/decks")
     }
 
+    func testASignInArrivingFromAnotherDeviceIsNoticed() throws {
+        let secrets = MemorySecretStore()
+        let store = RepositorySettingsStore(
+            defaults: UserDefaults(suiteName: "test.repository.\(UUID().uuidString)")!,
+            secrets: secrets
+        )
+        store.settings.repository = "javier/decks"
+        XCTAssertFalse(store.isReady)
+
+        // What iCloud Keychain does when another device signs in.
+        secrets.secrets["github"] = "token"
+        XCTAssertFalse(store.isSignedIn, "the Keychain does not announce it")
+
+        store.refreshSignIn()
+        XCTAssertTrue(store.isReady)
+
+        // And when another device signs out.
+        secrets.secrets["github"] = nil
+        store.refreshSignIn()
+        XCTAssertFalse(store.isSignedIn)
+    }
+
     func testOlderRepositorySettingsStillDecode() throws {
         let decoded = try JSONDecoder().decode(
             RepositorySettings.self,

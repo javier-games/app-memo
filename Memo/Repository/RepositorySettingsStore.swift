@@ -43,9 +43,9 @@ extension RepositorySettings {
 
 /// Holds the repository settings and whether this device is signed in.
 ///
-/// The settings are shared between the user's devices like the others. The
-/// token is not: like the AI key it stays in this device's Keychain, so each
-/// device signs in for itself.
+/// The settings are shared between the user's devices like the others. So is
+/// the sign-in: the token is kept in iCloud Keychain, so signing in on one
+/// device signs in all of them, and signing out does the same.
 @Observable
 final class RepositorySettingsStore {
 
@@ -73,7 +73,10 @@ final class RepositorySettingsStore {
 
     init(
         defaults: UserDefaults = .standard,
-        secrets: SecretStore = KeychainSecretStore(service: "games.javier.memo.github"),
+        secrets: SecretStore = KeychainSecretStore(
+            service: "games.javier.memo.github",
+            isSynchronized: true
+        ),
         cloud: SettingsCloud? = nil
     ) {
         let storage = SettingsStorage(key: Self.storageKey, defaults: defaults, cloud: cloud)
@@ -85,7 +88,18 @@ final class RepositorySettingsStore {
 
         storage.onRemoteChange { [weak self] data in
             self?.settings = Self.decode(data)
+            // A sign-in elsewhere changes the settings too, so this is the
+            // moment its token is likely to have arrived as well.
+            self?.refreshSignIn()
         }
+    }
+
+    /// Looks again for a token. The Keychain says nothing when one arrives
+    /// from, or is removed by, another device, so this is asked at the times
+    /// that matters: coming back to the app, and opening the Sync settings.
+    func refreshSignIn() {
+        let hasToken = secrets.secret(for: Self.tokenAccount) != nil
+        if hasToken != isSignedIn { isSignedIn = hasToken }
     }
 
     var token: String? { secrets.secret(for: Self.tokenAccount) }
@@ -99,8 +113,8 @@ final class RepositorySettingsStore {
         settings.accountLogin = login
     }
 
-    /// Forgets the token. The repository choice is kept: it is shared with
-    /// the user's other devices, and signing out here should not undo it there.
+    /// Forgets the token, on every device. The repository choice is kept, so
+    /// signing in again picks up where things were.
     func signOut() {
         do {
             try secrets.setSecret(nil, for: Self.tokenAccount)
