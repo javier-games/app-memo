@@ -121,7 +121,7 @@ practised a card elsewhere, you can set its count by hand in the card editor.
 ## Card Audio
 
 Each card can carry four recordings: its front, its back, and each hint. In the
-card editor, the button beside a field records for it (a red dot when there is
+card editor, the button at the end of each field's row records for it (a red dot when there is
 nothing yet). Once recorded it plays the clip, and holding it offers **Record
 Again** and **Remove**. Clips are recorded as AAC, mono, at speech quality, and
 stop on their own at 30 seconds.

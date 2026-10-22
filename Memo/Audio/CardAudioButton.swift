@@ -55,19 +55,31 @@ struct CardAudioButton: View {
     }
 
     private var ring: some View {
+        AudioRing(isPlaying: isPlaying, progress: player.progress, style: style, size: size)
+    }
+}
+
+/// The round play-or-stop face of an audio control, with the ring that fills
+/// as a clip plays. Shared by every control that plays card audio, whatever
+/// kind of control it sits in.
+struct AudioRing: View {
+
+    let isPlaying: Bool
+    let progress: Double
+    var style = CardAudioButton.Style.plain
+    var size: CGFloat = 30
+
+    var body: some View {
         ZStack {
             Circle()
-                .fill(style == .onCard ? AnyShapeStyle(.ultraThinMaterial) : AnyShapeStyle(Color(.secondarySystemGroupedBackground)))
-
-            Circle()
-                .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
+                .fill(style == .onCard ? AnyShapeStyle(.ultraThinMaterial) : AnyShapeStyle(Color(.tertiarySystemFill)))
 
             if isPlaying {
                 Circle()
-                    .trim(from: 0, to: player.progress)
+                    .trim(from: 0, to: progress)
                     .stroke(Color.accentColor, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
                     .rotationEffect(.degrees(-90))
-                    .animation(.linear(duration: 0.05), value: player.progress)
+                    .animation(.linear(duration: 0.05), value: progress)
             }
 
             Image(systemName: isPlaying ? "stop.fill" : "play.fill")

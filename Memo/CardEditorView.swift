@@ -186,7 +186,7 @@ struct CardEditorView: View {
                 } header: {
                     Text("Front")
                 } footer: {
-                    Text("The button beside each field records audio for it. Hold a recorded one to record again or remove it.")
+                    Text("The button at the end of each row records audio for it. Hold a recorded one to record again or remove it.")
                 }
 
                 practiceSection
@@ -238,8 +238,9 @@ struct CardEditorView: View {
 
     // MARK: - Text and audio
 
-    /// One side of the card: its text and its hint, each with the button for
-    /// its recording outside the field, so it never reads as dictation.
+    /// One side of the card: its text and its hint, each in its own row with
+    /// the button for its recording at the end of the row.
+    @ViewBuilder
     private func side(
         text: Binding<String>,
         prompt: LocalizedStringKey,
@@ -247,65 +248,55 @@ struct CardEditorView: View {
         hint: Binding<String>,
         hintSlot: AudioSlot
     ) -> some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 10) {
-                TextField(prompt, text: text, axis: .vertical)
-                    .lineLimit(2...8)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 11)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        Color(.secondarySystemGroupedBackground),
-                        in: UnevenRoundedRectangle(topLeadingRadius: 10, topTrailingRadius: 10)
-                    )
-                    .overlay(alignment: .bottom) {
-                        Divider().padding(.leading, 16)
-                    }
-
-                audioControl(slot)
-            }
-
-            HStack(spacing: 10) {
-                TextField("Hint", text: hint, axis: .vertical)
-                    .lineLimit(1...4)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 11)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        Color(.secondarySystemGroupedBackground),
-                        in: UnevenRoundedRectangle(bottomLeadingRadius: 10, bottomTrailingRadius: 10)
-                    )
-
-                audioControl(hintSlot)
-            }
+        HStack(spacing: 12) {
+            TextField(prompt, text: text, axis: .vertical)
+                .lineLimit(2...8)
+            audioControl(slot)
         }
-        // The fields draw their own rounded group so the buttons can sit
-        // beside it rather than inside it.
-        .listRowInsets(EdgeInsets())
-        .listRowBackground(Color.clear)
+
+        HStack(spacing: 12) {
+            TextField("Hint", text: hint, axis: .vertical)
+                .lineLimit(1...4)
+            audioControl(hintSlot)
+        }
     }
 
-    /// Records when the slot is empty; plays and stops when it is not, with
-    /// re-recording and removal on a hold.
+    /// Records when the slot is empty. Once recorded, a tap plays or stops,
+    /// and a hold opens a menu from the button itself to record again or
+    /// remove, so it is clear which recording is meant.
+    ///
+    /// Borderless, so only the button responds: in a form, an ordinary button
+    /// makes its whole row a button.
     @ViewBuilder
     private func audioControl(_ slot: AudioSlot) -> some View {
-        if draft.audio[slot] != nil {
-            CardAudioButton(id: "draft-\(slot.rawValue)", data: { draft.audio[slot]?.data })
-                .buttonStyle(.plain)
-                .contextMenu {
-                    Button {
-                        player.stop()
-                        recordingSlot = slot
-                    } label: {
-                        Label("Record Again", systemImage: "record.circle")
-                    }
+        let id = "draft-\(slot.rawValue)"
 
-                    Button(role: .destructive) {
-                        removingSlot = slot
-                    } label: {
-                        Label("Remove", systemImage: "trash")
-                    }
+        if draft.audio[slot] != nil {
+            Menu {
+                Button {
+                    player.stop()
+                    recordingSlot = slot
+                } label: {
+                    Label("Record Again", systemImage: "record.circle")
                 }
+
+                Button(role: .destructive) {
+                    removingSlot = slot
+                } label: {
+                    Label("Remove", systemImage: "trash")
+                }
+            } label: {
+                AudioRing(isPlaying: player.isPlaying(id), progress: player.progress)
+            } primaryAction: {
+                if player.isPlaying(id) {
+                    player.stop()
+                } else if let data = draft.audio[slot]?.data {
+                    player.play(data, id: id, trigger: .user)
+                }
+            }
+            .buttonStyle(.borderless)
+            .accessibilityLabel(player.isPlaying(id) ? "Stop \(slot.title) audio" : "Play \(slot.title) audio")
+            .accessibilityHint("Hold for more options")
         } else {
             Button {
                 player.stop()
@@ -313,16 +304,14 @@ struct CardEditorView: View {
             } label: {
                 ZStack {
                     Circle()
-                        .fill(Color(.secondarySystemGroupedBackground))
-                    Circle()
-                        .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
+                        .fill(Color(.tertiarySystemFill))
                     Circle()
                         .fill(Color.red)
                         .frame(width: 11, height: 11)
                 }
                 .frame(width: 30, height: 30)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.borderless)
             .accessibilityLabel("Record \(slot.title) audio")
         }
     }
