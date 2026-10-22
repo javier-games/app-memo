@@ -102,8 +102,13 @@ struct CardDraft {
             changed = true
 
             // Every recording in the slot, in case two devices each added one.
-            for old in (card.audios ?? []) where old.slot == slot {
-                card.modelContext?.delete(old)
+            // Taken off the card as well as deleted: a deletion only reaches
+            // the relationship when the store next saves, and until then the
+            // card would go on reporting, and playing, the old recording.
+            let old = (card.audios ?? []).filter { $0.slot == slot }
+            card.audios?.removeAll { $0.slot == slot }
+            for recording in old {
+                card.modelContext?.delete(recording)
             }
 
             if let wanted {

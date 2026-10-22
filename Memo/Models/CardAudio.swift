@@ -80,9 +80,9 @@ extension Card {
     /// have each recorded one before syncing.
     func audio(for slot: AudioSlot) -> CardAudio? {
         (audios ?? [])
-            .filter { $0.slot == slot }
+            .filter { $0.slot == slot && !$0.isDeleted }
             .max { $0.createdAt < $1.createdAt }
     }
 
-    var hasAudio: Bool { !(audios ?? []).isEmpty }
+    var hasAudio: Bool { (audios ?? []).contains { !$0.isDeleted } }
 }
