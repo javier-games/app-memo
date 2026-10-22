@@ -44,7 +44,7 @@ enum MemoModelContainer {
     /// reasons. Changing this string orphans every record already synced.
     static let cloudKitContainerIdentifier = "iCloud.com.javier.memo"
 
-    static let schema = Schema([Deck.self, Card.self])
+    static let schema = Schema([Deck.self, Card.self, CardAudio.self])
 
     /// Creates the container used by the app.
     static func make() -> ModelContainer {

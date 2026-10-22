@@ -359,4 +359,5 @@ struct DeckRow: View {
         .environment(RepositorySettingsStore(
             defaults: UserDefaults(suiteName: "preview.repository.settings")!
         ))
+        .environment(AudioPlayer())
 }

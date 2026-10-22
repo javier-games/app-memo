@@ -11,6 +11,8 @@ import SwiftData
 struct PracticeView: View {
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(AudioPlayer.self) private var player
+    @Environment(PracticeSettingsStore.self) private var store
 
     let deck: Deck
 
@@ -29,6 +31,10 @@ struct PracticeView: View {
     @State private var cardScale: CGFloat = 0
     @State private var showHint = false
     @State private var editingCard: Card?
+
+    /// Set while one card makes way for the next, so the outgoing card turning
+    /// back over does not play its audio on the way out.
+    @State private var isChangingCard = false
 
     init(deck: Deck, settings: PracticeSettings) {
         self.deck = deck
@@ -62,6 +68,7 @@ struct PracticeView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .onDisappear { player.stop() }
     }
 
     // MARK: - Practising
@@ -105,6 +112,15 @@ struct PracticeView: View {
                     } label: {
                         Label("Show hint", systemImage: "questionmark.circle")
                     }
+                }
+
+                if let audio = visibleHintAudio {
+                    CardAudioButton(
+                        id: audio.uuid.uuidString,
+                        data: { audio.data },
+                        size: 22,
+                        label: "Hint"
+                    )
                 }
             }
             .buttonStyle(.bordered)
@@ -197,15 +213,15 @@ struct PracticeView: View {
 
     /// The face revealed by flipping: the answer.
     private var frontView: some View {
-        cardFace(text: faces?.answerText ?? "", hint: faces?.answerHint ?? "")
+        cardFace(text: faces?.answerText ?? "", hint: faces?.answerHint ?? "", slot: faces?.answerSlot)
     }
 
     /// The face shown first: the prompt.
     private var backView: some View {
-        cardFace(text: faces?.promptText ?? "", hint: faces?.promptHint ?? "")
+        cardFace(text: faces?.promptText ?? "", hint: faces?.promptHint ?? "", slot: faces?.promptSlot)
     }
 
-    private func cardFace(text: String, hint: String) -> some View {
+    private func cardFace(text: String, hint: String, slot: AudioSlot?) -> some View {
         VStack(spacing: 10) {
             Text(text)
                 // Roughly twice the body text this used to use. Short entries —
@@ -232,6 +248,49 @@ struct PracticeView: View {
         .frame(width: Self.cardSize.width, height: Self.cardSize.height)
         .background(deck.color)
         .foregroundStyle(deck.contrastingTextColor)
+        // Stops this side's audio, or plays it again.
+        .overlay(alignment: .topTrailing) {
+            if let audio = currentAudio(slot) {
+                CardAudioButton(
+                    id: audio.uuid.uuidString,
+                    data: { audio.data },
+                    style: .onCard,
+                    size: 32
+                )
+                .buttonStyle(.plain)
+                .padding(8)
+            }
+        }
+    }
+
+    // MARK: - Audio
+
+    private func currentAudio(_ slot: AudioSlot?) -> CardAudio? {
+        guard let slot else { return nil }
+        return session.currentCard?.audio(for: slot)
+    }
+
+    /// The recorded hint for whichever side is facing the user.
+    private var visibleHintAudio: CardAudio? {
+        guard let faces else { return nil }
+        return currentAudio(isRevealed ? faces.answerHintSlot : faces.promptHintSlot)
+    }
+
+    /// Plays the audio of the side now facing the user, if the playback
+    /// setting says it should play by itself. Either way, whatever was
+    /// playing stops: a side being shown ends the last side's audio and any
+    /// hint.
+    private func playVisibleSide() {
+        player.stop()
+
+        guard !isChangingCard,
+              let faces,
+              store.settings.audioPlayback.playsAutomatically(headphonesConnected: AudioRoute.hasHeadphones),
+              let audio = currentAudio(isRevealed ? faces.answerSlot : faces.promptSlot),
+              let data = audio.data
+        else { return }
+
+        player.play(data, id: audio.uuid.uuidString, trigger: .automatic)
     }
 
     /// Bookmarking here changes later runs, not this one: the cards of a run
@@ -380,7 +439,10 @@ struct PracticeView: View {
     }
 
     private func onFlip(isRevealed: Bool) {
+        let isNewSide = self.isRevealed != isRevealed
         self.isRevealed = isRevealed
+
+        if isNewSide { playVisibleSide() }
 
         if isRevealed {
             interactivity.remove(.flipDrag)
@@ -407,12 +469,18 @@ struct PracticeView: View {
     // MARK: - Card animation
 
     private func showCard() {
+        isChangingCard = false
+        playVisibleSide()
+
         withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
             cardScale = 1
         }
     }
 
     private func hideCard(completion: @escaping () -> Void) {
+        isChangingCard = true
+        player.stop()
+
         if isRevealed { flip = true }
 
         withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
@@ -506,4 +574,8 @@ struct CircleButtonView: View {
         PracticeView(deck: PreviewData.sampleDeck(in: container), settings: .default)
     }
     .modelContainer(container)
+    .environment(AudioPlayer())
+    .environment(PracticeSettingsStore(
+        defaults: UserDefaults(suiteName: "preview.practice.settings")!
+    ))
 }

@@ -167,6 +167,10 @@ struct PracticeSettings: Codable, Equatable {
     /// What a wrong answer does to a card's progress.
     var errorPenalty: PracticeErrorPenalty = .none
 
+    /// When card audio plays without being asked. An app-wide choice, read
+    /// from the app's own settings rather than from a deck's.
+    var audioPlayback: AudioPlaybackMode = .automatic
+
     static let `default` = PracticeSettings()
 
     /// The range the practice target may be set to.
@@ -220,7 +224,7 @@ struct PracticeSettings: Codable, Equatable {
 extension PracticeSettings {
 
     private enum CodingKeys: String, CodingKey {
-        case isInverted, mode, cardLimit, practiceTarget, bookmarkFallbackMode, errorPenalty
+        case isInverted, mode, cardLimit, practiceTarget, bookmarkFallbackMode, errorPenalty, audioPlayback
     }
 
     /// Decodes leniently: any rule absent from a stored payload takes its
@@ -247,7 +251,9 @@ extension PracticeSettings {
             bookmarkFallbackMode: (try? container.decode(PracticeMode.self, forKey: .bookmarkFallbackMode))
                 ?? fallback.bookmarkFallbackMode,
             errorPenalty: (try? container.decode(PracticeErrorPenalty.self, forKey: .errorPenalty))
-                ?? fallback.errorPenalty
+                ?? fallback.errorPenalty,
+            audioPlayback: (try? container.decode(AudioPlaybackMode.self, forKey: .audioPlayback))
+                ?? fallback.audioPlayback
         )
     }
 }
@@ -263,7 +269,18 @@ struct CardFaces: Equatable {
     let answerText: String
     let answerHint: String
 
+    /// Where each face's recordings live, the same way round as its text.
+    let promptSlot: AudioSlot
+    let promptHintSlot: AudioSlot
+    let answerSlot: AudioSlot
+    let answerHintSlot: AudioSlot
+
     init(card: Card, inverted: Bool) {
+        promptSlot = inverted ? .front : .back
+        promptHintSlot = inverted ? .frontHint : .backHint
+        answerSlot = inverted ? .back : .front
+        answerHintSlot = inverted ? .backHint : .frontHint
+
         if inverted {
             promptText = card.frontText
             promptHint = card.frontHintText

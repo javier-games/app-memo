@@ -75,6 +75,13 @@
 		A6843ADDCA130BB990EB6BA2 /* PracticeResultsReveal.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDEF0381D5A853BBE5FE5954 /* PracticeResultsReveal.swift */; };
 		F4BFFC7D395650B3F68BDB74 /* PracticeReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5C7F0FE60E72EDB2F23F66E /* PracticeReviewView.swift */; };
 		66691679C5E4350E6254FA2C /* PracticeResultsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C91BDBFB605F67F2A7F896 /* PracticeResultsTests.swift */; };
+		CC3DD37CF59A51FC738CE5A5 /* AudioPlayback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70465F6800209ABBFA298CBB /* AudioPlayback.swift */; };
+		F2A7F9C2E995831AB6E4B246 /* VoiceRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EB8CD69649048406AB8434 /* VoiceRecorder.swift */; };
+		1D9E38233570254D45D3C80B /* CardAudioButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B525D981ED38225EE30FEACF /* CardAudioButton.swift */; };
+		29F92395E0BC16C977996EBD /* AudioRecorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00C1A57823788427AE76384 /* AudioRecorderView.swift */; };
+		B59A5B4F1CA82506DD6C6D66 /* CardAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 539091B020E38B3475938956 /* CardAudio.swift */; };
+		C604A922D3376439BF3B7278 /* AudioSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA7ABF5CA8E45496AB9E3B38 /* AudioSettingsView.swift */; };
+		BEE6A85ED300ED3A10E51D7F /* CardAudioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77712C3DE53C8E235670F53 /* CardAudioTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -167,6 +174,13 @@
 		BDEF0381D5A853BBE5FE5954 /* PracticeResultsReveal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PracticeResultsReveal.swift"; sourceTree = "<group>"; };
 		D5C7F0FE60E72EDB2F23F66E /* PracticeReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PracticeReviewView.swift"; sourceTree = "<group>"; };
 		96C91BDBFB605F67F2A7F896 /* PracticeResultsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PracticeResultsTests.swift"; sourceTree = "<group>"; };
+		70465F6800209ABBFA298CBB /* AudioPlayback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AudioPlayback.swift"; sourceTree = "<group>"; };
+		A2EB8CD69649048406AB8434 /* VoiceRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VoiceRecorder.swift"; sourceTree = "<group>"; };
+		B525D981ED38225EE30FEACF /* CardAudioButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CardAudioButton.swift"; sourceTree = "<group>"; };
+		E00C1A57823788427AE76384 /* AudioRecorderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AudioRecorderView.swift"; sourceTree = "<group>"; };
+		539091B020E38B3475938956 /* CardAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CardAudio.swift"; sourceTree = "<group>"; };
+		EA7ABF5CA8E45496AB9E3B38 /* AudioSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AudioSettingsView.swift"; sourceTree = "<group>"; };
+		F77712C3DE53C8E235670F53 /* CardAudioTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CardAudioTests.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -219,6 +233,7 @@
 			isa = PBXGroup;
 			children = (
 				D05C2182AE53FB30E3B4D500 /* DeckTransferTests.swift */,
+				F77712C3DE53C8E235670F53 /* CardAudioTests.swift */,
 				90C3A1F6B51A26AE7467D5A8 /* CardSearchTests.swift */,
 				E22AEBEFD80E57E1794B80A7 /* RepositorySyncTests.swift */,
 				E2E45FF985F8468B80EEF8AF /* SettingsStorageTests.swift */,
@@ -258,6 +273,7 @@
 			children = (
 				B2D436FEA185699A975E2AD3 /* Deck.swift */,
 				34901B269B68CECE9F0FA098 /* Card.swift */,
+				539091B020E38B3475938956 /* CardAudio.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -312,6 +328,7 @@
 				38D198E6451FDCC727584A9A /* DeckEditorView.swift */,
 				B4CB5403CE9F8816943F8E52 /* DeckSettingsView.swift */,
 				9D13033938681367210A0106 /* Transfer */,
+				E4FC598D5EA677774C5CB7CF /* Audio */,
 				595CC55D75B9FD5C06B84FCC /* Repository */,
 				98B30011FD76E354F808B610 /* AI */,
 				DA611807EB61CA9BE0B68095 /* Settings */,
@@ -351,6 +368,7 @@
 			isa = PBXGroup;
 			children = (
 				D0E4498A909F21F5E7EA5650 /* SettingsView.swift */,
+				EA7ABF5CA8E45496AB9E3B38 /* AudioSettingsView.swift */,
 				6A7B43A7CBB143C75EA82DEC /* SyncSettingsView.swift */,
 				9DB301C2A0449B7F7D3CD9CB /* DecksSettingsView.swift */,
 			);
@@ -366,6 +384,17 @@
 				80B085E329B1114FCA3698FC /* RepositorySyncView.swift */,
 			);
 			path = Repository;
+			sourceTree = "<group>";
+		};
+		E4FC598D5EA677774C5CB7CF /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				70465F6800209ABBFA298CBB /* AudioPlayback.swift */,
+				A2EB8CD69649048406AB8434 /* VoiceRecorder.swift */,
+				B525D981ED38225EE30FEACF /* CardAudioButton.swift */,
+				E00C1A57823788427AE76384 /* AudioRecorderView.swift */,
+			);
+			path = Audio;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -500,6 +529,12 @@
 				E6E73DEC4915BB2596461DB7 /* DeckEditorView.swift in Sources */,
 				6EB9C5C8D6E2CB8D41295675 /* DeckExporter.swift in Sources */,
 				AC18781D6AE2C10323E98859 /* DeckImporter.swift in Sources */,
+				C604A922D3376439BF3B7278 /* AudioSettingsView.swift in Sources */,
+				B59A5B4F1CA82506DD6C6D66 /* CardAudio.swift in Sources */,
+				29F92395E0BC16C977996EBD /* AudioRecorderView.swift in Sources */,
+				1D9E38233570254D45D3C80B /* CardAudioButton.swift in Sources */,
+				F2A7F9C2E995831AB6E4B246 /* VoiceRecorder.swift in Sources */,
+				CC3DD37CF59A51FC738CE5A5 /* AudioPlayback.swift in Sources */,
 				BBA5870F944F3767E0122916 /* DeckSettingsView.swift in Sources */,
 				E7E9C2BFA1398C1DE81ADF38 /* CardSearch.swift in Sources */,
 				4B895D2EE0904CD60F6BBF98 /* SyncSettingsView.swift in Sources */,
@@ -557,6 +592,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				75FED3B78920FDF5C57F2854 /* DeckTransferTests.swift in Sources */,
+				BEE6A85ED300ED3A10E51D7F /* CardAudioTests.swift in Sources */,
 				9CBBF9A78CA9DAA6DFA6C3EC /* CardSearchTests.swift in Sources */,
 				0CFC3F08AABAB9A50E5A8182 /* RepositorySyncTests.swift in Sources */,
 				8DA371F06B7CF0668C45FE6B /* SettingsStorageTests.swift in Sources */,
@@ -728,6 +764,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Memo;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Memo uses the microphone only while you record audio for a card.";
 				INFOPLIST_KEY_UIBackgroundModes = "remote-notification";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -764,6 +801,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Memo;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Memo uses the microphone only while you record audio for a card.";
 				INFOPLIST_KEY_UIBackgroundModes = "remote-notification";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

@@ -50,6 +50,11 @@ final class Card {
 
     var deck: Deck?
 
+    /// Recordings for the card's sides and hints; see ``CardAudio``. Deleting
+    /// the card deletes them, on every device.
+    @Relationship(deleteRule: .cascade, inverse: \CardAudio.card)
+    var audios: [CardAudio]? = []
+
     init(
         uuid: UUID = UUID(),
         frontText: String = "",

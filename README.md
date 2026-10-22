@@ -21,6 +21,7 @@ Designed to enhance your learning experience by using customizable flash cards. 
     - **Session results**: Finishing a deck counts up how many you got right, wrong and skipped, and offers another run. Tap any of the three to see its cards, and tap a card there to edit it without leaving the results.
 - **Practice Options**: Five modes to practise in, an inverse mode that flips which side asks the question, and a limit so you can drill part of a deck. Each deck has its own. See [Practice Options](#practice-options).
 - **Bookmarks**: Mark the cards you want to come back to and practise only those.
+- **Audio**: Record audio for either side of a card and for its hints. It plays as each side is shown while practising, or only when you tap, as you choose. See [Card Audio](#card-audio).
 - **Progress per Card**: Each card counts consecutive correct answers towards a target. A wrong answer sends it back to zero, so the count reflects what you currently know rather than what you once did.
 - **Import and Export Decks**: Import decks from the **Add** menu on the deck list, and share a deck from its **Deck Settings**. Both work in JSON and CSV. **Settings → Decks → Export All Decks** puts every deck in one JSON file. A JSON file exported from Memo can be imported again to update the decks it came from.
 - **Repository Sync**: Keep decks in a GitHub repository and push or pull the ones you pick. See [Repository Sync](#repository-sync).
@@ -116,6 +117,35 @@ already at zero, already at the target, or the deck's target is 0 — the menu
 says so instead. The deck list shows each card's standing
 — grey while short of the target, green once reached. If you have already
 practised a card elsewhere, you can set its count by hand in the card editor.
+
+## Card Audio
+
+Each card can carry four recordings: its front, its back, and each hint. In the
+card editor, the button beside a field records for it (a red dot when there is
+nothing yet). Once recorded it plays the clip, and holding it offers **Record
+Again** and **Remove**. Clips are recorded as AAC, mono, at speech quality, and
+stop on their own at 30 seconds.
+
+While practising, a side with audio shows a button in the card's corner, with
+a ring that fills as the clip plays: tap it to stop, or to hear it again. A
+recorded hint gets its own **Hint** button under the card. Only one clip plays
+at a time: turning the card, playing the hint and moving to the next card each
+stop whatever was playing.
+
+**Settings → Practice → Audio** decides when audio plays by itself:
+
+| Mode | What happens |
+| --- | --- |
+| **Automatic** (default) | Each side plays its audio as it is shown. |
+| **Manual** | Audio plays only when you tap a play button. |
+| **Automatic with Headphones** | Automatic while headphones are connected, manual when they are not. |
+
+Audio that plays by itself is silenced by the silent switch; audio you start
+with a button is not. Either way, music or anything else playing on the phone
+carries on at full volume.
+
+Recordings sync through iCloud with the cards they belong to. They are not yet
+included in exports or in repository sync.
 
 ## File Formats
 
