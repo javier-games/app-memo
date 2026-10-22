@@ -144,8 +144,9 @@ Audio that plays by itself is silenced by the silent switch; audio you start
 with a button is not. Either way, music or anything else playing on the phone
 carries on at full volume.
 
-Recordings sync through iCloud with the cards they belong to. They are not yet
-included in exports or in repository sync.
+Recordings sync through iCloud with the cards they belong to, and travel in
+exports as described under [Packages](#packages). They are not yet included in
+repository sync.
 
 ## File Formats
 
@@ -185,6 +186,32 @@ Everything except `cardList` is optional, so a hand-written file needs only what
 you care about. Cards with no front or no back are skipped, and the import
 summary says how many were left out. A file may hold any number of decks, and
 several files can be picked at once.
+
+### Packages
+
+A deck with recordings can be shared as **JSON and Audio**, from its Deck
+Settings, or every deck at once with **Export All with Audio** in Settings →
+Decks. Either makes a zip:
+
+```
+Verbs.zip
+├── Verbs.json
+└── audio/
+    └── 0A1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D.m4a
+```
+
+The JSON is the ordinary format plus one reference per recording on each card:
+`frontAudio`, `frontHintAudio`, `backAudio` and `backHintAudio`, each a path
+relative to the JSON file, such as `"frontAudio": "audio/0A1B….m4a"`.
+Recordings are AAC (`.m4a`); MP3, AAC, WAV and CAF files are accepted on
+import, up to 5 MB each. A plain JSON export leaves the references out, and a
+plain JSON import ignores any it finds, since there is no audio to go with
+them.
+
+Import a package with **Add → Import → JSON and Audio**. It follows the same
+rules as any other import, and for recordings: a card that has none in a slot
+gets the package's, and a recording already on a card is never replaced or
+removed.
 
 ### Importing a file again
 

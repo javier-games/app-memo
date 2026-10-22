@@ -30,14 +30,23 @@ struct ImportReviewView: View {
                         count("New Cards", plan.newCardCount)
                         count("Decks Updated", plan.updatedDeckCount)
                         count("Cards Updated", plan.updatedCardCount)
+                        count("Recordings", plan.newAudioCount)
                     } else if plan.hasConflicts {
                         Text("Nothing in the file is new besides the differences below.")
                     } else {
                         Text("Everything in the file is already in your library.")
                     }
                 } footer: {
-                    if plan.skippedCardCount > 0 {
-                        Text("\(plan.skippedCardCount) card(s) were left out for having no front or no back.")
+                    VStack(alignment: .leading, spacing: 4) {
+                        if plan.skippedCardCount > 0 {
+                            Text("\(plan.skippedCardCount) card(s) were left out for having no front or no back.")
+                        }
+                        if plan.skippedAudioCount > 0 {
+                            Text("\(plan.skippedAudioCount) recording(s) were left out: missing from the file, not audio, or larger than 5 MB.")
+                        }
+                        if plan.newAudioCount > 0 {
+                            Text("Recordings are added where a card has none. Recordings you already have are kept.")
+                        }
                     }
                 }
 

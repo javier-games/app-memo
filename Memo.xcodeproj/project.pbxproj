@@ -82,6 +82,9 @@
 		B59A5B4F1CA82506DD6C6D66 /* CardAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 539091B020E38B3475938956 /* CardAudio.swift */; };
 		C604A922D3376439BF3B7278 /* AudioSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA7ABF5CA8E45496AB9E3B38 /* AudioSettingsView.swift */; };
 		BEE6A85ED300ED3A10E51D7F /* CardAudioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77712C3DE53C8E235670F53 /* CardAudioTests.swift */; };
+		8D87A492A9B32E37798B1BBD /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 068D40B626A5CF059C9A6456 /* ZIPFoundation */; };
+		F6F124B6F9FBCA067C341781 /* DeckPackage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 186BA3656AA036E63FA8AC1A /* DeckPackage.swift */; };
+		1F4D7E5675FAE237CA11E65B /* DeckPackageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D6A456A6BF1784B06EA7F9 /* DeckPackageTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -181,6 +184,8 @@
 		539091B020E38B3475938956 /* CardAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CardAudio.swift"; sourceTree = "<group>"; };
 		EA7ABF5CA8E45496AB9E3B38 /* AudioSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AudioSettingsView.swift"; sourceTree = "<group>"; };
 		F77712C3DE53C8E235670F53 /* CardAudioTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CardAudioTests.swift"; sourceTree = "<group>"; };
+		186BA3656AA036E63FA8AC1A /* DeckPackage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeckPackage.swift"; sourceTree = "<group>"; };
+		D8D6A456A6BF1784B06EA7F9 /* DeckPackageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeckPackageTests.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -188,6 +193,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8D87A492A9B32E37798B1BBD /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -214,6 +220,7 @@
 				89903CBD36787EB75C82B396 /* DeckTransferFormat.swift */,
 				3323348FE7108D16A54E1D56 /* DeckCSVFormat.swift */,
 				495041363AA400C41DF8D836 /* DeckImporter.swift */,
+				186BA3656AA036E63FA8AC1A /* DeckPackage.swift */,
 				E99A15A61F481A85DEFFFA70 /* ImportReviewView.swift */,
 				F7E3C6CDBCF596C67FD4B498 /* DeckImportPlan.swift */,
 				06E5E5C55257B9702C3D24CD /* DeckExporter.swift */,
@@ -233,6 +240,7 @@
 			isa = PBXGroup;
 			children = (
 				D05C2182AE53FB30E3B4D500 /* DeckTransferTests.swift */,
+				D8D6A456A6BF1784B06EA7F9 /* DeckPackageTests.swift */,
 				F77712C3DE53C8E235670F53 /* CardAudioTests.swift */,
 				90C3A1F6B51A26AE7467D5A8 /* CardSearchTests.swift */,
 				E22AEBEFD80E57E1794B80A7 /* RepositorySyncTests.swift */,
@@ -413,6 +421,9 @@
 			dependencies = (
 			);
 			name = Memo;
+			packageProductDependencies = (
+				068D40B626A5CF059C9A6456 /* ZIPFoundation */,
+			);
 			productName = Memo;
 			productReference = F49183742B622B930051531F /* Memo.app */;
 			productType = "com.apple.product-type.application";
@@ -485,6 +496,9 @@
 				Base,
 			);
 			mainGroup = F491836B2B622B930051531F;
+			packageReferences = (
+				CABC9E60F2B43281826AD9C9 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+			);
 			productRefGroup = F49183752B622B930051531F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -529,6 +543,7 @@
 				E6E73DEC4915BB2596461DB7 /* DeckEditorView.swift in Sources */,
 				6EB9C5C8D6E2CB8D41295675 /* DeckExporter.swift in Sources */,
 				AC18781D6AE2C10323E98859 /* DeckImporter.swift in Sources */,
+				F6F124B6F9FBCA067C341781 /* DeckPackage.swift in Sources */,
 				C604A922D3376439BF3B7278 /* AudioSettingsView.swift in Sources */,
 				B59A5B4F1CA82506DD6C6D66 /* CardAudio.swift in Sources */,
 				29F92395E0BC16C977996EBD /* AudioRecorderView.swift in Sources */,
@@ -592,6 +607,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				75FED3B78920FDF5C57F2854 /* DeckTransferTests.swift in Sources */,
+				1F4D7E5675FAE237CA11E65B /* DeckPackageTests.swift in Sources */,
 				BEE6A85ED300ED3A10E51D7F /* CardAudioTests.swift in Sources */,
 				9CBBF9A78CA9DAA6DFA6C3EC /* CardSearchTests.swift in Sources */,
 				0CFC3F08AABAB9A50E5A8182 /* RepositorySyncTests.swift in Sources */,
@@ -942,6 +958,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CABC9E60F2B43281826AD9C9 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.19;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		068D40B626A5CF059C9A6456 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CABC9E60F2B43281826AD9C9 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = F491836C2B622B930051531F /* Project object */;
 }

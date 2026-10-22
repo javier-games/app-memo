@@ -85,6 +85,14 @@ struct DeckTransferCard: Codable {
     /// to the published schema.
     var practiceProgress: Int?
 
+    /// Where each recording is in a package, relative to the JSON file, such
+    /// as `audio/6F1C2B3A-….m4a`. Only written into packages; plain JSON
+    /// has nowhere to keep the sound, so it leaves these out.
+    var frontAudio: String?
+    var frontHintAudio: String?
+    var backAudio: String?
+    var backHintAudio: String?
+
     init(
         id: String? = nil,
         modifiedAt: String? = nil,
@@ -114,6 +122,30 @@ struct DeckTransferCard: Codable {
         frontHintText = (try? container.decode(String.self, forKey: .frontHintText)) ?? ""
         backHintText = (try? container.decode(String.self, forKey: .backHintText)) ?? ""
         practiceProgress = try? container.decode(Int.self, forKey: .practiceProgress)
+        frontAudio = try? container.decode(String.self, forKey: .frontAudio)
+        frontHintAudio = try? container.decode(String.self, forKey: .frontHintAudio)
+        backAudio = try? container.decode(String.self, forKey: .backAudio)
+        backHintAudio = try? container.decode(String.self, forKey: .backHintAudio)
+    }
+
+    /// The recording reference for `slot`.
+    subscript(audio slot: AudioSlot) -> String? {
+        get {
+            switch slot {
+            case .front:     frontAudio
+            case .frontHint: frontHintAudio
+            case .back:      backAudio
+            case .backHint:  backHintAudio
+            }
+        }
+        set {
+            switch slot {
+            case .front:     frontAudio = newValue
+            case .frontHint: frontHintAudio = newValue
+            case .back:      backAudio = newValue
+            case .backHint:  backHintAudio = newValue
+            }
+        }
     }
 
     var uuid: UUID? { id.flatMap(UUID.init(uuidString:)) }
