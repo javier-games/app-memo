@@ -31,6 +31,9 @@ struct MemoApp: App {
     /// the other settings; the GitHub token stays in this device's Keychain.
     @State private var repositorySettings: RepositorySettingsStore
 
+    /// The one player for card audio, so only one clip ever plays at a time.
+    @State private var audioPlayer = AudioPlayer()
+
     /// Created before the store, so no sync event is missed.
     @State private var syncMonitor = CloudSyncMonitor()
 
@@ -55,6 +58,7 @@ struct MemoApp: App {
                 .environment(practiceSettings)
                 .environment(aiSettings)
                 .environment(repositorySettings)
+                .environment(audioPlayer)
                 .onChange(of: scenePhase) {
                     // A sign-in or sign-out on another device shows up here
                     // the next time the app is looked at.

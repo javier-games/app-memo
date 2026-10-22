@@ -271,10 +271,12 @@ struct DeckView: View {
 
     private func addCard(from draft: CardDraft) {
         let card = Card()
-        draft.apply(to: card)
 
         withAnimation {
+            // Inserted before the draft is applied, so any recordings it
+            // carries are saved along with the card.
             modelContext.insert(card)
+            draft.apply(to: card)
             deck.append(card)
         }
     }
@@ -321,6 +323,7 @@ private enum CardSheet: Identifiable {
         DeckView(deck: PreviewData.sampleDeck(in: container))
     }
     .modelContainer(container)
+    .environment(AudioPlayer())
     .environment(PracticeSettingsStore(
         defaults: UserDefaults(suiteName: "preview.practice.settings")!
     ))

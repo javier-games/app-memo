@@ -15,13 +15,21 @@ struct SettingsView: View {
 
         NavigationStack {
             List {
-                Section {
+                Section("Practice") {
+                    NavigationLink {
+                        AudioSettingsView()
+                    } label: {
+                        Label("Audio", systemImage: "speaker.wave.2")
+                    }
+
                     NavigationLink {
                         DecksSettingsView()
                     } label: {
                         Label("Decks", systemImage: "rectangle.stack")
                     }
+                }
 
+                Section {
                     NavigationLink {
                         AIConnectionSettingsView()
                     } label: {
