@@ -12,29 +12,40 @@ enum DeckTransferKind: String, CaseIterable, Identifiable {
 
     case json
     case csv
+    /// JSON and the recordings it refers to, together in a zip.
+    case package
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
-        case .json: "JSON"
-        case .csv:  "CSV"
+        case .json:    "JSON"
+        case .csv:     "CSV"
+        case .package: String(localized: "JSON and Audio")
         }
     }
 
     var contentTypes: [UTType] {
         switch self {
-        case .json: [.json]
-        case .csv:  [.commaSeparatedText, .plainText]
+        case .json:    [.json]
+        case .csv:     [.commaSeparatedText, .plainText]
+        case .package: [.zip]
         }
     }
 
-    var fileExtension: String { rawValue }
+    var fileExtension: String {
+        switch self {
+        case .json:    "json"
+        case .csv:     "csv"
+        case .package: "zip"
+        }
+    }
 
     var menuIcon: String {
         switch self {
-        case .json: "curlybraces"
-        case .csv:  "tablecells"
+        case .json:    "curlybraces"
+        case .csv:     "tablecells"
+        case .package: "doc.zipper"
         }
     }
 }
@@ -76,6 +87,13 @@ enum DeckImporter {
 
         /// Cards found but left out because they had no front or no back.
         var skippedCardCount: Int
+
+        /// The recordings a package carried, by the reference its cards use.
+        var audio: [String: Data] = [:]
+
+        /// Recordings a card referred to that could not be used: missing
+        /// from the package, or too large.
+        var skippedAudioCount = 0
 
         var deckCount: Int { decks.count }
         var cardCount: Int { decks.reduce(0) { $0 + $1.cardList.count } }
@@ -136,6 +154,8 @@ enum DeckImporter {
                 )
                 combined.decks += preview.decks
                 combined.skippedCardCount += preview.skippedCardCount
+                combined.audio.merge(preview.audio) { first, _ in first }
+                combined.skippedAudioCount += preview.skippedAudioCount
             } catch let error where files.count > 1 {
                 throw Failure.inFile(name: file.name, reason: error.localizedDescription)
             }
@@ -149,11 +169,19 @@ enum DeckImporter {
         kind: DeckTransferKind,
         fallbackDeckName: String
     ) throws -> Preview {
-        let decks: [DeckTransferDeck] = switch kind {
-        case .json: try decodeJSON(data)
-        case .csv:  try decodeCSV(data, deckName: fallbackDeckName)
+        let decks: [DeckTransferDeck]
+        switch kind {
+        case .json:    decks = try decodeJSON(data)
+        case .csv:     decks = try decodeCSV(data, deckName: fallbackDeckName)
+        case .package: return try DeckPackage.preview(fromZip: data)
         }
 
+        return try preview(decks: decks)
+    }
+
+    /// Drops cards that cannot be practised and refuses a file left with
+    /// nothing, the same for every format.
+    static func preview(decks: [DeckTransferDeck]) throws -> Preview {
         var skipped = 0
         let cleaned: [DeckTransferDeck] = decks.map { deck in
             var deck = deck
@@ -172,7 +200,15 @@ enum DeckImporter {
 
     private static func decodeJSON(_ data: Data) throws -> [DeckTransferDeck] {
         do {
-            return try JSONDecoder().decode(DeckTransferFile.self, from: data).deckList
+            // A plain JSON file has no recordings to go with any references,
+            // so they are dropped here rather than looked for later.
+            return try JSONDecoder().decode(DeckTransferFile.self, from: data).deckList.map { deck in
+                var deck = deck
+                for index in deck.cardList.indices {
+                    for slot in AudioSlot.allCases { deck.cardList[index][audio: slot] = nil }
+                }
+                return deck
+            }
         } catch {
             throw Failure.malformed(error.localizedDescription)
         }
@@ -215,6 +251,7 @@ enum DeckImporter {
                 transferDeck,
                 sortIndex: existingDeckCount + offset,
                 takenIDs: &takenIDs,
+                audio: preview.audio,
                 into: context
             )
         }
@@ -230,6 +267,7 @@ enum DeckImporter {
         _ transferDeck: DeckTransferDeck,
         sortIndex: Int,
         takenIDs: inout Set<UUID>,
+        audio: [String: Data] = [:],
         into context: ModelContext
     ) -> Deck {
         let deck = Deck(
@@ -254,9 +292,46 @@ enum DeckImporter {
             let card = makeCard(from: transferCard, sortIndex: cardIndex, takenIDs: &takenIDs)
             context.insert(card)
             card.deck = deck
+            attachAudio(from: transferCard, to: card, audio: audio, onlyEmptySlots: false)
         }
 
         return deck
+    }
+
+    /// Gives `card` the recordings `transferCard` refers to, from `audio`.
+    ///
+    /// With `onlyEmptySlots`, a slot that already has a recording keeps it:
+    /// importing a file again adds the recordings a card lacks, and never
+    /// replaces or removes one made here.
+    ///
+    /// Returns how many recordings were added.
+    @discardableResult
+    static func attachAudio(
+        from transferCard: DeckTransferCard,
+        to card: Card,
+        audio: [String: Data],
+        onlyEmptySlots: Bool
+    ) -> Int {
+        var added = 0
+
+        for slot in AudioSlot.allCases {
+            guard let reference = transferCard[audio: slot],
+                  let data = audio[reference],
+                  !onlyEmptySlots || card.audio(for: slot) == nil
+            else { continue }
+
+            let recording = CardAudio(
+                slot: slot,
+                data: data,
+                duration: DeckPackage.duration(of: data),
+                fileExtension: DeckPackage.fileExtension(of: reference)
+            )
+            card.modelContext?.insert(recording)
+            recording.card = card
+            added += 1
+        }
+
+        return added
     }
 
     static func makeCard(

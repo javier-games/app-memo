@@ -43,10 +43,19 @@ struct DecksSettingsView: View {
                     Label("Export All Decks", systemImage: "square.and.arrow.up")
                 }
                 .disabled(decks.isEmpty)
+
+                if decks.contains(where: \.hasAudio) {
+                    ShareLink(
+                        item: ExportedDeckPackage(decks: decks, name: "Memo Decks"),
+                        preview: SharePreview("Memo Decks")
+                    ) {
+                        Label("Export All with Audio", systemImage: "doc.zipper")
+                    }
+                }
             } header: {
                 Text("Export")
             } footer: {
-                Text("One JSON file holding every deck. Importing it, here or on another device, updates the decks it came from and adds the ones that are missing.")
+                Text("One JSON file holding every deck, or a zip with the recordings too. Importing it, here or on another device, updates the decks it came from and adds the ones that are missing.")
             }
         }
         .navigationTitle("Decks")

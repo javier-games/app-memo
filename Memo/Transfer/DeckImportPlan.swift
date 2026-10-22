@@ -59,6 +59,16 @@ struct DeckImportPlan: Identifiable {
     /// Cards found but left out because they had no front or no back.
     var skippedCardCount = 0
 
+    /// The recordings the file carried, by the reference its cards use.
+    var audio: [String: Data] = [:]
+
+    /// Recordings a card referred to that could not be used.
+    var skippedAudioCount = 0
+
+    /// Cards already in the library that the file gives a recording for a
+    /// slot they have none in. Recordings already here are never replaced.
+    var audioAdditions: [CardChange] = []
+
     // MARK: - Counts
 
     var newDeckCount: Int { newDecks.count }
@@ -71,6 +81,25 @@ struct DeckImportPlan: Identifiable {
     var updatedDeckCount: Int { changes.filter { $0.details == .update }.count }
 
     var updatedCardCount: Int { changes.reduce(0) { $0 + $1.updatedCards.count } }
+
+    /// Recordings the import would add, to new cards and to existing ones.
+    var newAudioCount: Int {
+        let onNewCards = (newDecks.flatMap(\.cardList) + changes.flatMap(\.newCards))
+            .reduce(0) { total, card in
+                total + AudioSlot.allCases.filter { slot in
+                    card[audio: slot].map { audio[$0] != nil } ?? false
+                }.count
+            }
+
+        let onExistingCards = audioAdditions.reduce(0) { total, pair in
+            total + AudioSlot.allCases.filter { slot in
+                pair.card.audio(for: slot) == nil
+                    && pair.incoming[audio: slot].map { audio[$0] != nil } ?? false
+            }.count
+        }
+
+        return onNewCards + onExistingCards
+    }
 
     var conflicts: [Conflict] {
         changes.flatMap { change -> [Conflict] in
@@ -102,7 +131,7 @@ struct DeckImportPlan: Identifiable {
 
     /// Whether there is anything to do besides settling conflicts.
     var hasChangesToApply: Bool {
-        newDeckCount + newCardCount + updatedDeckCount + updatedCardCount > 0
+        newDeckCount + newCardCount + updatedDeckCount + updatedCardCount + newAudioCount > 0
     }
 
     private static func describe(_ card: DeckTransferCard) -> String {
@@ -119,7 +148,11 @@ extension DeckImporter {
 
     /// Works out what `preview` would do to a library holding `decks`.
     static func plan(_ preview: Preview, against decks: [Deck]) -> DeckImportPlan {
-        var plan = DeckImportPlan(skippedCardCount: preview.skippedCardCount)
+        var plan = DeckImportPlan(
+            skippedCardCount: preview.skippedCardCount,
+            audio: preview.audio,
+            skippedAudioCount: preview.skippedAudioCount
+        )
 
         // The first deck with an identifier wins, in the unlikely event that
         // two share one.
@@ -132,6 +165,24 @@ extension DeckImporter {
             }
 
             plan.changes.append(change(to: deck, from: incoming))
+
+            // Recordings for cards the deck already has, whatever their text
+            // is doing, in slots the card has nothing in.
+            let cards = Dictionary(
+                (deck.cards ?? []).map { ($0.uuid, $0) },
+                uniquingKeysWith: { first, _ in first }
+            )
+            for incomingCard in incoming.cardList {
+                guard let id = incomingCard.uuid, let card = cards[id] else { continue }
+
+                let addsAudio = AudioSlot.allCases.contains { slot in
+                    card.audio(for: slot) == nil
+                        && incomingCard[audio: slot].map { preview.audio[$0] != nil } ?? false
+                }
+                if addsAudio {
+                    plan.audioAdditions.append(DeckImportPlan.CardChange(card: card, incoming: incomingCard))
+                }
+            }
         }
 
         return plan
@@ -239,6 +290,7 @@ extension DeckImporter {
                 transferDeck,
                 sortIndex: existingDeckCount + offset,
                 takenIDs: &takenIDs,
+                audio: plan.audio,
                 into: context
             )
         }
@@ -257,7 +309,12 @@ extension DeckImporter {
                 let card = makeCard(from: incoming, sortIndex: 0, takenIDs: &takenIDs)
                 context.insert(card)
                 change.deck.append(card)
+                attachAudio(from: incoming, to: card, audio: plan.audio, onlyEmptySlots: false)
             }
+        }
+
+        for pair in plan.audioAdditions {
+            attachAudio(from: pair.incoming, to: pair.card, audio: plan.audio, onlyEmptySlots: true)
         }
     }
 

@@ -67,13 +67,23 @@ struct DeckSettingsView: View {
                         Label("JSON", systemImage: "curlybraces")
                     }
 
+                    if deck.hasAudio {
+                        ShareLink(item: packageExport, preview: SharePreview(deck.name)) {
+                            Label("JSON and Audio", systemImage: "doc.zipper")
+                        }
+                    }
+
                     ShareLink(item: csvExport, preview: SharePreview(deck.name)) {
                         Label("CSV", systemImage: "tablecells")
                     }
                 } header: {
                     Text("Share")
                 } footer: {
-                    Text("JSON keeps the deck's name, icon and colour, and can be imported again to update the deck. CSV holds the cards only. Neither includes practice progress or bookmarks.")
+                    Text(
+                        deck.hasAudio
+                            ? "JSON keeps the deck's name, icon and colour, and can be imported again to update the deck. JSON and Audio is the same with the recordings, in a zip. CSV holds the cards only. None include practice progress or bookmarks."
+                            : "JSON keeps the deck's name, icon and colour, and can be imported again to update the deck. CSV holds the cards only. Neither includes practice progress or bookmarks."
+                    )
                 }
                 .disabled(deck.isEmpty)
             }
@@ -117,6 +127,13 @@ struct DeckSettingsView: View {
         ExportedDeckJSON(
             data: (try? DeckExporter.jsonData(for: deck)) ?? Data(),
             fileName: DeckExporter.fileName(for: deck, kind: .json)
+        )
+    }
+
+    private var packageExport: ExportedDeckPackage {
+        ExportedDeckPackage(
+            decks: [deck],
+            name: (DeckExporter.fileName(for: deck, kind: .package) as NSString).deletingPathExtension
         )
     }
 
