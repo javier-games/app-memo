@@ -74,6 +74,10 @@ protocol GitHubFiles {
 
     func contents(of path: String, in repository: String, token: String) async throws -> Data
 
+    /// The names of the files in `folder` at the repository's root, however
+    /// many there are. Empty if there is no such folder.
+    func fileNames(inFolder folder: String, in repository: String, token: String) async throws -> Set<String>
+
     /// Creates the file, or replaces the version identified by `sha`.
     func write(
         _ data: Data,
@@ -239,6 +243,31 @@ struct GitHubClient: GitHubFiles {
         request.setValue("application/vnd.github.raw+json", forHTTPHeaderField: "Accept")
 
         return try await Self.send(request)
+    }
+
+    /// Read through git's own trees rather than the contents listing, which
+    /// stops at a thousand entries: an audio folder outgrows that quickly.
+    func fileNames(inFolder folder: String, in repository: String, token: String) async throws -> Set<String> {
+        let info = try Self.object(in: try await Self.send(Self.apiRequest("repos/\(repository)", token: token)))
+        guard let branch = info["default_branch"] as? String else { return [] }
+
+        let root = try await Self.send(Self.apiRequest("repos/\(repository)/git/trees/\(branch)", token: token))
+        guard let folderSHA = Self.treeEntries(from: root)
+            .first(where: { $0.path == folder && !$0.isFile })?.sha
+        else { return [] }
+
+        let tree = try await Self.send(Self.apiRequest("repos/\(repository)/git/trees/\(folderSHA)", token: token))
+        return Set(Self.treeEntries(from: tree).filter(\.isFile).map(\.path))
+    }
+
+    static func treeEntries(from data: Data) -> [GitHubEntry] {
+        let object = (try? Self.object(in: data)) ?? [:]
+        let list = object["tree"] as? [[String: Any]] ?? []
+
+        return list.compactMap { item in
+            guard let path = item["path"] as? String, let sha = item["sha"] as? String else { return nil }
+            return GitHubEntry(path: path, sha: sha, isFile: item["type"] as? String == "blob")
+        }
     }
 
     func write(

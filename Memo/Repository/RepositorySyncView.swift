@@ -25,6 +25,10 @@ struct RepositorySyncView: View {
     @State private var errorMessage: String?
     @State private var pendingImport: DeckImportPlan?
 
+    /// Recordings fetched so far out of those wanted, while a pull or push
+    /// is moving audio.
+    @State private var audioProgress: (done: Int, total: Int)?
+
     private var items: [RepositoryItem] {
         snapshot.map { RepositorySync.items(local: decks, snapshot: $0) } ?? []
     }
@@ -44,6 +48,17 @@ struct RepositorySyncView: View {
                     }
                 }
 
+                if let audioProgress {
+                    Section {
+                        ProgressView(
+                            value: Double(audioProgress.done),
+                            total: Double(max(1, audioProgress.total))
+                        ) {
+                            Text("Recordings \(audioProgress.done) of \(audioProgress.total)")
+                        }
+                    }
+                }
+
                 if let snapshot {
                     problems(in: snapshot)
 
@@ -54,7 +69,7 @@ struct RepositorySyncView: View {
                     } header: {
                         Text(repository.settings.repository ?? "")
                     } footer: {
-                        Text("Pull brings the repository's version here, and asks before replacing an edit of yours. Push writes your version to the repository. Progress and bookmarks are never sent.")
+                        Text("Pull brings the repository's version here, with its recordings, and asks before replacing an edit of yours. Push writes your version to the repository, recordings included. Progress and bookmarks are never sent.")
                     }
 
                     Section {
@@ -229,8 +244,12 @@ struct RepositorySyncView: View {
     }
 
     /// Goes through the same review as a file import, so an edit made here is
-    /// never replaced without being shown first.
+    /// never replaced without being shown first. The recordings the chosen
+    /// decks refer to, and the cards here lack, are downloaded first so the
+    /// review can count them.
     private func pull() {
+        guard let name = repository.settings.repository, let token = repository.token else { return }
+
         let incoming = selected.filter(\.canPull).compactMap(\.remote).map { deck in
             var deck = deck
             deck.cardList = deck.cardList.filter(\.isComplete)
@@ -238,10 +257,66 @@ struct RepositorySyncView: View {
         }
         guard !incoming.isEmpty else { return }
 
-        pendingImport = DeckImporter.plan(
-            DeckImporter.Preview(decks: incoming, skippedCardCount: 0),
-            against: decks
-        )
+        let wanted = Array(RepositorySync.audioToDownload(for: incoming, against: decks)).sorted()
+
+        isWorking = true
+        errorMessage = nil
+        audioProgress = wanted.isEmpty ? nil : (0, wanted.count)
+
+        Task {
+            defer {
+                isWorking = false
+                audioProgress = nil
+            }
+
+            var preview = DeckImporter.Preview(decks: incoming, skippedCardCount: 0)
+
+            do {
+                let downloaded = try await download(wanted, from: name, token: token)
+                preview.audio = downloaded
+                preview.skippedAudioCount = wanted.count - downloaded.count
+            } catch is CancellationError {
+                return
+            } catch {
+                errorMessage = error.localizedDescription
+                return
+            }
+
+            pendingImport = DeckImporter.plan(preview, against: decks)
+        }
+    }
+
+    /// Fetches recordings a few at a time. One that is missing, too large or
+    /// not audio is left out and counted, rather than stopping the pull.
+    private func download(_ paths: [String], from name: String, token: String) async throws -> [String: Data] {
+        var results: [String: Data] = [:]
+        var remaining = paths[...]
+
+        try await withThrowingTaskGroup(of: (String, Data?).self) { group in
+            func startNext() {
+                guard let path = remaining.popFirst() else { return }
+                group.addTask {
+                    do {
+                        return (path, try await files.contents(of: path, in: name, token: token))
+                    } catch GitHubFailure.notFound {
+                        return (path, nil)
+                    }
+                }
+            }
+
+            for _ in 0..<6 { startNext() }
+
+            while let result = try await group.next() {
+                let (path, data) = result
+                if let data, !data.isEmpty, data.count <= DeckPackage.audioSizeLimit {
+                    results[path] = data
+                }
+                audioProgress?.done += 1
+                startNext()
+            }
+        }
+
+        return results
     }
 
     private func push() {
@@ -258,6 +333,29 @@ struct RepositorySyncView: View {
 
         Task {
             do {
+                // Recordings first, so a deck file never points at audio
+                // that is not there yet.
+                let existing = try await files.fileNames(
+                    inFolder: DeckPackage.audioFolder,
+                    in: name,
+                    token: token
+                )
+                let recordings = RepositorySync.recordingWrites(for: outgoing, existing: existing)
+
+                audioProgress = recordings.isEmpty ? nil : (0, recordings.count)
+                for recording in recordings {
+                    try await files.write(
+                        recording.data,
+                        to: recording.path,
+                        replacing: nil,
+                        message: recording.message,
+                        in: name,
+                        token: token
+                    )
+                    audioProgress?.done += 1
+                }
+                audioProgress = nil
+
                 let writes = try RepositorySync.writes(
                     pushing: outgoing,
                     snapshot: snapshot,
@@ -279,6 +377,8 @@ struct RepositorySyncView: View {
             } catch {
                 errorMessage = error.localizedDescription
             }
+
+            audioProgress = nil
 
             // Either way what the repository holds has changed or is in
             // doubt, and the next push needs the new versions to quote.

@@ -145,8 +145,8 @@ with a button is not. Either way, music or anything else playing on the phone
 carries on at full volume.
 
 Recordings sync through iCloud with the cards they belong to, and travel in
-exports as described under [Packages](#packages). They are not yet included in
-repository sync.
+exports as described under [Packages](#packages). Repository sync carries
+them too: see [Repository Sync](#repository-sync).
 
 ## File Formats
 
@@ -305,6 +305,13 @@ be renamed in the repository. A deck found in more than one file is reported
 and left alone until one copy is removed, since there is no telling which is
 the right one. Practice progress, bookmarks and practice options are never
 pushed.
+
+Recordings travel with their decks, laid out as in a [package](#packages): an
+`audio/` folder of files named by each recording's id, and a reference to each
+on its card. A push uploads only the recordings the repository does not have
+yet, before the deck file that refers to them. A pull downloads only the ones a
+card here is missing, and never replaces a recording already on a card. A deck
+counts as different when a recording is on one side and not the other.
 
 The feature appears only in a build with `gitHubClientID` set in
 `Memo/Shared/AppConfiguration.swift`: the client ID of a GitHub OAuth app with

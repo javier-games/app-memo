@@ -320,7 +320,12 @@ enum DeckImporter {
                   !onlyEmptySlots || card.audio(for: slot) == nil
             else { continue }
 
+            // The file is named by the recording's id. Keeping it means the
+            // recording is recognised as the same one when it goes back, and
+            // is not uploaded again under a new name.
+            let fileName = ((reference as NSString).lastPathComponent as NSString).deletingPathExtension
             let recording = CardAudio(
+                uuid: UUID(uuidString: fileName) ?? UUID(),
                 slot: slot,
                 data: data,
                 duration: DeckPackage.duration(of: data),

@@ -246,6 +246,117 @@ final class RepositorySyncTests: XCTestCase {
         XCTAssertFalse(text.contains("practiceSettings"))
     }
 
+    // MARK: - Audio
+
+    private func addAudio(_ slot: AudioSlot, to card: Card, in context: ModelContext, id: UUID = UUID()) {
+        let audio = CardAudio(uuid: id, slot: slot, data: Data([7, 7]), duration: 1)
+        context.insert(audio)
+        audio.card = card
+    }
+
+    func testARecordingOnOneSideOnlyMakesADeckDifferent() throws {
+        let context = makeContext()
+        let deck = makeDeck("Food", in: context)
+        let card = try XCTUnwrap(deck.orderedCards.first)
+
+        // In the repository, not here: the text matches, the audio does not.
+        var remote = transfer(deck)
+        remote.cardList[0].backAudio = "audio/\(UUID().uuidString).mp3"
+        XCTAssertEqual(
+            RepositorySync.items(local: [deck], snapshot: RepositorySnapshot(files: [file("Food.json", [remote])])).map(\.state),
+            [.different]
+        )
+
+        // Here, not in the repository.
+        addAudio(.back, to: card, in: context)
+        XCTAssertEqual(
+            RepositorySync.items(local: [deck], snapshot: RepositorySnapshot(files: [file("Food.json", [transfer(deck)])])).map(\.state),
+            [.different]
+        )
+
+        // On both.
+        XCTAssertEqual(
+            RepositorySync.items(local: [deck], snapshot: RepositorySnapshot(files: [file("Food.json", [remote])])).map(\.state),
+            [.same]
+        )
+    }
+
+    func testAPullDownloadsOnlyTheRecordingsACardLacks() throws {
+        let context = makeContext()
+        let deck = makeDeck("Food", in: context, cards: [("Tea", "Té"), ("Bread", "Pan")])
+        let cards = deck.orderedCards
+        addAudio(.back, to: cards[0], in: context)
+
+        var remote = transfer(deck)
+        remote.cardList[0].backAudio = "audio/A.mp3"       // already has one: skipped
+        remote.cardList[1].backAudio = "audio/B.mp3"       // lacks one: fetched
+        remote.cardList[1].backHintAudio = "../secret.mp3" // leaves the repository: refused
+
+        let newDeck = DeckTransferDeck(id: UUID().uuidString, name: "New", cardList: [
+            DeckTransferCard(id: UUID().uuidString, frontText: "Eat", backText: "Comer", backAudio: "audio/C.m4a")
+        ])
+
+        XCTAssertEqual(
+            RepositorySync.audioToDownload(for: [remote, newDeck], against: [deck]),
+            ["audio/B.mp3", "audio/C.m4a"]
+        )
+    }
+
+    func testOnlyAudioInsideTheRepositoryIsFetched() {
+        XCTAssertTrue(RepositorySync.isSafe("audio/0A1B.mp3"))
+        XCTAssertTrue(RepositorySync.isSafe("library/N5/肩.mp3"))
+        XCTAssertFalse(RepositorySync.isSafe("../outside.mp3"))
+        XCTAssertFalse(RepositorySync.isSafe("/etc/passwd.mp3"))
+        XCTAssertFalse(RepositorySync.isSafe("audio//x.mp3"))
+        XCTAssertFalse(RepositorySync.isSafe("audio/notes.txt"))
+    }
+
+    func testAPushKeepsTheAudioReferencesAndSendsOnlyNewRecordings() throws {
+        let context = makeContext()
+        let deck = makeDeck("Food", in: context, cards: [("Tea", "Té"), ("Bread", "Pan")])
+        let kept = UUID()
+        let fresh = UUID()
+        addAudio(.back, to: deck.orderedCards[0], in: context, id: kept)
+        addAudio(.back, to: deck.orderedCards[1], in: context, id: fresh)
+
+        let writes = try RepositorySync.writes(pushing: [deck], snapshot: RepositorySnapshot(), usesSingleFile: false)
+        let pushed = try decks(in: writes[0])[0]
+        XCTAssertEqual(pushed.cardList[0].backAudio, "audio/\(kept.uuidString).m4a")
+        XCTAssertEqual(pushed.cardList[1].backAudio, "audio/\(fresh.uuidString).m4a")
+
+        let uploads = RepositorySync.recordingWrites(for: [deck], existing: ["\(kept.uuidString).m4a"])
+        XCTAssertEqual(uploads.map(\.path), ["audio/\(fresh.uuidString).m4a"])
+        XCTAssertNil(uploads.first?.sha)
+    }
+
+    func testAPulledRecordingKeepsTheIdItsFileIsNamedBy() throws {
+        let context = makeContext()
+        let card = Card(frontText: "Tea", backText: "Té")
+        context.insert(card)
+        let id = UUID()
+
+        DeckImporter.attachAudio(
+            from: DeckTransferCard(backAudio: "audio/\(id.uuidString).mp3"),
+            to: card,
+            audio: ["audio/\(id.uuidString).mp3": Data([1])],
+            onlyEmptySlots: true
+        )
+
+        XCTAssertEqual(card.audio(for: .back)?.uuid, id, "so pushing it back does not upload it again")
+        XCTAssertEqual(card.audio(for: .back)?.fileExtension, "mp3")
+    }
+
+    func testTreesAreReadForFolderListings() {
+        let entries = GitHubClient.treeEntries(from: Data(#"""
+            {"tree":[{"path":"a.mp3","type":"blob","sha":"1"},{"path":"sub","type":"tree","sha":"2"}]}
+            """#.utf8))
+
+        XCTAssertEqual(entries, [
+            GitHubEntry(path: "a.mp3", sha: "1", isFile: true),
+            GitHubEntry(path: "sub", sha: "2", isFile: false),
+        ])
+    }
+
     // MARK: - GitHub
 
     func testAWriteQuotesTheVersionItReplaces() throws {
