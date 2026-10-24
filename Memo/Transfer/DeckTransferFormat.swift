@@ -100,10 +100,18 @@ struct DeckTransferCard: Codable {
         frontHintText: String = "",
         backText: String = "",
         backHintText: String = "",
-        practiceProgress: Int? = nil
+        practiceProgress: Int? = nil,
+        frontAudio: String? = nil,
+        frontHintAudio: String? = nil,
+        backAudio: String? = nil,
+        backHintAudio: String? = nil
     ) {
         self.id = id
         self.modifiedAt = modifiedAt
+        self.frontAudio = frontAudio
+        self.frontHintAudio = frontHintAudio
+        self.backAudio = backAudio
+        self.backHintAudio = backHintAudio
         self.frontText = frontText
         self.frontHintText = frontHintText
         self.backText = backText

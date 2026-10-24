@@ -206,7 +206,63 @@ enum RepositorySync {
         // The plan only looks one way. A card made here that the repository
         // has never seen is a difference too.
         let remoteCards = Set(remote.cardList.compactMap(\.uuid))
-        return (deck.cards ?? []).allSatisfy { remoteCards.contains($0.uuid) }
+        guard (deck.cards ?? []).allSatisfy({ remoteCards.contains($0.uuid) }) else { return false }
+
+        // And so is a recording on either side that the other lacks. Text
+        // alone would call a deck up to date while its audio never arrives.
+        let local = Dictionary(
+            (deck.cards ?? []).map { ($0.uuid, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        return remote.cardList.allSatisfy { incoming in
+            guard let id = incoming.uuid, let card = local[id] else { return true }
+            return AudioSlot.allCases.allSatisfy { slot in
+                (incoming[audio: slot] != nil) == (card.audio(for: slot) != nil)
+            }
+        }
+    }
+
+    // MARK: - Pulling
+
+    /// The recordings to download for `decks`: every one a card refers to and
+    /// does not already have here, by its path in the repository.
+    ///
+    /// Recordings already here are never replaced, so they are not fetched.
+    static func audioToDownload(for decks: [DeckTransferDeck], against library: [Deck]) -> Set<String> {
+        let cards = Dictionary(
+            library.flatMap { $0.cards ?? [] }.map { ($0.uuid, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+
+        var paths: Set<String> = []
+
+        for deck in decks {
+            for incoming in deck.cardList {
+                let card = incoming.uuid.flatMap { cards[$0] }
+
+                for slot in AudioSlot.allCases {
+                    guard let reference = incoming[audio: slot],
+                          isSafe(reference),
+                          card?.audio(for: slot) == nil
+                    else { continue }
+
+                    paths.insert(reference)
+                }
+            }
+        }
+
+        return paths
+    }
+
+    /// A reference may only name an audio file inside the repository: no
+    /// climbing out with `..`, and no absolute paths.
+    static func isSafe(_ reference: String) -> Bool {
+        let parts = reference.split(separator: "/", omittingEmptySubsequences: false)
+
+        return !reference.hasPrefix("/")
+            && !parts.contains("..")
+            && !parts.contains("")
+            && DeckPackage.audioExtensions.contains((reference as NSString).pathExtension.lowercased())
     }
 
     // MARK: - Pushing
@@ -217,6 +273,7 @@ enum RepositorySync {
     /// whatever that file is called, and any other decks in that file are
     /// kept. A deck the repository has never seen gets a file named after it,
     /// or joins the library file.
+    @MainActor
     static func writes(
         pushing decks: [Deck],
         snapshot: RepositorySnapshot,
@@ -230,7 +287,10 @@ enum RepositorySync {
         var takenPaths = Set(snapshot.files.map { $0.path.lowercased() })
 
         for deck in decks {
-            let transfer = DeckExporter.transferFile(for: deck).deckList[0]
+            // With its audio references, which the recordings uploaded
+            // alongside will answer. Written without them, a push would cut
+            // every card off from its recordings.
+            let transfer = DeckPackage.contents(for: [deck]).file.deckList[0]
 
             let path: String
             if let existing = snapshot.location(of: deck.uuid)?.file.path {
@@ -262,6 +322,23 @@ enum RepositorySync {
                 data: try DeckExporter.jsonData(for: DeckTransferFile(deckList: contents[path] ?? [])),
                 message: message(for: changed[path] ?? [], isNew: snapshot.file(at: path) == nil)
             )
+        }
+    }
+
+    /// The recordings `decks` use that the repository does not have yet.
+    ///
+    /// Files are named by the recording's id and a new recording always has a
+    /// new id, so a name already in `audio/` is the same recording, and is not
+    /// sent again.
+    @MainActor
+    static func recordingWrites(for decks: [Deck], existing: Set<String>) -> [RepositoryWrite] {
+        var seen: Set<String> = []
+
+        return DeckPackage.contents(for: decks).recordings.compactMap { recording in
+            let name = (recording.path as NSString).lastPathComponent
+            guard !existing.contains(name), seen.insert(recording.path).inserted else { return nil }
+
+            return RepositoryWrite(path: recording.path, sha: nil, data: recording.data, message: "Add recording \(name)")
         }
     }
 
