@@ -58,6 +58,10 @@ final class VoiceRecorder {
             return
         }
 
+        // The recorder sets the session up its own way, so the player's
+        // record of how it left things no longer holds.
+        AudioSession.shared.invalidate()
+
         do {
             let session = AVAudioSession.sharedInstance()
             // Mixing, so music the user is listening to keeps going.
