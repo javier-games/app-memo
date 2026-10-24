@@ -85,6 +85,7 @@
 		8D87A492A9B32E37798B1BBD /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 068D40B626A5CF059C9A6456 /* ZIPFoundation */; };
 		F6F124B6F9FBCA067C341781 /* DeckPackage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 186BA3656AA036E63FA8AC1A /* DeckPackage.swift */; };
 		1F4D7E5675FAE237CA11E65B /* DeckPackageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D6A456A6BF1784B06EA7F9 /* DeckPackageTests.swift */; };
+		B151E724F930692606CEC95B /* AudioPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8D67B8E5176865CD3CABFA5 /* AudioPreloader.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -186,6 +187,7 @@
 		F77712C3DE53C8E235670F53 /* CardAudioTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CardAudioTests.swift"; sourceTree = "<group>"; };
 		186BA3656AA036E63FA8AC1A /* DeckPackage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeckPackage.swift"; sourceTree = "<group>"; };
 		D8D6A456A6BF1784B06EA7F9 /* DeckPackageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeckPackageTests.swift"; sourceTree = "<group>"; };
+		B8D67B8E5176865CD3CABFA5 /* AudioPreloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AudioPreloader.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -398,6 +400,7 @@
 			isa = PBXGroup;
 			children = (
 				70465F6800209ABBFA298CBB /* AudioPlayback.swift */,
+				B8D67B8E5176865CD3CABFA5 /* AudioPreloader.swift */,
 				A2EB8CD69649048406AB8434 /* VoiceRecorder.swift */,
 				B525D981ED38225EE30FEACF /* CardAudioButton.swift */,
 				E00C1A57823788427AE76384 /* AudioRecorderView.swift */,
@@ -550,6 +553,7 @@
 				1D9E38233570254D45D3C80B /* CardAudioButton.swift in Sources */,
 				F2A7F9C2E995831AB6E4B246 /* VoiceRecorder.swift in Sources */,
 				CC3DD37CF59A51FC738CE5A5 /* AudioPlayback.swift in Sources */,
+				B151E724F930692606CEC95B /* AudioPreloader.swift in Sources */,
 				BBA5870F944F3767E0122916 /* DeckSettingsView.swift in Sources */,
 				E7E9C2BFA1398C1DE81ADF38 /* CardSearch.swift in Sources */,
 				4B895D2EE0904CD60F6BBF98 /* SyncSettingsView.swift in Sources */,

@@ -11,6 +11,7 @@ import SwiftData
 struct PracticeView: View {
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @Environment(AudioPlayer.self) private var player
     @Environment(PracticeSettingsStore.self) private var store
 
@@ -35,6 +36,10 @@ struct PracticeView: View {
     /// Set while one card makes way for the next, so the outgoing card turning
     /// back over does not play its audio on the way out.
     @State private var isChangingCard = false
+
+    /// The run's recordings, read ahead in the background when it starts so
+    /// that playing one never waits on the disk.
+    @State private var audioCache: [UUID: Data] = [:]
 
     init(deck: Deck, settings: PracticeSettings) {
         self.deck = deck
@@ -69,6 +74,7 @@ struct PracticeView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .onDisappear { player.stop() }
+        .task(id: session.cards.map(\.uuid)) { await preloadAudio() }
     }
 
     // MARK: - Practising
@@ -117,7 +123,7 @@ struct PracticeView: View {
                 if let audio = visibleHintAudio {
                     CardAudioButton(
                         id: audio.uuid.uuidString,
-                        data: { audio.data },
+                        data: { sound(of: audio) },
                         size: 22,
                         label: "Hint"
                     )
@@ -253,7 +259,7 @@ struct PracticeView: View {
             if let audio = currentAudio(slot) {
                 CardAudioButton(
                     id: audio.uuid.uuidString,
-                    data: { audio.data },
+                    data: { sound(of: audio) },
                     style: .onCard,
                     size: 32
                 )
@@ -264,6 +270,31 @@ struct PracticeView: View {
     }
 
     // MARK: - Audio
+
+    /// Reads every recording the run's cards have, off the main thread.
+    private func preloadAudio() async {
+        let wanted = session.cards
+            .flatMap { $0.audios ?? [] }
+            .filter { !$0.isDeleted && audioCache[$0.uuid] == nil }
+            .map(\.persistentModelID)
+        guard !wanted.isEmpty else { return }
+
+        let preloader = AudioPreloader(modelContainer: modelContext.container)
+        let loaded = await preloader.load(wanted)
+        audioCache.merge(loaded) { current, _ in current }
+
+        // The first card was shown before its recording could be read; it
+        // plays now, unless something else already is.
+        if player.playingID == nil {
+            playVisibleSide()
+        }
+    }
+
+    /// A recording's sound: from the cache when it has been read ahead, from
+    /// the store otherwise.
+    private func sound(of audio: CardAudio) -> Data? {
+        audioCache[audio.uuid] ?? audio.data
+    }
 
     private func currentAudio(_ slot: AudioSlot?) -> CardAudio? {
         guard let slot else { return nil }
@@ -287,7 +318,10 @@ struct PracticeView: View {
               let faces,
               store.settings.audioPlayback.playsAutomatically(headphonesConnected: AudioRoute.hasHeadphones),
               let audio = currentAudio(isRevealed ? faces.answerSlot : faces.promptSlot),
-              let data = audio.data
+              // Only what has been read ahead: a side shown before its
+              // recording has loaded stays quiet rather than stall the flip.
+              // Its button still plays it.
+              let data = audioCache[audio.uuid]
         else { return }
 
         player.play(data, id: audio.uuid.uuidString, trigger: .automatic)
