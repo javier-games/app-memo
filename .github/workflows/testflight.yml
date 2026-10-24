@@ -17,7 +17,14 @@ name: TestFlight
 # pointed at CloudKit's development database. Running it once after a change to
 # the data model is what creates the new fields there, which a Mac-less setup
 # has no other way to do.
+#
+# Also runs by itself after every push to develop, once CI has passed on that
+# commit, and builds exactly that commit for TestFlight.
 on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [develop]
   workflow_dispatch:
     inputs:
       destination:
@@ -37,6 +44,12 @@ concurrency:
 jobs:
   upload:
     name: Archive and upload
+    # Started by hand, or by CI finishing green on a push. Not by a failed
+    # run, and not by CI on a pull request, whose branch has not been merged.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
     runs-on: macos-26
     timeout-minutes: 45
     env:
@@ -48,7 +61,10 @@ jobs:
       FASTLANE_SKIP_UPDATE_CHECK: "1"
       FASTLANE_HIDE_CHANGELOG: "1"
     steps:
+      # The commit CI tested, not whatever develop has moved on to since.
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Check configuration
         env:
