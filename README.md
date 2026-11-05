@@ -123,12 +123,13 @@ practised a card elsewhere, you can set its count by hand in the card editor.
 ### Quick Practice
 
 **Quick Practice** at the bottom of the deck list starts a run drawn from
-several decks at once: 10 cards, picked at random. Each card keeps its own
-deck's colour.
+several decks at once: 10 cards, picked at random by default. Each card keeps
+its own deck's colour.
 
 Its options are in **Settings → Practice → Quick Practice**: which decks it
 draws from (**All Decks** by default, which includes decks added later), how
-many cards it deals, **Inverse**, the **Practice Target**, and **After a Wrong
+many cards it deals, the **Mode** (any of the [modes](#modes); **In Order**
+goes deck by deck in the order of your deck list), **Inverse**, the **Practice Target**, and **After a Wrong
 Answer**. These apply to quick runs only; each deck's own options are
 unchanged. Like the other settings, they sync through iCloud.
 
