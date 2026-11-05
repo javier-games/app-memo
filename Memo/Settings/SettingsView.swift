@@ -27,6 +27,12 @@ struct SettingsView: View {
                     } label: {
                         Label("Decks", systemImage: "rectangle.stack")
                     }
+
+                    NavigationLink {
+                        QuickPracticeSettingsView()
+                    } label: {
+                        Label("Quick Practice", systemImage: "bolt")
+                    }
                 }
 
                 Section {

@@ -21,6 +21,7 @@ struct DecksView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(AISettingsStore.self) private var ai
     @Environment(RepositorySettingsStore.self) private var repository
+    @Environment(PracticeSettingsStore.self) private var practiceSettings
 
     @Query(sort: [SortDescriptor(\Deck.sortIndex), SortDescriptor(\Deck.createdAt)])
     private var decks: [Deck]
@@ -77,6 +78,23 @@ struct DecksView: View {
                 prompt: "Search Decks and Cards"
             )
             .toolbar {
+                ToolbarItem(placement: .bottomBar) {
+                    NavigationLink {
+                        PracticeView(source: .decks(quickPracticeDecks), settings: quickPracticeSettings)
+                    } label: {
+                        // As on the deck screen: an explicit HStack, since a
+                        // toolbar Label collapses to its icon.
+                        HStack(spacing: 6) {
+                            Image(systemName: "bolt.fill")
+                            Text("Quick Practice")
+                        }
+                        .padding(.horizontal, 30)
+                        .foregroundStyle(.white)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(!quickPracticeDecks.contains(where: \.hasPractisableCards))
+                }
+
                 // Only once there is somewhere to sync to; setting that up is
                 // in Settings.
                 if repository.isReady {
@@ -137,6 +155,20 @@ struct DecksView: View {
                 Text(message)
             }
         }
+    }
+
+    // MARK: - Quick Practice
+
+    /// The decks Quick Practice draws from, as chosen in Settings.
+    private var quickPracticeDecks: [Deck] {
+        practiceSettings.quickPractice.decks(from: decks)
+    }
+
+    private var quickPracticeSettings: PracticeSettings {
+        practiceSettings.quickPractice.practiceSettings(
+            audioPlayback: practiceSettings.settings.audioPlayback,
+            bookmarkFallback: practiceSettings.settings.bookmarkFallbackMode
+        )
     }
 
     // MARK: - The library
