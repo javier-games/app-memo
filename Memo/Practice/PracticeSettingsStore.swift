@@ -34,7 +34,16 @@ final class PracticeSettingsStore {
         }
     }
 
+    /// How learned cards' progress fades over time. App-wide.
+    var reviewSchedule: ReviewScheduleSettings {
+        didSet {
+            guard reviewSchedule != oldValue else { return }
+            Self.save(reviewSchedule, to: reviewScheduleStorage)
+        }
+    }
+
     @ObservationIgnored private let storage: SettingsStorage
+    @ObservationIgnored private let reviewScheduleStorage: SettingsStorage
     @ObservationIgnored private let quickPracticeStorage: SettingsStorage
 
     @ObservationIgnored
@@ -42,6 +51,9 @@ final class PracticeSettingsStore {
 
     @ObservationIgnored
     private static let quickPracticeKey = "QuickPracticeSettings"
+
+    @ObservationIgnored
+    private static let reviewScheduleKey = "ReviewScheduleSettings"
 
     @ObservationIgnored
     private static let logger = Logger(
@@ -52,17 +64,23 @@ final class PracticeSettingsStore {
     init(defaults: UserDefaults = .standard, cloud: SettingsCloud? = nil) {
         let storage = SettingsStorage(key: Self.storageKey, defaults: defaults, cloud: cloud)
         let quickPracticeStorage = SettingsStorage(key: Self.quickPracticeKey, defaults: defaults, cloud: cloud)
+        let reviewScheduleStorage = SettingsStorage(key: Self.reviewScheduleKey, defaults: defaults, cloud: cloud)
 
         self.storage = storage
         self.quickPracticeStorage = quickPracticeStorage
         self.settings = Self.decode(storage.load())
         self.quickPractice = Self.decodeQuickPractice(quickPracticeStorage.load())
+        self.reviewScheduleStorage = reviewScheduleStorage
+        self.reviewSchedule = Self.decoded(reviewScheduleStorage.load()) ?? .default
 
         storage.onRemoteChange { [weak self] data in
             self?.settings = Self.decode(data)
         }
         quickPracticeStorage.onRemoteChange { [weak self] data in
             self?.quickPractice = Self.decodeQuickPractice(data)
+        }
+        reviewScheduleStorage.onRemoteChange { [weak self] data in
+            self?.reviewSchedule = Self.decoded(data) ?? .default
         }
     }
 
@@ -106,6 +124,20 @@ final class PracticeSettingsStore {
 
         if let data = try? encoder.encode(quickPractice) {
             quickPracticeStorage.save(data)
+        }
+    }
+
+    private static func decoded<Value: Decodable>(_ data: Data?) -> Value? {
+        guard let data else { return nil }
+        return try? JSONDecoder().decode(Value.self, from: data)
+    }
+
+    private static func save<Value: Encodable>(_ value: Value, to storage: SettingsStorage) {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+
+        if let data = try? encoder.encode(value) {
+            storage.save(data)
         }
     }
 }

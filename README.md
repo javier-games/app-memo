@@ -120,6 +120,26 @@ says so instead. The deck list shows each card's standing
 — grey while short of the target, green once reached. If you have already
 practised a card elsewhere, you can set its count by hand in the card editor.
 
+### Review Schedule
+
+Once a card reaches its target for the first time, its **Review Schedule**
+starts: its progress slowly goes down again, so cards you have not seen for a
+while come back up in **Least Practiced**. The default steps, one after
+another from the day the card was learned:
+
+| Every | Progress | For |
+|---|---|---|
+| week | −1 | 4 weeks |
+| month | −1 | 6 months |
+| year | −1 | 2 years |
+
+A period in which you answered the card takes nothing off. Edit the steps in
+**Settings → Practice → Review Schedule**: each one lowers progress by any
+amount or back to zero. Each card can turn its schedule off, or restart it
+from today, in the card editor, which also shows when the card was last
+answered and what happens next. These dates live in the app and iCloud only,
+not in exported JSON.
+
 ### Quick Practice
 
 **Quick Practice** at the bottom of the deck list starts a run drawn from

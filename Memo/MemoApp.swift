@@ -62,10 +62,15 @@ struct MemoApp: App {
                 .onChange(of: scenePhase) {
                     // A sign-in or sign-out on another device shows up here
                     // the next time the app is looked at.
-                    if scenePhase == .active { repositorySettings.refreshSignIn() }
+                    if scenePhase == .active {
+                        repositorySettings.refreshSignIn()
+                        updateReviewSchedules()
+                    }
                 }
                 .environment(syncMonitor)
                 .task {
+                    updateReviewSchedules()
+
                     // Logged at launch so "my decks didn't sync" is
                     // diagnosable: the store opens fine whether or not sync is
                     // actually running, so the account status is the real signal.
@@ -73,5 +78,14 @@ struct MemoApp: App {
                 }
         }
         .modelContainer(modelContainer)
+    }
+
+    /// Lowers the progress of learned cards whose Review Schedule says so.
+    @MainActor
+    private func updateReviewSchedules() {
+        ReviewScheduler.updateAll(
+            in: modelContainer.mainContext,
+            schedule: practiceSettings.reviewSchedule
+        )
     }
 }

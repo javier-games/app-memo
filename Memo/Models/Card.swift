@@ -48,6 +48,27 @@ final class Card {
     /// Marked by the user for the Bookmarked practice mode.
     var isBookmarked: Bool = false
 
+    // MARK: Review Schedule
+    //
+    // Kept on this device and in iCloud only: none of these are part of a
+    // deck's JSON, since they describe the user's practice, not the card.
+
+    /// When the card was last answered, right or wrong. A Review Schedule
+    /// period in which the card was answered takes nothing off.
+    var lastAnsweredAt: Date?
+
+    /// Whether the Review Schedule lowers this card's progress over time.
+    /// Turned on the first time the card is fully learned.
+    var isReviewScheduleEnabled: Bool = false
+
+    /// When the card was fully learned: where its Review Schedule starts.
+    /// The user can move it to today from the card editor.
+    var learnedAt: Date?
+
+    /// The last Review Schedule checkpoint already dealt with, so none is
+    /// applied twice.
+    var reviewCheckedAt: Date?
+
     var deck: Deck?
 
     /// Recordings for the card's sides and hints; see ``CardAudio``. Deleting

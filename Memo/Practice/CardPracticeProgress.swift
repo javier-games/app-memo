@@ -47,12 +47,23 @@ enum CardPracticeProgressRecorder {
     /// changes nothing — a deferred card has not been answered. A target of
     /// zero is left entirely alone, so turning tracking off does not quietly
     /// wipe progress the user may want back.
+    ///
+    /// Any Review Schedule checkpoint already passed is applied first, so the
+    /// answer counts for the period it falls in. A card that reaches its
+    /// target for the first time starts its Review Schedule.
     static func record(
         _ outcome: PracticeSession.Outcome,
         on card: Card,
         target: Int,
-        penalty: PracticeErrorPenalty
+        penalty: PracticeErrorPenalty,
+        schedule: ReviewScheduleSettings? = nil,
+        now: Date = Date()
     ) {
+        guard outcome != .skipped else { return }
+
+        if let schedule { ReviewScheduler.update(card, schedule: schedule, now: now) }
+        card.lastAnsweredAt = now
+
         guard target > 0 else { return }
 
         switch outcome {
@@ -67,13 +78,24 @@ enum CardPracticeProgressRecorder {
         case .skipped:
             break
         }
+
+        ReviewScheduler.noteProgress(of: card, target: target, now: now)
     }
 
     /// Takes `card` straight to the target: the user is saying they know it,
     /// without answering it that many times. A target of zero is left alone,
     /// as it is for any other outcome.
-    static func complete(_ card: Card, target: Int) {
+    static func complete(
+        _ card: Card,
+        target: Int,
+        schedule: ReviewScheduleSettings? = nil,
+        now: Date = Date()
+    ) {
+        if let schedule { ReviewScheduler.update(card, schedule: schedule, now: now) }
+        card.lastAnsweredAt = now
+
         guard target > 0 else { return }
         card.practiceProgress = target
+        ReviewScheduler.noteProgress(of: card, target: target, now: now)
     }
 }

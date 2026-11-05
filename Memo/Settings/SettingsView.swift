@@ -33,6 +33,12 @@ struct SettingsView: View {
                     } label: {
                         Label("Quick Practice", systemImage: "bolt")
                     }
+
+                    NavigationLink {
+                        ReviewScheduleSettingsView()
+                    } label: {
+                        Label("Review Schedule", systemImage: "calendar.badge.clock")
+                    }
                 }
 
                 Section {
