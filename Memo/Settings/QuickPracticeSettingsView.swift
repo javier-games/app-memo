@@ -54,6 +54,12 @@ struct QuickPracticeSettingsView: View {
             Section {
                 Toggle("Inverse", isOn: $store.quickPractice.isInverted)
 
+                Picker("Mode", selection: $store.quickPractice.mode) {
+                    ForEach(PracticeMode.allCases) { mode in
+                        Text(mode.title).tag(mode)
+                    }
+                }
+
                 Stepper(
                     value: $store.quickPractice.cardCount,
                     in: QuickPracticeSettings.cardCountRange
@@ -67,7 +73,7 @@ struct QuickPracticeSettingsView: View {
                     }
                 }
             } footer: {
-                Text("A quick run deals this many cards, picked at random from the chosen decks.")
+                Text(modeFooter)
             }
 
             Section {
@@ -111,6 +117,23 @@ struct QuickPracticeSettingsView: View {
         }
         .navigationTitle("Quick Practice")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var modeFooter: String {
+        let count = store.quickPractice.cardCount
+
+        switch store.quickPractice.mode {
+        case .random:
+            return String(localized: "A quick run deals \(count) cards, picked at random from the chosen decks.")
+        case .inOrder:
+            return String(localized: "A quick run deals the first \(count) cards, deck by deck in the order of your deck list.")
+        case .leastPracticed:
+            return String(localized: "A quick run deals the \(count) least practised cards across the chosen decks.")
+        case .leastPracticedShuffled:
+            return String(localized: "A quick run deals the \(count) least practised cards across the chosen decks, shuffled among equally practised ones.")
+        case .bookmarked:
+            return String(localized: "A quick run deals up to \(count) bookmarked cards from the chosen decks. With no bookmarks, it uses \(store.settings.resolvedBookmarkFallbackMode.title) mode instead.")
+        }
     }
 
     /// Turning "All Decks" off starts from every deck ticked, so nothing is

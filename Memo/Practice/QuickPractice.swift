@@ -16,6 +16,9 @@ struct QuickPracticeSettings: Codable, Equatable {
 
     var isInverted = false
 
+    /// How the run picks its cards from the chosen decks.
+    var mode = PracticeMode.random
+
     /// How many cards a run deals.
     var cardCount = 10
 
@@ -38,12 +41,12 @@ struct QuickPracticeSettings: Codable, Equatable {
         return library.filter { chosen.contains($0.uuid) }
     }
 
-    /// The run's options as the practice screen takes them: a random pick of
-    /// ``cardCount`` cards, with the app-wide choices the run cannot make for
-    /// itself passed in.
+    /// The run's options as the practice screen takes them: ``cardCount``
+    /// cards picked by ``mode``, with the app-wide choices the run cannot make
+    /// for itself passed in.
     func practiceSettings(audioPlayback: AudioPlaybackMode, bookmarkFallback: PracticeMode) -> PracticeSettings {
         var settings = PracticeSettings()
-        settings.mode = .random
+        settings.mode = mode
         settings.isInverted = isInverted
         settings.cardLimit = min(max(cardCount, Self.cardCountRange.lowerBound), Self.cardCountRange.upperBound)
         settings.practiceTarget = practiceTarget
@@ -58,7 +61,7 @@ struct QuickPracticeSettings: Codable, Equatable {
 extension QuickPracticeSettings {
 
     private enum CodingKeys: String, CodingKey {
-        case deckIDs, isInverted, cardCount, practiceTarget, errorPenalty
+        case deckIDs, isInverted, mode, cardCount, practiceTarget, errorPenalty
     }
 
     /// Tolerant for the same reason ``PracticeSettings`` is: an option added
@@ -70,6 +73,7 @@ extension QuickPracticeSettings {
         self.init(
             deckIDs: try container.decodeIfPresent([UUID].self, forKey: .deckIDs),
             isInverted: try container.decodeIfPresent(Bool.self, forKey: .isInverted) ?? fallback.isInverted,
+            mode: (try? container.decode(PracticeMode.self, forKey: .mode)) ?? fallback.mode,
             cardCount: try container.decodeIfPresent(Int.self, forKey: .cardCount) ?? fallback.cardCount,
             practiceTarget: try container.decodeIfPresent(Int.self, forKey: .practiceTarget) ?? fallback.practiceTarget,
             errorPenalty: (try? container.decode(PracticeErrorPenalty.self, forKey: .errorPenalty)) ?? fallback.errorPenalty
@@ -92,7 +96,13 @@ enum PracticeSource {
         case .deck(let deck):
             PracticePlanner.cards(for: deck, settings: settings)
         case .decks(let decks):
-            PracticePlanner.plan(from: decks.flatMap(\.practisableCards), settings: settings)
+            // Capped here as well as by the planner: In Order ignores the card
+            // limit for a single deck, where it means "the whole deck", but a
+            // quick run always deals its card count.
+            Array(
+                PracticePlanner.plan(from: decks.flatMap(\.practisableCards), settings: settings)
+                    .prefix(max(1, settings.cardLimit ?? .max))
+            )
         }
     }
 }
