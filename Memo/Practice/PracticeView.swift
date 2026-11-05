@@ -15,7 +15,8 @@ struct PracticeView: View {
     @Environment(AudioPlayer.self) private var player
     @Environment(PracticeSettingsStore.self) private var store
 
-    let deck: Deck
+    /// Where the run's cards come from: one deck, or several.
+    let source: PracticeSource
 
     /// Captured when the run starts, so changing options mid-run cannot
     /// reshape a session already in progress.
@@ -42,16 +43,16 @@ struct PracticeView: View {
     @State private var audioCache: [UUID: Data] = [:]
 
     init(deck: Deck, settings: PracticeSettings) {
-        self.deck = deck
+        self.init(source: .deck(deck), settings: settings)
+    }
+
+    init(source: PracticeSource, settings: PracticeSettings) {
+        self.source = source
         self.settings = settings
         // Seeded through `State(initialValue:)` rather than by assigning the
         // wrapped value, which would re-plan on every view re-init while
         // SwiftUI kept only the first result.
-        _session = State(
-            initialValue: PracticeSession(
-                cards: PracticePlanner.cards(for: deck, settings: settings)
-            )
-        )
+        _session = State(initialValue: PracticeSession(cards: source.cards(settings: settings)))
     }
 
     /// Which way round the current card is, per the inverse setting.
@@ -252,8 +253,10 @@ struct PracticeView: View {
         // minus this margin and never runs into its edges.
         .padding(Self.cardTextInset)
         .frame(width: Self.cardSize.width, height: Self.cardSize.height)
-        .background(deck.color)
-        .foregroundStyle(deck.contrastingTextColor)
+        // The colour of the deck the card belongs to, which in a run drawn
+        // from several decks changes from card to card.
+        .background(session.currentCard?.deck?.color ?? .white)
+        .foregroundStyle(session.currentCard?.deck?.contrastingTextColor ?? .black)
         // Stops this side's audio, or plays it again.
         .overlay(alignment: .topTrailing) {
             if let audio = currentAudio(slot) {
@@ -359,7 +362,12 @@ struct PracticeView: View {
     /// Said in place of options that would change nothing, so holding a
     /// button always answers with something and never looks broken.
     private var trackingOffNote: String {
-        String(localized: "Progress is off for this deck: its practice target is 0.")
+        switch source {
+        case .deck:
+            String(localized: "Progress is off for this deck: its practice target is 0.")
+        case .decks:
+            String(localized: "Progress is off for Quick Practice: its practice target is 0.")
+        }
     }
 
     private var correctNote: String? {
@@ -463,7 +471,7 @@ struct PracticeView: View {
     }
 
     private func practiceAgain() {
-        session.restart(with: PracticePlanner.cards(for: deck, settings: settings))
+        session.restart(with: source.cards(settings: settings))
         offset = .zero
         hasBeenFlipped = false
         isRevealed = false

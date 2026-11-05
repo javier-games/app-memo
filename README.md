@@ -20,6 +20,7 @@ Designed to enhance your learning experience by using customizable flash cards. 
     - **Mark as Correct, Wrong, or Skip**: Correct and wrong both settle a card; skipping sends it to the back of the deck for later, and does not count as an answer.
     - **Session results**: Finishing a deck counts up how many you got right, wrong and skipped, and offers another run. Tap any of the three to see its cards, and tap a card there to edit it without leaving the results.
 - **Practice Options**: Five modes to practise in, an inverse mode that flips which side asks the question, and a limit so you can drill part of a deck. Each deck has its own. See [Practice Options](#practice-options).
+- **Quick Practice**: One button on the deck list deals a short random run from all your decks, or the ones you pick. See [Quick Practice](#quick-practice).
 - **Bookmarks**: Mark the cards you want to come back to and practise only those.
 - **Audio**: Record audio for either side of a card and for its hints. It plays as each side is shown while practising, or only when you tap, as you choose. See [Card Audio](#card-audio).
 - **Progress per Card**: Each card counts consecutive correct answers towards a target. A wrong answer sends it back to zero, so the count reflects what you currently know rather than what you once did.
@@ -117,6 +118,18 @@ already at zero, already at the target, or the deck's target is 0 — the menu
 says so instead. The deck list shows each card's standing
 — grey while short of the target, green once reached. If you have already
 practised a card elsewhere, you can set its count by hand in the card editor.
+
+### Quick Practice
+
+**Quick Practice** at the bottom of the deck list starts a run drawn from
+several decks at once: 10 cards, picked at random. Each card keeps its own
+deck's colour.
+
+Its options are in **Settings → Practice → Quick Practice**: which decks it
+draws from (**All Decks** by default, which includes decks added later), how
+many cards it deals, **Inverse**, the **Practice Target**, and **After a Wrong
+Answer**. These apply to quick runs only; each deck's own options are
+unchanged. Like the other settings, they sync through iCloud.
 
 ## Card Audio
 
