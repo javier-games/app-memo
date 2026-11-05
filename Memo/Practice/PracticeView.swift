@@ -98,6 +98,9 @@ struct PracticeView: View {
             )
             .onAppear(perform: showCard)
 
+            currentCardProgress
+                .padding(.top, 20)
+
             // Under the card rather than in the navigation bar: it acts on the
             // card in front of you, and up there it sat next to Edit, away
             // from everything else you do with a card.
@@ -131,7 +134,7 @@ struct PracticeView: View {
                 }
             }
             .buttonStyle(.bordered)
-            .padding(.top, 32)
+            .padding(.top, 16)
 
             Spacer()
 
@@ -357,6 +360,33 @@ struct PracticeView: View {
 
     private var currentProgress: Int {
         max(0, session.currentCard?.practiceProgress ?? 0)
+    }
+
+    /// How far the card in front of you is towards its target, such as
+    /// "3/10", green with a tick once it is learned. Nothing when progress is
+    /// off.
+    @ViewBuilder
+    private var currentCardProgress: some View {
+        if let card = session.currentCard,
+           let description = settings.progress(for: card).shortDescription {
+            let isLearned = settings.progress(for: card).isFulfilled
+
+            Label {
+                Text(description)
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+            } icon: {
+                Image(systemName: isLearned ? "checkmark.circle.fill" : "chart.bar.fill")
+            }
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(isLearned ? Color.green : Color.secondary)
+            .animation(.default, value: description)
+            .accessibilityLabel(
+                isLearned
+                    ? String(localized: "Learned, \(description)")
+                    : String(localized: "Progress \(description)")
+            )
+        }
     }
 
     /// Said in place of options that would change nothing, so holding a
