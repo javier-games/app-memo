@@ -25,6 +25,18 @@ struct CardDraft {
 
     var isBookmarked = false
 
+    /// The card's Review Schedule switch, as the editor shows it.
+    var isReviewScheduleEnabled = false
+
+    /// When the card's Review Schedule started. Shown, not edited.
+    var learnedAt: Date?
+
+    /// When the card was last answered. Shown, not edited.
+    var lastAnsweredAt: Date?
+
+    /// Set by "Restart from Today"; applied on save.
+    var restartsReviewSchedule = false
+
     /// A recording as the editor holds it, before it is saved to the card.
     struct Recording: Equatable {
         var data: Data
@@ -45,6 +57,9 @@ struct CardDraft {
         backHintText = card.backHintText
         practiceProgress = card.practiceProgress
         isBookmarked = card.isBookmarked
+        isReviewScheduleEnabled = card.isReviewScheduleEnabled
+        learnedAt = card.learnedAt
+        lastAnsweredAt = card.lastAnsweredAt
 
         for slot in AudioSlot.allCases {
             if let recording = card.audio(for: slot), let data = recording.data {
@@ -78,6 +93,11 @@ struct CardDraft {
         card.backHintText = texts[3]
         card.practiceProgress = max(0, practiceProgress)
         card.isBookmarked = isBookmarked
+
+        ReviewScheduler.setEnabled(isReviewScheduleEnabled, for: card)
+        if restartsReviewSchedule, isReviewScheduleEnabled {
+            ReviewScheduler.restart(card)
+        }
 
         if applyAudio(to: card) {
             card.modifiedAt = Date()
@@ -133,6 +153,7 @@ struct CardEditorView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(AudioPlayer.self) private var player
+    @Environment(PracticeSettingsStore.self) private var practiceStore
 
     let title: LocalizedStringKey
     let saveTitle: LocalizedStringKey
@@ -195,6 +216,8 @@ struct CardEditorView: View {
                 }
 
                 practiceSection
+
+                reviewScheduleSection
 
                 Section {
                     HStack {
@@ -376,6 +399,58 @@ struct CardEditorView: View {
             ? String(localized: "Correct answers recorded so far. Set it by hand if you have already practised this card elsewhere — a correct answer adds one, and Practice Options decides what a wrong one does. Bookmarked cards are the ones Bookmarked mode practises.")
             : String(localized: "Progress tracking is switched off in Practice Options. Bookmarked cards are the ones Bookmarked mode practises.")
     }
+
+    // MARK: - Review Schedule
+
+    private var reviewScheduleSection: some View {
+        Section {
+            Toggle("Review Schedule", isOn: $draft.isReviewScheduleEnabled)
+
+            if draft.isReviewScheduleEnabled {
+                LabeledContent("Learned") {
+                    if let start = scheduleStart {
+                        Text(start, format: .dateTime.day().month().year())
+                    }
+                }
+
+                Button("Restart from Today") {
+                    draft.restartsReviewSchedule = true
+                }
+                .disabled(draft.restartsReviewSchedule)
+            }
+
+            if let lastAnsweredAt = draft.lastAnsweredAt {
+                LabeledContent("Last Answered") {
+                    Text(lastAnsweredAt, format: .dateTime.day().month().year())
+                }
+            }
+        } footer: {
+            Text(reviewScheduleFooter)
+        }
+    }
+
+    /// Where the schedule counts from once saved.
+    private var scheduleStart: Date? {
+        guard draft.isReviewScheduleEnabled else { return nil }
+        return draft.restartsReviewSchedule ? Date() : (draft.learnedAt ?? Date())
+    }
+
+    private var reviewScheduleFooter: String {
+        guard let start = scheduleStart else {
+            return String(localized: "Lowers this card's progress over time once it is learned, so Least Practiced brings it back. Turns on by itself the first time the card reaches its target.")
+        }
+
+        guard let next = practiceStore.reviewSchedule.nextCheckpoint(after: Date(), learnedAt: start) else {
+            return String(localized: "The schedule has run its course: this card's progress no longer goes down.")
+        }
+
+        let change = next.interval.resetsProgress
+            ? String(localized: "back to zero")
+            : "−\(next.interval.decrease)"
+        let date = next.date.formatted(.dateTime.day().month().year())
+
+        return String(localized: "Next: \(change) on \(date), unless the card is answered before then. The steps are in Settings → Practice → Review Schedule.")
+    }
 }
 
 #Preview {
@@ -386,4 +461,5 @@ struct CardEditorView: View {
         draft: CardDraft(card: Card(frontText: "Tea", backText: "Té", practiceProgress: 3))
     ) { _ in }
     .environment(AudioPlayer())
+    .environment(PracticeSettingsStore(defaults: UserDefaults(suiteName: "preview.card.editor")!))
 }

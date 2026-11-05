@@ -89,6 +89,9 @@
 		6F6D0A85B55272A21CD2BE2E /* QuickPractice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA5592DC5EBE48EEC05D759 /* QuickPractice.swift */; };
 		2D0CA194687A585554700B8B /* QuickPracticeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E4CC2220E4BEC111180B73 /* QuickPracticeSettingsView.swift */; };
 		C94A2497C6D1774061E92932 /* QuickPracticeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723007023B066BC49B97FAFD /* QuickPracticeTests.swift */; };
+		F37D2DEE7DF2D0EE022DC1FA /* ReviewSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF01B51AA5F1F29D8154946F /* ReviewSchedule.swift */; };
+		24351C4E61CC687BF719FD7B /* ReviewScheduleSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5CF9F39F0B958A1FD95916 /* ReviewScheduleSettingsView.swift */; };
+		F5D5B4B891BD48018B46DF08 /* ReviewScheduleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6062E42D25D02090E409F543 /* ReviewScheduleTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -194,6 +197,9 @@
 		0DA5592DC5EBE48EEC05D759 /* QuickPractice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "QuickPractice.swift"; sourceTree = "<group>"; };
 		B4E4CC2220E4BEC111180B73 /* QuickPracticeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "QuickPracticeSettingsView.swift"; sourceTree = "<group>"; };
 		723007023B066BC49B97FAFD /* QuickPracticeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "QuickPracticeTests.swift"; sourceTree = "<group>"; };
+		BF01B51AA5F1F29D8154946F /* ReviewSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ReviewSchedule.swift"; sourceTree = "<group>"; };
+		3E5CF9F39F0B958A1FD95916 /* ReviewScheduleSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ReviewScheduleSettingsView.swift"; sourceTree = "<group>"; };
+		6062E42D25D02090E409F543 /* ReviewScheduleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ReviewScheduleTests.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -260,6 +266,7 @@
 				073A51012FC7992EEB1510CE /* CardPracticeProgressTests.swift */,
 				BCE7896AF372DD4AC9382622 /* PracticeSessionTests.swift */,
 				723007023B066BC49B97FAFD /* QuickPracticeTests.swift */,
+				6062E42D25D02090E409F543 /* ReviewScheduleTests.swift */,
 				96C91BDBFB605F67F2A7F896 /* PracticeResultsTests.swift */,
 				CACDFFC3B2C44B4B53080E43 /* PracticeSettingsTests.swift */,
 				003548B3F8CF85A99D2148CD /* SortIndexedTests.swift */,
@@ -280,6 +287,7 @@
 				F49183792B622B930051531F /* PracticeView.swift */,
 				816FD4CB07057DBA31D88990 /* PracticeResultsView.swift */,
 				0DA5592DC5EBE48EEC05D759 /* QuickPractice.swift */,
+				BF01B51AA5F1F29D8154946F /* ReviewSchedule.swift */,
 				D5C7F0FE60E72EDB2F23F66E /* PracticeReviewView.swift */,
 				BDEF0381D5A853BBE5FE5954 /* PracticeResultsReveal.swift */,
 			);
@@ -387,6 +395,7 @@
 			children = (
 				D0E4498A909F21F5E7EA5650 /* SettingsView.swift */,
 				B4E4CC2220E4BEC111180B73 /* QuickPracticeSettingsView.swift */,
+				3E5CF9F39F0B958A1FD95916 /* ReviewScheduleSettingsView.swift */,
 				EA7ABF5CA8E45496AB9E3B38 /* AudioSettingsView.swift */,
 				6A7B43A7CBB143C75EA82DEC /* SyncSettingsView.swift */,
 				9DB301C2A0449B7F7D3CD9CB /* DecksSettingsView.swift */,
@@ -556,7 +565,9 @@
 				6EB9C5C8D6E2CB8D41295675 /* DeckExporter.swift in Sources */,
 				AC18781D6AE2C10323E98859 /* DeckImporter.swift in Sources */,
 				2D0CA194687A585554700B8B /* QuickPracticeSettingsView.swift in Sources */,
+				24351C4E61CC687BF719FD7B /* ReviewScheduleSettingsView.swift in Sources */,
 				6F6D0A85B55272A21CD2BE2E /* QuickPractice.swift in Sources */,
+				F37D2DEE7DF2D0EE022DC1FA /* ReviewSchedule.swift in Sources */,
 				F6F124B6F9FBCA067C341781 /* DeckPackage.swift in Sources */,
 				C604A922D3376439BF3B7278 /* AudioSettingsView.swift in Sources */,
 				B59A5B4F1CA82506DD6C6D66 /* CardAudio.swift in Sources */,
@@ -637,6 +648,7 @@
 				E5237B44299BD97AC38FF11F /* PracticeSettingsTests.swift in Sources */,
 				F47FB4B91BF44840839F3166 /* PracticeSessionTests.swift in Sources */,
 				C94A2497C6D1774061E92932 /* QuickPracticeTests.swift in Sources */,
+				F5D5B4B891BD48018B46DF08 /* ReviewScheduleTests.swift in Sources */,
 				66691679C5E4350E6254FA2C /* PracticeResultsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -460,14 +460,16 @@ struct PracticeView: View {
             if completing {
                 CardPracticeProgressRecorder.complete(
                     card,
-                    target: settings.resolvedPracticeTarget
+                    target: settings.resolvedPracticeTarget,
+                    schedule: store.reviewSchedule
                 )
             } else {
                 CardPracticeProgressRecorder.record(
                     outcome,
                     on: card,
                     target: settings.resolvedPracticeTarget,
-                    penalty: penalty ?? settings.errorPenalty
+                    penalty: penalty ?? settings.errorPenalty,
+                    schedule: store.reviewSchedule
                 )
             }
         }
