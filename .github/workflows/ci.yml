@@ -12,7 +12,9 @@ concurrency:
 jobs:
   test:
     name: Unit tests
-    runs-on: macos-26
+    # App Store Connect only accepts builds made with the iOS 27 SDK or later
+    # (ITMS-90725). GitHub ships Xcode 27 on its own image, not on macos-26.
+    runs-on: xcode-27
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5

@@ -50,7 +50,9 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.event == 'push')
-    runs-on: macos-26
+    # App Store Connect only accepts builds made with the iOS 27 SDK or later
+    # (ITMS-90725). GitHub ships Xcode 27 on its own image, not on macos-26.
+    runs-on: xcode-27
     timeout-minutes: 45
     env:
       APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
@@ -99,7 +101,14 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Show Xcode version
-        run: xcodebuild -version
+        run: |
+          xcodebuild -version
+          sdk=$(xcrun --sdk iphoneos --show-sdk-version)
+          echo "iOS SDK $sdk"
+          if [ "${sdk%%.*}" -lt 27 ]; then
+            echo "::error::App Store Connect needs the iOS 27 SDK or later; this runner has $sdk"
+            exit 1
+          fi
 
       - name: Write the App Store Connect API key
         env:

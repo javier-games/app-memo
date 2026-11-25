@@ -15,7 +15,8 @@ on:
 jobs:
   revoke:
     name: Revoke
-    runs-on: macos-26
+    # The same image as the TestFlight workflow, so fastlane runs on one setup.
+    runs-on: xcode-27
     timeout-minutes: 10
     env:
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
