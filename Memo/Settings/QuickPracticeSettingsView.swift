@@ -60,6 +60,8 @@ struct QuickPracticeSettingsView: View {
                     }
                 }
 
+                Toggle("Shuffle", isOn: $store.quickPractice.isShuffled)
+
                 Stepper(
                     value: $store.quickPractice.cardCount,
                     in: QuickPracticeSettings.cardCountRange
@@ -120,20 +122,16 @@ struct QuickPracticeSettingsView: View {
     }
 
     private var modeFooter: String {
-        let count = store.quickPractice.cardCount
+        let quick = store.quickPractice
+        let explanation = quick.mode.explanation(
+            isShuffled: quick.isShuffled,
+            fallback: store.settings.resolvedBookmarkFallbackMode
+        )
+        let order = quick.mode == .all && !quick.isShuffled
+            ? String(localized: "Decks follow the order of your deck list.")
+            : ""
 
-        switch store.quickPractice.mode {
-        case .random:
-            return String(localized: "A quick run deals \(count) cards, picked at random from the chosen decks.")
-        case .inOrder:
-            return String(localized: "A quick run deals the first \(count) cards, deck by deck in the order of your deck list.")
-        case .leastPracticed:
-            return String(localized: "A quick run deals the \(count) least practised cards across the chosen decks.")
-        case .leastPracticedShuffled:
-            return String(localized: "A quick run deals the \(count) least practised cards across the chosen decks, shuffled among equally practised ones.")
-        case .bookmarked:
-            return String(localized: "A quick run deals up to \(count) bookmarked cards from the chosen decks. With no bookmarks, it uses \(store.settings.resolvedBookmarkFallbackMode.title) mode instead.")
-        }
+        return String(localized: "A quick run deals up to \(quick.cardCount) cards from the chosen decks. \(explanation) \(order)")
     }
 
     /// Turning "All Decks" off starts from every deck ticked, so nothing is

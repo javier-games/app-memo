@@ -195,6 +195,53 @@ final class ReviewScheduleTests: XCTestCase {
         XCTAssertEqual(card.practiceProgress, 9)
     }
 
+    // MARK: - Review mode
+
+    private func reviewPool() -> [Card] {
+        let learnedFull = learnedCard(on: date(2026, 1, 1), progress: 10)
+        learnedFull.frontText = "full"
+        let fadedLittle = learnedCard(on: date(2026, 1, 1), progress: 9)
+        fadedLittle.frontText = "little"
+        let fadedLots = learnedCard(on: date(2026, 1, 1), progress: 4)
+        fadedLots.frontText = "lots"
+        let neverLearned = Card(frontText: "new", backText: "B", practiceProgress: 2)
+        return [learnedFull, fadedLittle, neverLearned, fadedLots]
+    }
+
+    private func reviewSettings(shuffled: Bool = false) -> PracticeSettings {
+        var settings = PracticeSettings()
+        settings.mode = .review
+        settings.isShuffled = shuffled
+        return settings
+    }
+
+    func testReviewDealsOnlyFadedCardsMostFadedFirst() {
+        let dealt = PracticePlanner.plan(from: reviewPool(), settings: reviewSettings())
+
+        XCTAssertEqual(dealt.map(\.frontText), ["lots", "little"])
+    }
+
+    func testShuffledReviewStillPutsTheMostFadedFirst() {
+        for _ in 0..<20 {
+            let dealt = PracticePlanner.plan(from: reviewPool(), settings: reviewSettings(shuffled: true))
+            XCTAssertEqual(dealt.map(\.frontText), ["lots", "little"])
+        }
+    }
+
+    func testReviewWithNothingFadedFallsBack() {
+        var settings = reviewSettings()
+        settings.bookmarkFallbackMode = .leastPracticed
+
+        let pool = [learnedCard(on: date(2026, 1, 1)), Card(frontText: "new", backText: "B")]
+        let dealt = PracticePlanner.plan(from: pool, settings: settings)
+
+        XCTAssertEqual(dealt.map(\.frontText), ["new", "Tea"])
+    }
+
+    func testReviewIsOffWithTrackingOff() {
+        XCTAssertFalse(learnedCard(on: date(2026, 1, 1), progress: 3).needsReview(target: 0))
+    }
+
     // MARK: - Saving
 
     func testScheduleSurvivesARelaunch() {

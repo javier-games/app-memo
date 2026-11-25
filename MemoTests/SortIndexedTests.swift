@@ -162,7 +162,7 @@ final class SortIndexedTests: XCTestCase {
         cards.applyMove(from: IndexSet(integer: 3), to: 0)
 
         var settings = PracticeSettings()
-        settings.mode = .inOrder
+        settings.isShuffled = false
         let sorted = cards.sorted { $0.sortIndex < $1.sortIndex }
 
         XCTAssertEqual(

@@ -19,7 +19,7 @@ Designed to enhance your learning experience by using customizable flash cards. 
 - **Practice**: Cards appear one-by-one so you can focus on individual items.
     - **Mark as Correct, Wrong, or Skip**: Correct and wrong both settle a card; skipping sends it to the back of the deck for later, and does not count as an answer.
     - **Session results**: Finishing a deck counts up how many you got right, wrong and skipped, and offers another run. Tap any of the three to see its cards, and tap a card there to edit it without leaving the results.
-- **Practice Options**: Five modes to practise in, an inverse mode that flips which side asks the question, and a limit so you can drill part of a deck. Each deck has its own. See [Practice Options](#practice-options).
+- **Practice Options**: Four modes to practise in, each shuffled or not, an inverse mode that flips which side asks the question, and a limit so you can drill part of a deck. Each deck has its own. See [Practice Options](#practice-options).
 - **Quick Practice**: One button on the deck list deals a short random run from all your decks, or the ones you pick. See [Quick Practice](#quick-practice).
 - **Bookmarks**: Mark the cards you want to come back to and practise only those.
 - **Audio**: Record audio for either side of a card and for its hints. It plays as each side is shown while practising, or only when you tap, as you choose. See [Card Audio](#card-audio).
@@ -28,7 +28,7 @@ Designed to enhance your learning experience by using customizable flash cards. 
 - **Repository Sync**: Keep decks in a GitHub repository and push or pull the ones you pick. See [Repository Sync](#repository-sync).
 - **AI-Assisted Import**: Turn a text file or a PDF into a deck with Claude or ChatGPT, using your own API key. See [AI-Assisted Import](#ai-assisted-import).
 - **Search**: Find a deck or a card from the deck list, or a card from inside its deck. Choosing a card takes you to it, lights it up, and opens it for editing.
-- **Reorder**: Long-press and drag to rearrange decks or cards. Card order is what the *In Order* practice mode deals.
+- **Reorder**: Long-press and drag to rearrange decks or cards. Card order is what *All Cards* deals with **Shuffle** off.
 - **Flexible Study**: Perfect for language learning, memorizing trivia, studying for exams, or any topic that benefits from flash cards.
 
 ## Requirements
@@ -74,34 +74,42 @@ in progress.
 | Option | Default | What it does |
 | --- | --- | --- |
 | **Inverse** | Off | Swaps which side asks and which answers, hints included. |
-| **Mode** | Random | The order cards are dealt in — see below. |
+| **Mode** | All Cards | Which cards are dealt, and in what order — see below. |
+| **Shuffle** | On | Deal in a different order each run. |
 | **Cards** | All | Practise a slice of the deck rather than all of it. Stored as "no limit" rather than a number, so it keeps meaning across decks of different sizes. |
 | **Practice Target** | 10 | Correct answers a card needs before it counts as learned. **0** turns progress tracking off entirely, without discarding progress already recorded. |
 | **After a Wrong Answer** | Keep Progress | What a wrong answer does to a card's progress — see [Progress](#progress). |
 
 ### Modes
 
-| Mode | Order |
-| --- | --- |
-| **Random** | The whole deck, shuffled. |
-| **In Order** | The deck as you arranged it, start to finish. Always the whole deck, so the card limit does not apply. |
-| **Least Practiced** | Lowest progress first, ties keeping the deck's order. The same run every time. |
-| **Least Practiced, Shuffled** | Lowest progress first, but ties vary each run. |
-| **Bookmarked** | Only the cards you have bookmarked, shuffled. |
+| Mode | Shuffle off | Shuffle on |
+| --- | --- | --- |
+| **All Cards** | The deck as you arranged it. | The deck, shuffled. |
+| **Least Practiced** | Lowest progress first, ties keeping the deck's order. | Lowest progress first, ties shuffled. |
+| **Bookmarked** | Only bookmarked cards, in deck order. | Only bookmarked cards, shuffled. |
+| **Review** | Only learned cards whose progress has dropped since, most faded first. | The same, ties shuffled. |
 
-The two *Least Practiced* modes put the cards you keep getting wrong — and the
-ones you have never seen — ahead of the ones you have already learned. Combined
-with **Cards**, they give you "the twenty I am worst at". With **Practice
-Target** set to 0 every card sits at zero progress, so both fall back to their
-unordered form.
+*Least Practiced* puts the cards you keep getting wrong — and the ones you have
+never seen — ahead of the ones you have already learned. Combined with
+**Cards**, it gives you "the twenty I am worst at". With **Practice Target** set
+to 0 every card sits at zero progress, so it deals the deck as if it were All
+Cards.
+
+*Review* deals the cards the [Review Schedule](#review-schedule) has faded (and
+any other learned card a wrong answer has pulled below the target).
+
+Versions before the **Shuffle** switch had *Random*, *In Order* and *Least
+Practiced, Shuffled* as modes of their own; saved options carry over as the
+matching mode and switch.
 
 ### Bookmarks
 
 Bookmark a card by swiping it to the right in the deck, with the **Bookmarked**
 switch in the card editor, or with the **Bookmark** button under the card while practising it.
 **Bookmarked** mode then deals only those cards. A deck with no bookmarks is
-practised in another mode instead, **Random** unless you pick a different one
-under **Settings → Decks → When a Deck Has No Bookmarks**; that choice applies to every deck.
+practised in another mode instead, **All Cards** unless you pick a different one
+under **Settings → Decks → When a Mode Has No Cards**; that choice applies to every deck,
+and to Review mode when there is nothing to review.
 
 ### Progress
 

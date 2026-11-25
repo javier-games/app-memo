@@ -41,7 +41,8 @@ final class QuickPracticeTests: XCTestCase {
         XCTAssertEqual(settings.cardCount, 10)
         XCTAssertFalse(settings.isInverted)
         XCTAssertEqual(settings.errorPenalty, .none)
-        XCTAssertEqual(settings.mode, .random)
+        XCTAssertEqual(settings.mode, .all)
+        XCTAssertTrue(settings.isShuffled)
     }
 
     // MARK: - Choosing decks
@@ -68,7 +69,7 @@ final class QuickPracticeTests: XCTestCase {
 
     func testRunUsesTheChosenOptions() {
         let quick = QuickPracticeSettings(isInverted: true, mode: .leastPracticed, cardCount: 7, practiceTarget: 4, errorPenalty: .reset)
-        let settings = quick.practiceSettings(audioPlayback: .manual, bookmarkFallback: .inOrder)
+        let settings = quick.practiceSettings(audioPlayback: .manual, bookmarkFallback: .leastPracticed)
 
         XCTAssertEqual(settings.mode, .leastPracticed)
         XCTAssertTrue(settings.isInverted)
@@ -81,7 +82,7 @@ final class QuickPracticeTests: XCTestCase {
     func testRunDrawsFromEveryChosenDeckUpToTheCount() {
         let context = makeContext()
         let decks = [makeDeck("A", cards: 8, in: context), makeDeck("B", cards: 8, in: context)]
-        let settings = QuickPracticeSettings().practiceSettings(audioPlayback: .manual, bookmarkFallback: .random)
+        let settings = QuickPracticeSettings().practiceSettings(audioPlayback: .manual, bookmarkFallback: .all)
 
         let cards = PracticeSource.decks(decks).cards(settings: settings)
 
@@ -92,7 +93,7 @@ final class QuickPracticeTests: XCTestCase {
     func testSmallLibraryDealsEveryCard() {
         let context = makeContext()
         let decks = [makeDeck("A", cards: 3, in: context), makeDeck("B", cards: 2, in: context)]
-        let settings = QuickPracticeSettings().practiceSettings(audioPlayback: .manual, bookmarkFallback: .random)
+        let settings = QuickPracticeSettings().practiceSettings(audioPlayback: .manual, bookmarkFallback: .all)
 
         XCTAssertEqual(PracticeSource.decks(decks).cards(settings: settings).count, 5)
     }
@@ -100,8 +101,8 @@ final class QuickPracticeTests: XCTestCase {
     func testInOrderStillDealsTheCardCount() {
         let context = makeContext()
         let decks = [makeDeck("A", cards: 8, in: context), makeDeck("B", cards: 8, in: context)]
-        let settings = QuickPracticeSettings(mode: .inOrder)
-            .practiceSettings(audioPlayback: .manual, bookmarkFallback: .random)
+        let settings = QuickPracticeSettings(mode: .all, isShuffled: false)
+            .practiceSettings(audioPlayback: .manual, bookmarkFallback: .all)
 
         let fronts = PracticeSource.decks(decks).cards(settings: settings).map(\.frontText)
 
@@ -115,8 +116,8 @@ final class QuickPracticeTests: XCTestCase {
         a.orderedCards.forEach { $0.practiceProgress = 5 }
         b.orderedCards[2].practiceProgress = 5
 
-        let settings = QuickPracticeSettings(mode: .leastPracticed, cardCount: 2)
-            .practiceSettings(audioPlayback: .manual, bookmarkFallback: .random)
+        let settings = QuickPracticeSettings(mode: .leastPracticed, isShuffled: false, cardCount: 2)
+            .practiceSettings(audioPlayback: .manual, bookmarkFallback: .all)
 
         XCTAssertEqual(
             PracticeSource.decks([a, b]).cards(settings: settings).map(\.frontText),
@@ -132,7 +133,7 @@ final class QuickPracticeTests: XCTestCase {
         b.orderedCards[3].isBookmarked = true
 
         let settings = QuickPracticeSettings(mode: .bookmarked)
-            .practiceSettings(audioPlayback: .manual, bookmarkFallback: .random)
+            .practiceSettings(audioPlayback: .manual, bookmarkFallback: .all)
 
         XCTAssertEqual(
             Set(PracticeSource.decks([a, b]).cards(settings: settings).map(\.frontText)),
@@ -157,7 +158,7 @@ final class QuickPracticeTests: XCTestCase {
 
         XCTAssertEqual(decoded.cardCount, 5)
         XCTAssertNil(decoded.deckIDs)
-        XCTAssertEqual(decoded.mode, .random)
+        XCTAssertEqual(decoded.mode, .all)
         XCTAssertEqual(decoded.practiceTarget, QuickPracticeSettings.default.practiceTarget)
     }
 }

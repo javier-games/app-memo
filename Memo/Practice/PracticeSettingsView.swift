@@ -38,10 +38,13 @@ struct PracticeOptionsSections: View {
                     Text(mode.title).tag(mode)
                 }
             }
+
+            Toggle("Shuffle", isOn: $settings.isShuffled)
         } footer: {
-            if settings.mode == .bookmarked {
-                Text("Practises only the cards you have bookmarked. A deck with no bookmarks is practised in \(settings.resolvedBookmarkFallbackMode.title) mode instead.")
-            }
+            Text(settings.mode.explanation(
+                isShuffled: settings.isShuffled,
+                fallback: settings.resolvedBookmarkFallbackMode
+            ))
         }
 
         if let deckCardCount {
@@ -58,13 +61,10 @@ struct PracticeOptionsSections: View {
                             .monospacedDigit()
                     }
                 }
-                // Only adjustable when the mode allows it and there is a
-                // choice to make.
-                .disabled(!settings.mode.allowsCardLimit || deckCardCount <= 1)
+                // Only adjustable when there is a choice to make.
+                .disabled(deckCardCount <= 1)
             } footer: {
-                if let explanation = settings.mode.cardLimitExplanation {
-                    Text(explanation)
-                } else if deckCardCount == 0 {
+                if deckCardCount == 0 {
                     Text("This deck has no cards to practise yet.")
                 } else {
                     Text("Practise a smaller slice of the deck. \"All\" uses every card.")

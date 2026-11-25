@@ -9,82 +9,122 @@
 
 import Foundation
 
-/// The order cards are dealt in.
+/// Which cards a run deals, and in what order. Whether they are shuffled
+/// is a separate switch, ``PracticeSettings/isShuffled``.
 ///
 /// Adding a mode means adding a case here and answering the capability
-/// questions below; the settings panel builds itself from `allCases`.
-enum PracticeMode: String, Codable, CaseIterable, Identifiable {
+/// questions below; the settings panels build themselves from `allCases`.
+enum PracticeMode: String, CaseIterable, Identifiable {
 
-    /// The deck, shuffled.
-    case random
+    /// Every card: in the deck's order, or shuffled.
+    case all
 
-    /// The deck in its authored order, start to finish.
-    case inOrder
-
-    /// Lowest practice progress first, ties keeping the deck's order.
+    /// Lowest practice progress first. Shuffling only reorders cards with
+    /// the same progress.
     ///
     /// Puts the cards you keep getting wrong — and the ones you have never
     /// seen — in front of the ones you have already learned.
     case leastPracticed
 
-    /// Lowest practice progress first, ties in a different order each run.
-    case leastPracticedShuffled
-
-    /// Only the cards the user has bookmarked, shuffled.
+    /// Only the cards the user has bookmarked.
     ///
     /// A deck with no bookmarks is practised in
     /// ``PracticeSettings/bookmarkFallbackMode`` instead, so choosing this
     /// mode never leaves a deck with nothing to deal.
     case bookmarked
 
+    /// Only learned cards that have slipped below the practice target since,
+    /// mostly through the Review Schedule. Most faded first.
+    ///
+    /// Falls back like ``bookmarked`` when there are none.
+    case review
+
     var id: String { rawValue }
 
     var title: String {
         switch self {
-        case .random:                 String(localized: "Random")
-        case .inOrder:                String(localized: "In Order")
-        case .leastPracticed:         String(localized: "Least Practiced")
-        case .leastPracticedShuffled: String(localized: "Least Practiced, Shuffled")
-        case .bookmarked:             String(localized: "Bookmarked")
-        }
-    }
-
-    /// Whether a run in this mode may practise a subset of the deck.
-    ///
-    /// `inOrder` is a run through the whole deck by definition, so a card limit
-    /// would be meaningless; the panel disables the control and explains why.
-    var allowsCardLimit: Bool {
-        switch self {
-        case .random, .leastPracticed, .leastPracticedShuffled, .bookmarked: true
-        case .inOrder:                                                      false
+        case .all:            String(localized: "All Cards")
+        case .leastPracticed: String(localized: "Least Practiced")
+        case .bookmarked:     String(localized: "Bookmarked")
+        case .review:         String(localized: "Review")
         }
     }
 
     /// Whether the run is ordered by how much each card has been practiced.
-    ///
-    /// Both such modes fall back to their unordered form when the practice
-    /// target is zero, since every card then sits at zero progress.
     var ordersByProgress: Bool {
         switch self {
-        case .leastPracticed, .leastPracticedShuffled: true
-        case .random, .inOrder, .bookmarked:           false
+        case .leastPracticed, .review: true
+        case .all, .bookmarked:        false
         }
     }
 
-    /// Why the card limit is unavailable, for modes that fix it.
-    var cardLimitExplanation: String? {
+    /// Whether the mode deals only some cards, and so needs a fallback for a
+    /// deck where it would deal none.
+    var needsFallback: Bool {
         switch self {
-        case .random, .leastPracticed, .leastPracticedShuffled, .bookmarked:
-            nil
-        case .inOrder:
-            String(localized: "In Order practises the whole deck, so every card is included.")
+        case .bookmarked, .review:  true
+        case .all, .leastPracticed: false
         }
     }
 
-    /// The modes a deck with no bookmarks can be practised in: every mode
-    /// that does not itself need bookmarks.
-    static var bookmarkFallbacks: [PracticeMode] {
-        allCases.filter { $0 != .bookmarked }
+    /// The modes a deck can fall back to: those that always have cards.
+    static var fallbacks: [PracticeMode] {
+        allCases.filter { !$0.needsFallback }
+    }
+
+    /// What a run in this mode deals, for the settings panels.
+    func explanation(isShuffled: Bool, fallback: PracticeMode) -> String {
+        switch (self, isShuffled) {
+        case (.all, false):
+            String(localized: "Every card, in order.")
+        case (.all, true):
+            String(localized: "Every card, shuffled.")
+        case (.leastPracticed, false):
+            String(localized: "The least practised cards first; cards with the same progress keep their order.")
+        case (.leastPracticed, true):
+            String(localized: "The least practised cards first; cards with the same progress are shuffled.")
+        case (.bookmarked, _):
+            String(localized: "Only the cards you have bookmarked. With no bookmarks, \(fallback.title) is used instead.")
+        case (.review, _):
+            String(localized: "Only learned cards whose progress has dropped since, most faded first — mostly through the Review Schedule. With none, \(fallback.title) is used instead.")
+        }
+    }
+}
+
+extension PracticeMode: Codable {
+
+    /// Reads the modes of earlier versions too: Random and In Order are now
+    /// All Cards, and Least Practiced, Shuffled is Least Practiced. Whether
+    /// they shuffled is read by ``PracticeSettings`` as ``isShuffled``.
+    init(from decoder: Decoder) throws {
+        let raw = try decoder.singleValueContainer().decode(String.self)
+        guard let mode = Self(legacyRawValue: raw) else {
+            throw DecodingError.dataCorrupted(.init(
+                codingPath: decoder.codingPath,
+                debugDescription: "Unknown practice mode \(raw)"
+            ))
+        }
+        self = mode
+    }
+
+    init?(legacyRawValue raw: String) {
+        switch raw {
+        case "random", "inOrder":       self = .all
+        case "leastPracticedShuffled":  self = .leastPracticed
+        default:
+            guard let mode = Self(rawValue: raw) else { return nil }
+            self = mode
+        }
+    }
+
+    /// Whether a mode saved by an earlier version shuffled, or nil if the
+    /// value says nothing about it.
+    static func legacyShuffle(_ raw: String) -> Bool? {
+        switch raw {
+        case "random", "leastPracticedShuffled", "bookmarked": true
+        case "inOrder", "leastPracticed":                      false
+        default:                                               nil
+        }
     }
 }
 
@@ -142,7 +182,11 @@ struct PracticeSettings: Codable, Equatable {
     /// swaps the two, hints included.
     var isInverted: Bool = false
 
-    var mode: PracticeMode = .random
+    var mode: PracticeMode = .all
+
+    /// Deal the mode's cards in a different order each run. For Least
+    /// Practiced and Review, only cards with the same progress are shuffled.
+    var isShuffled: Bool = true
 
     /// Correct answers a card needs before it counts as learned.
     ///
@@ -162,7 +206,7 @@ struct PracticeSettings: Codable, Equatable {
     ///
     /// An app-wide choice: a deck's own options never override it. See
     /// ``Deck/resolvedPracticeSettings(bookmarkFallback:)``.
-    var bookmarkFallbackMode: PracticeMode = .random
+    var bookmarkFallbackMode: PracticeMode = .all
 
     /// What a wrong answer does to a card's progress.
     var errorPenalty: PracticeErrorPenalty = .none
@@ -179,18 +223,18 @@ struct PracticeSettings: Codable, Equatable {
     /// How many cards a run over `deckSize` cards will actually deal.
     ///
     /// Clamped rather than trusted: the stored limit may outlive the deck it
-    /// was chosen for, and the mode may forbid a limit entirely.
+    /// was chosen for.
     func cardCount(forDeckSize deckSize: Int) -> Int {
         guard deckSize > 0 else { return 0 }
-        guard mode.allowsCardLimit, let cardLimit else { return deckSize }
+        guard let cardLimit else { return deckSize }
 
         return min(max(1, cardLimit), deckSize)
     }
 
-    /// The fallback in force. Never ``PracticeMode/bookmarked`` itself, which
-    /// would fall back to itself for ever.
+    /// The fallback in force for Bookmarked and Review. Never one of those
+    /// itself, which could fall back for ever.
     var resolvedBookmarkFallbackMode: PracticeMode {
-        bookmarkFallbackMode == .bookmarked ? .random : bookmarkFallbackMode
+        bookmarkFallbackMode.needsFallback ? .all : bookmarkFallbackMode
     }
 
     /// Whether the run covers the whole deck.
@@ -224,7 +268,7 @@ struct PracticeSettings: Codable, Equatable {
 extension PracticeSettings {
 
     private enum CodingKeys: String, CodingKey {
-        case isInverted, mode, cardLimit, practiceTarget, bookmarkFallbackMode, errorPenalty, audioPlayback
+        case isInverted, mode, isShuffled, cardLimit, practiceTarget, bookmarkFallbackMode, errorPenalty, audioPlayback
     }
 
     /// Decodes leniently: any rule absent from a stored payload takes its
@@ -240,11 +284,18 @@ extension PracticeSettings {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let fallback = PracticeSettings()
 
+        // Saved before shuffling was its own switch, the mode said it.
+        let rawMode = try? container.decode(String.self, forKey: .mode)
+        let isShuffled = try container.decodeIfPresent(Bool.self, forKey: .isShuffled)
+            ?? rawMode.flatMap(PracticeMode.legacyShuffle)
+            ?? fallback.isShuffled
+
         self.init(
             isInverted: try container.decodeIfPresent(Bool.self, forKey: .isInverted)
                 ?? fallback.isInverted,
             mode: (try? container.decode(PracticeMode.self, forKey: .mode))
                 ?? fallback.mode,
+            isShuffled: isShuffled,
             practiceTarget: try container.decodeIfPresent(Int.self, forKey: .practiceTarget)
                 ?? fallback.practiceTarget,
             cardLimit: try container.decodeIfPresent(Int.self, forKey: .cardLimit),

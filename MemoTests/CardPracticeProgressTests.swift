@@ -237,6 +237,7 @@ final class CardPracticeProgressTests: XCTestCase {
 
         XCTAssertEqual(decoded.practiceTarget, 10)
         XCTAssertTrue(decoded.isInverted)
-        XCTAssertEqual(decoded.mode, .inOrder)
+        XCTAssertEqual(decoded.mode, .all)
+        XCTAssertFalse(decoded.isShuffled)
     }
 }
