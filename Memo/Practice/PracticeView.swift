@@ -38,6 +38,11 @@ struct PracticeView: View {
     /// back over does not play its audio on the way out.
     @State private var isChangingCard = false
 
+    /// Whether the card in front of you has finished arriving. Every way of
+    /// answering, skipping or flipping waits for it, so a quick second tap
+    /// cannot land on the next card while it is still on its way in.
+    @State private var isCardSettled = false
+
     /// The run's recordings, read ahead in the background when it starts so
     /// that playing one never waits on the disk.
     @State private var audioCache: [UUID: Data] = [:]
@@ -97,6 +102,7 @@ struct PracticeView: View {
                 onRelease: onRelease
             )
             .onAppear(perform: showCard)
+            .allowsHitTesting(isCardSettled)
 
             currentCardProgress
                 .padding(.top, 20)
@@ -143,7 +149,7 @@ struct PracticeView: View {
                     iconName: "forward.fill",
                     label: "Skip card",
                     buttonColor: .accentColor,
-                    isEnabled: session.canSkip,
+                    isEnabled: session.canSkip && isCardSettled,
                     action: { skipCard() }
                 )
 
@@ -154,7 +160,7 @@ struct PracticeView: View {
                     iconName: "xmark",
                     label: "Mark incorrect",
                     buttonColor: .red,
-                    isEnabled: hasBeenFlipped,
+                    isEnabled: hasBeenFlipped && isCardSettled,
                     held: incorrectAlternatives,
                     heldNote: incorrectNote,
                     action: { finishCard(.incorrect) }
@@ -164,7 +170,7 @@ struct PracticeView: View {
                     iconName: "checkmark",
                     label: "Mark correct",
                     buttonColor: .green,
-                    isEnabled: hasBeenFlipped,
+                    isEnabled: hasBeenFlipped && isCardSettled,
                     held: correctAlternatives,
                     heldNote: correctNote,
                     action: { finishCard(.correct) }
@@ -174,7 +180,7 @@ struct PracticeView: View {
                     iconName: "arrow.2.squarepath",
                     label: "Flip card",
                     buttonColor: .accentColor,
-                    isEnabled: true,
+                    isEnabled: isCardSettled,
                     action: { flip.toggle() }
                 )
             }
@@ -454,6 +460,9 @@ struct PracticeView: View {
         penalty: PracticeErrorPenalty? = nil,
         completing: Bool = false
     ) {
+        // Disabling the buttons takes effect on the next frame; this does not.
+        guard isCardSettled else { return }
+
         // Recorded before the session advances, while the answered card is
         // still the current one.
         if let card = session.currentCard {
@@ -485,7 +494,7 @@ struct PracticeView: View {
     /// Distinct from answering: the card is deferred, not settled, so it does
     /// not move the progress bar and the session cannot end on a skip.
     private func skipCard() {
-        guard session.canSkip else { return }
+        guard session.canSkip, isCardSettled else { return }
 
         hideCard {
             session.record(.skipped)
@@ -546,12 +555,16 @@ struct PracticeView: View {
         isChangingCard = false
         playVisibleSide()
 
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.6), completionCriteria: .logicallyComplete) {
             cardScale = 1
+        } completion: {
+            // Only if no other change began meanwhile.
+            if !isChangingCard { isCardSettled = true }
         }
     }
 
     private func hideCard(completion: @escaping () -> Void) {
+        isCardSettled = false
         isChangingCard = true
         player.stop()
 
