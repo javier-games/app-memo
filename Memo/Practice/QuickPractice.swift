@@ -17,7 +17,9 @@ struct QuickPracticeSettings: Codable, Equatable {
     var isInverted = false
 
     /// How the run picks its cards from the chosen decks.
-    var mode = PracticeMode.random
+    var mode = PracticeMode.all
+
+    var isShuffled = true
 
     /// How many cards a run deals.
     var cardCount = 10
@@ -47,6 +49,7 @@ struct QuickPracticeSettings: Codable, Equatable {
     func practiceSettings(audioPlayback: AudioPlaybackMode, bookmarkFallback: PracticeMode) -> PracticeSettings {
         var settings = PracticeSettings()
         settings.mode = mode
+        settings.isShuffled = isShuffled
         settings.isInverted = isInverted
         settings.cardLimit = min(max(cardCount, Self.cardCountRange.lowerBound), Self.cardCountRange.upperBound)
         settings.practiceTarget = practiceTarget
@@ -61,7 +64,7 @@ struct QuickPracticeSettings: Codable, Equatable {
 extension QuickPracticeSettings {
 
     private enum CodingKeys: String, CodingKey {
-        case deckIDs, isInverted, mode, cardCount, practiceTarget, errorPenalty
+        case deckIDs, isInverted, mode, isShuffled, cardCount, practiceTarget, errorPenalty
     }
 
     /// Tolerant for the same reason ``PracticeSettings`` is: an option added
@@ -69,11 +72,15 @@ extension QuickPracticeSettings {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let fallback = QuickPracticeSettings()
+        let rawMode = try? container.decode(String.self, forKey: .mode)
 
         self.init(
             deckIDs: try container.decodeIfPresent([UUID].self, forKey: .deckIDs),
             isInverted: try container.decodeIfPresent(Bool.self, forKey: .isInverted) ?? fallback.isInverted,
             mode: (try? container.decode(PracticeMode.self, forKey: .mode)) ?? fallback.mode,
+            isShuffled: try container.decodeIfPresent(Bool.self, forKey: .isShuffled)
+                ?? rawMode.flatMap(PracticeMode.legacyShuffle)
+                ?? fallback.isShuffled,
             cardCount: try container.decodeIfPresent(Int.self, forKey: .cardCount) ?? fallback.cardCount,
             practiceTarget: try container.decodeIfPresent(Int.self, forKey: .practiceTarget) ?? fallback.practiceTarget,
             errorPenalty: (try? container.decode(PracticeErrorPenalty.self, forKey: .errorPenalty)) ?? fallback.errorPenalty

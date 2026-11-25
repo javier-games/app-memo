@@ -49,9 +49,9 @@ final class SettingsStorageTests: XCTestCase {
         return try encoder.encode(settings)
     }
 
-    private var inOrderFallback: PracticeSettings {
+    private var leastPracticedFallback: PracticeSettings {
         var settings = PracticeSettings()
-        settings.bookmarkFallbackMode = .inOrder
+        settings.bookmarkFallbackMode = .leastPracticed
         return settings
     }
 
@@ -61,27 +61,27 @@ final class SettingsStorageTests: XCTestCase {
         let cloud = MemoryCloud()
         let store = PracticeSettingsStore(defaults: makeDefaults(), cloud: cloud)
 
-        store.settings.bookmarkFallbackMode = .inOrder
+        store.settings.bookmarkFallbackMode = .leastPracticed
 
         let shared = try XCTUnwrap(cloud.values["PracticeSettings"])
         XCTAssertEqual(
             try JSONDecoder().decode(PracticeSettings.self, from: shared).bookmarkFallbackMode,
-            .inOrder
+            .leastPracticed
         )
     }
 
     func testANewDeviceStartsFromTheCloud() throws {
         let cloud = MemoryCloud()
-        cloud.values["PracticeSettings"] = try encoded(inOrderFallback)
+        cloud.values["PracticeSettings"] = try encoded(leastPracticedFallback)
 
         let store = PracticeSettingsStore(defaults: makeDefaults(), cloud: cloud)
 
-        XCTAssertEqual(store.settings.bookmarkFallbackMode, .inOrder)
+        XCTAssertEqual(store.settings.bookmarkFallbackMode, .leastPracticed)
     }
 
     func testADeviceWithSettingsTheCloudLacksOffersItsOwn() throws {
         let defaults = makeDefaults()
-        PracticeSettingsStore(defaults: defaults).settings.bookmarkFallbackMode = .inOrder
+        PracticeSettingsStore(defaults: defaults).settings.bookmarkFallbackMode = .leastPracticed
 
         let cloud = MemoryCloud()
         _ = PracticeSettingsStore(defaults: defaults, cloud: cloud)
@@ -95,20 +95,20 @@ final class SettingsStorageTests: XCTestCase {
         let store = PracticeSettingsStore(defaults: defaults, cloud: cloud)
         let writesBefore = cloud.writeCount
 
-        cloud.receive(try encoded(inOrderFallback), forKey: "PracticeSettings")
+        cloud.receive(try encoded(leastPracticedFallback), forKey: "PracticeSettings")
 
-        XCTAssertEqual(store.settings.bookmarkFallbackMode, .inOrder)
+        XCTAssertEqual(store.settings.bookmarkFallbackMode, .leastPracticed)
         XCTAssertEqual(cloud.writeCount, writesBefore, "echoing it would loop between devices")
 
         // And it is kept for the next launch, cloud or no cloud.
-        XCTAssertEqual(PracticeSettingsStore(defaults: defaults).settings.bookmarkFallbackMode, .inOrder)
+        XCTAssertEqual(PracticeSettingsStore(defaults: defaults).settings.bookmarkFallbackMode, .leastPracticed)
     }
 
     func testWithoutACloudSettingsStayOnTheDevice() {
         let defaults = makeDefaults()
-        PracticeSettingsStore(defaults: defaults).settings.bookmarkFallbackMode = .inOrder
+        PracticeSettingsStore(defaults: defaults).settings.bookmarkFallbackMode = .leastPracticed
 
-        XCTAssertEqual(PracticeSettingsStore(defaults: defaults).settings.bookmarkFallbackMode, .inOrder)
+        XCTAssertEqual(PracticeSettingsStore(defaults: defaults).settings.bookmarkFallbackMode, .leastPracticed)
     }
 
     // MARK: - AI settings

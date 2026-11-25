@@ -25,14 +25,14 @@ struct DecksSettingsView: View {
         Form {
             Section {
                 Picker("Use This Mode", selection: $store.settings.bookmarkFallbackMode) {
-                    ForEach(PracticeMode.bookmarkFallbacks) { mode in
+                    ForEach(PracticeMode.fallbacks) { mode in
                         Text(mode.title).tag(mode)
                     }
                 }
             } header: {
-                Text("When a Deck Has No Bookmarks")
+                Text("When a Mode Has No Cards")
             } footer: {
-                Text("Only matters for a deck set to Bookmarked mode. If none of its cards are bookmarked, it is practised in this mode.")
+                Text("For Bookmarked and Review: a deck with no bookmarked cards, or no cards to review, is practised in this mode instead.")
             }
 
             Section {

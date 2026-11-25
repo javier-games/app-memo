@@ -18,7 +18,8 @@ final class PracticeSettingsTests: XCTestCase {
         let settings = PracticeSettings.default
 
         XCTAssertFalse(settings.isInverted)
-        XCTAssertEqual(settings.mode, .random)
+        XCTAssertEqual(settings.mode, .all)
+        XCTAssertTrue(settings.isShuffled, "the default is the old Random")
         XCTAssertNil(settings.cardLimit, "no limit means the whole deck")
         XCTAssertEqual(settings.cardCount(forDeckSize: 12), 12)
         XCTAssertTrue(settings.practisesWholeDeck(forDeckSize: 12))
@@ -49,32 +50,32 @@ final class PracticeSettingsTests: XCTestCase {
         XCTAssertEqual(settings.cardCount(forDeckSize: 0), 0)
     }
 
-    func testInOrderOverridesTheCardLimit() {
-        var settings = PracticeSettings()
-        settings.mode = .inOrder
-        settings.cardLimit = 3
+    func testEveryModeTakesACardLimit() {
+        for mode in PracticeMode.allCases {
+            var settings = PracticeSettings()
+            settings.mode = mode
+            settings.cardLimit = 3
 
-        XCTAssertEqual(settings.cardCount(forDeckSize: 12), 12)
-        XCTAssertTrue(settings.practisesWholeDeck(forDeckSize: 12))
-        XCTAssertEqual(settings.cardLimit, 3, "the choice is remembered for when the mode changes back")
+            XCTAssertEqual(settings.cardCount(forDeckSize: 12), 3, "\(mode)")
+        }
     }
 
-    func testModeCapabilities() {
-        XCTAssertTrue(PracticeMode.random.allowsCardLimit)
-        XCTAssertNil(PracticeMode.random.cardLimitExplanation)
+    func testInOrderTakesTheFirstCardsUpToTheLimit() {
+        var settings = PracticeSettings()
+        settings.isShuffled = false
+        settings.cardLimit = 2
 
-        XCTAssertFalse(PracticeMode.inOrder.allowsCardLimit)
-        XCTAssertNotNil(
-            PracticeMode.inOrder.cardLimitExplanation,
-            "a mode that disables the control must say why"
-        )
+        let dealt = PracticePlanner.plan(from: makeCards(6), settings: settings)
+
+        XCTAssertEqual(dealt.map(\.frontText), ["F0", "F1"])
     }
 
     // MARK: - Planner
 
     func testInOrderKeepsDeckOrderAndDealsEverything() {
         var settings = PracticeSettings()
-        settings.mode = .inOrder
+        settings.mode = .all
+        settings.isShuffled = false
 
         let dealt = PracticePlanner.plan(from: makeCards(6), settings: settings)
 
@@ -124,9 +125,10 @@ final class PracticeSettingsTests: XCTestCase {
         }
     }
 
-    private func settings(_ mode: PracticeMode, limit: Int? = nil) -> PracticeSettings {
+    private func settings(_ mode: PracticeMode, shuffled: Bool = false, limit: Int? = nil) -> PracticeSettings {
         var settings = PracticeSettings()
         settings.mode = mode
+        settings.isShuffled = shuffled
         settings.cardLimit = limit
         return settings
     }
@@ -164,7 +166,7 @@ final class PracticeSettingsTests: XCTestCase {
 
         for _ in 0..<40 {
             let dealt = PracticePlanner.plan(
-                from: pool, settings: settings(.leastPracticedShuffled)
+                from: pool, settings: settings(.leastPracticed, shuffled: true)
             )
             XCTAssertEqual(
                 dealt.map(\.practiceProgress), [0, 0, 5, 5, 9, 9],
@@ -179,7 +181,7 @@ final class PracticeSettingsTests: XCTestCase {
 
         for _ in 0..<40 {
             orderings.insert(
-                PracticePlanner.plan(from: pool, settings: settings(.leastPracticedShuffled))
+                PracticePlanner.plan(from: pool, settings: settings(.leastPracticed, shuffled: true))
                     .map(\.frontText)
                     .joined(separator: ",")
             )
@@ -195,7 +197,7 @@ final class PracticeSettingsTests: XCTestCase {
 
         for _ in 0..<40 {
             let dealt = PracticePlanner.plan(
-                from: pool, settings: settings(.leastPracticedShuffled)
+                from: pool, settings: settings(.leastPracticed, shuffled: true)
             )
             XCTAssertEqual(dealt.map(\.practiceProgress), [1, 1, 2, 2])
             pairOrderings.insert(dealt.map(\.frontText).joined())
@@ -214,18 +216,11 @@ final class PracticeSettingsTests: XCTestCase {
         XCTAssertEqual(dealt.map(\.practiceProgress), [0, 2], "the two weakest cards")
     }
 
-    func testBothNewModesAllowACardLimit() {
-        XCTAssertTrue(PracticeMode.leastPracticed.allowsCardLimit)
-        XCTAssertTrue(PracticeMode.leastPracticedShuffled.allowsCardLimit)
-        XCTAssertNil(PracticeMode.leastPracticed.cardLimitExplanation)
-        XCTAssertNil(PracticeMode.leastPracticedShuffled.cardLimitExplanation)
-    }
-
-    func testOnlyTheNewModesOrderByProgress() {
+    func testOnlyLeastPracticedAndReviewOrderByProgress() {
         XCTAssertTrue(PracticeMode.leastPracticed.ordersByProgress)
-        XCTAssertTrue(PracticeMode.leastPracticedShuffled.ordersByProgress)
-        XCTAssertFalse(PracticeMode.random.ordersByProgress)
-        XCTAssertFalse(PracticeMode.inOrder.ordersByProgress)
+        XCTAssertTrue(PracticeMode.review.ordersByProgress)
+        XCTAssertFalse(PracticeMode.all.ordersByProgress)
+        XCTAssertFalse(PracticeMode.bookmarked.ordersByProgress)
     }
 
     func testWithTrackingOffEveryCardIsEquallyUnpracticed() {
@@ -247,7 +242,7 @@ final class PracticeSettingsTests: XCTestCase {
     }
 
     func testTheNewModesSurviveARoundTrip() throws {
-        for mode in [PracticeMode.leastPracticed, .leastPracticedShuffled] {
+        for mode in PracticeMode.allCases {
             var settings = PracticeSettings()
             settings.mode = mode
 
@@ -259,7 +254,7 @@ final class PracticeSettingsTests: XCTestCase {
     }
 
     func testEveryModeIsOfferedByThePicker() {
-        XCTAssertEqual(PracticeMode.allCases.count, 5)
+        XCTAssertEqual(PracticeMode.allCases, [.all, .leastPracticed, .bookmarked, .review])
         XCTAssertTrue(PracticeMode.allCases.allSatisfy { !$0.title.isEmpty })
     }
 
@@ -299,7 +294,8 @@ final class PracticeSettingsTests: XCTestCase {
     func testSettingsSurviveARoundTrip() throws {
         var settings = PracticeSettings()
         settings.isInverted = true
-        settings.mode = .inOrder
+        settings.mode = .leastPracticed
+        settings.isShuffled = false
         settings.cardLimit = 7
 
         let decoded = try JSONDecoder().decode(
@@ -318,7 +314,8 @@ final class PracticeSettingsTests: XCTestCase {
         let decoded = try JSONDecoder().decode(PracticeSettings.self, from: legacy)
 
         XCTAssertTrue(decoded.isInverted)
-        XCTAssertEqual(decoded.mode, .random)
+        XCTAssertEqual(decoded.mode, .all)
+        XCTAssertTrue(decoded.isShuffled)
         XCTAssertNil(decoded.cardLimit)
     }
 
@@ -328,8 +325,26 @@ final class PracticeSettingsTests: XCTestCase {
 
         let decoded = try JSONDecoder().decode(PracticeSettings.self, from: payload)
 
-        XCTAssertEqual(decoded.mode, .random)
+        XCTAssertEqual(decoded.mode, .all)
         XCTAssertTrue(decoded.isInverted)
+    }
+
+    func testModesSavedByEarlierVersionsBecomeAModeAndAShuffle() throws {
+        let cases: [(String, PracticeMode, Bool)] = [
+            ("random", .all, true),
+            ("inOrder", .all, false),
+            ("leastPracticed", .leastPracticed, false),
+            ("leastPracticedShuffled", .leastPracticed, true),
+            ("bookmarked", .bookmarked, true),
+        ]
+
+        for (raw, mode, shuffled) in cases {
+            let decoded = try JSONDecoder().decode(
+                PracticeSettings.self, from: Data(#"{"mode":"\#(raw)"}"#.utf8)
+            )
+            XCTAssertEqual(decoded.mode, mode, raw)
+            XCTAssertEqual(decoded.isShuffled, shuffled, raw)
+        }
     }
 
     func testAnEmptyPayloadDecodesToDefaults() throws {
@@ -354,11 +369,11 @@ final class PracticeSettingsTests: XCTestCase {
         let defaults = makeDefaults()
         let store = PracticeSettingsStore(defaults: defaults)
 
-        store.settings.mode = .inOrder
+        store.settings.mode = .leastPracticed
         store.settings.cardLimit = 4
 
         let reloaded = PracticeSettingsStore(defaults: defaults)
-        XCTAssertEqual(reloaded.settings.mode, .inOrder)
+        XCTAssertEqual(reloaded.settings.mode, .leastPracticed)
         XCTAssertEqual(reloaded.settings.cardLimit, 4)
     }
 

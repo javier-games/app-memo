@@ -44,7 +44,8 @@ final class BookmarkTests: XCTestCase {
 
     func testWithNoBookmarksTheFallbackModeIsUsed() {
         var settings = bookmarkedMode
-        settings.bookmarkFallbackMode = .inOrder
+        settings.bookmarkFallbackMode = .all
+        settings.isShuffled = false
 
         let plan = PracticePlanner.plan(from: makeCards(6), settings: settings)
 
@@ -63,22 +64,31 @@ final class BookmarkTests: XCTestCase {
         var settings = bookmarkedMode
         settings.bookmarkFallbackMode = .bookmarked
 
-        XCTAssertEqual(settings.resolvedBookmarkFallbackMode, .random)
+        XCTAssertEqual(settings.resolvedBookmarkFallbackMode, .all)
         XCTAssertEqual(PracticePlanner.plan(from: makeCards(4), settings: settings).count, 4)
-        XCTAssertFalse(PracticeMode.bookmarkFallbacks.contains(.bookmarked))
+        XCTAssertFalse(PracticeMode.fallbacks.contains(.bookmarked))
+        XCTAssertFalse(PracticeMode.fallbacks.contains(.review))
     }
 
     // MARK: - Settings
 
     func testBookmarkedModeCapabilities() {
-        XCTAssertTrue(PracticeMode.bookmarked.allowsCardLimit)
+        XCTAssertTrue(PracticeMode.bookmarked.needsFallback)
         XCTAssertFalse(PracticeMode.bookmarked.ordersByProgress)
-        XCTAssertNil(PracticeMode.bookmarked.cardLimitExplanation)
+    }
+
+    func testUnshuffledBookmarksKeepDeckOrder() {
+        var settings = bookmarkedMode
+        settings.isShuffled = false
+
+        let plan = PracticePlanner.plan(from: makeCards(10, bookmarked: [7, 2, 5]), settings: settings)
+
+        XCTAssertEqual(plan.map(\.frontText), ["F2", "F5", "F7"])
     }
 
     func testFallbackModeSurvivesARoundTrip() throws {
         var settings = bookmarkedMode
-        settings.bookmarkFallbackMode = .leastPracticedShuffled
+        settings.bookmarkFallbackMode = .leastPracticed
 
         let data = try JSONEncoder().encode(settings)
         XCTAssertEqual(try JSONDecoder().decode(PracticeSettings.self, from: data), settings)
@@ -90,7 +100,7 @@ final class BookmarkTests: XCTestCase {
             from: Data(#"{"mode":"inOrder","isInverted":true}"#.utf8)
         )
 
-        XCTAssertEqual(decoded.bookmarkFallbackMode, .random)
+        XCTAssertEqual(decoded.bookmarkFallbackMode, .all)
     }
 
     // MARK: - Per-deck options
@@ -98,37 +108,37 @@ final class BookmarkTests: XCTestCase {
     func testADeckUsesTheStandardOptionsUntilItHasItsOwn() {
         let deck = Deck(name: "Food")
         XCTAssertNil(deck.practiceSettings)
-        XCTAssertEqual(deck.resolvedPracticeSettings(bookmarkFallback: .random), .default)
+        XCTAssertEqual(deck.resolvedPracticeSettings(bookmarkFallback: .all), .default)
 
         var own = PracticeSettings()
         own.mode = .leastPracticed
         own.isInverted = true
         deck.practiceSettings = own
 
-        let resolved = deck.resolvedPracticeSettings(bookmarkFallback: .random)
+        let resolved = deck.resolvedPracticeSettings(bookmarkFallback: .all)
         XCTAssertEqual(resolved.mode, .leastPracticed)
         XCTAssertTrue(resolved.isInverted)
 
         deck.practiceSettings = nil
-        XCTAssertEqual(deck.resolvedPracticeSettings(bookmarkFallback: .random), .default)
+        XCTAssertEqual(deck.resolvedPracticeSettings(bookmarkFallback: .all), .default)
     }
 
     func testTheBookmarkFallbackAlwaysComesFromSettings() {
         var own = PracticeSettings()
         own.mode = .bookmarked
-        own.bookmarkFallbackMode = .leastPracticed
+        own.bookmarkFallbackMode = .all
 
         let deck = Deck(name: "Food")
         deck.practiceSettings = own
 
-        let resolved = deck.resolvedPracticeSettings(bookmarkFallback: .inOrder)
+        let resolved = deck.resolvedPracticeSettings(bookmarkFallback: .leastPracticed)
         XCTAssertEqual(resolved.mode, .bookmarked)
-        XCTAssertEqual(resolved.bookmarkFallbackMode, .inOrder)
+        XCTAssertEqual(resolved.bookmarkFallbackMode, .leastPracticed)
 
         // A deck with no options of its own gets it too.
         XCTAssertEqual(
-            Deck(name: "Verbs").resolvedPracticeSettings(bookmarkFallback: .inOrder).bookmarkFallbackMode,
-            .inOrder
+            Deck(name: "Verbs").resolvedPracticeSettings(bookmarkFallback: .leastPracticed).bookmarkFallbackMode,
+            .leastPracticed
         )
     }
 

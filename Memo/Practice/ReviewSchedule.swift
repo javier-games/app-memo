@@ -226,3 +226,12 @@ extension ReviewScheduler {
         if changed { try? context.save() }
     }
 }
+
+extension Card {
+
+    /// Whether the card was learned and has slipped below `target` since:
+    /// what Review mode deals.
+    func needsReview(target: Int) -> Bool {
+        target > 0 && learnedAt != nil && practiceProgress < target
+    }
+}

@@ -24,35 +24,40 @@ enum PracticePlanner {
         // bookmarks is fewer than the deck.
         let ordered: [Card]
 
-        switch settings.mode {
-        case .random:
-            ordered = available.shuffled()
+        let shuffled = settings.isShuffled
 
-        case .inOrder:
-            ordered = available
+        switch settings.mode {
+        case .all:
+            ordered = shuffled ? available.shuffled() : available
 
         case .leastPracticed:
-            ordered = byProgress(available)
-
-        case .leastPracticedShuffled:
             // Shuffled first, then ordered by progress: the shuffle decides
             // what happens within a group of equally practiced cards, which is
             // the only place it can without breaking the ordering.
-            ordered = byProgress(available.shuffled())
+            ordered = byProgress(shuffled ? available.shuffled() : available)
 
         case .bookmarked:
             let bookmarked = available.filter(\.isBookmarked)
+            guard !bookmarked.isEmpty else { return fallback(from: available, settings: settings) }
 
-            guard !bookmarked.isEmpty else {
-                var fallback = settings
-                fallback.mode = settings.resolvedBookmarkFallbackMode
-                return plan(from: available, settings: fallback)
-            }
+            ordered = shuffled ? bookmarked.shuffled() : bookmarked
 
-            ordered = bookmarked.shuffled()
+        case .review:
+            let target = settings.resolvedPracticeTarget
+            let faded = available.filter { $0.needsReview(target: target) }
+            guard !faded.isEmpty else { return fallback(from: available, settings: settings) }
+
+            ordered = byProgress(shuffled ? faded.shuffled() : faded)
         }
 
         return Array(ordered.prefix(settings.cardCount(forDeckSize: ordered.count)))
+    }
+
+    /// The run a mode that found nothing to deal falls back to.
+    private static func fallback(from available: [Card], settings: PracticeSettings) -> [Card] {
+        var fallback = settings
+        fallback.mode = settings.resolvedBookmarkFallbackMode
+        return plan(from: available, settings: fallback)
     }
 
     /// Least practiced first, preserving the incoming order within each level.
