@@ -254,7 +254,7 @@ final class PracticeSettingsTests: XCTestCase {
     }
 
     func testEveryModeIsOfferedByThePicker() {
-        XCTAssertEqual(PracticeMode.allCases.count, 5)
+        XCTAssertEqual(PracticeMode.allCases, [.all, .leastPracticed, .bookmarked, .review])
         XCTAssertTrue(PracticeMode.allCases.allSatisfy { !$0.title.isEmpty })
     }
 
